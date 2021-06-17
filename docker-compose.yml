@@ -1,0 +1,17 @@
+version: '3.4'
+  
+networks:
+  web:
+    external:
+      name: web
+services:
+  ui:
+    labels:
+      - 'traefik.backend=lrm-ui'
+      - 'traefik.port=8055'
+      - 'traefik.frontend.rule=Host:lrm.gothereforeministries.org'
+    networks:
+      web:
+    image: wayimp/lrm-ui
+    ports:
+      - 8055:8055
