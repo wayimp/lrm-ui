@@ -5,7 +5,7 @@ networks:
     external:
       name: web
 services:
-  ui:
+  lrm:
     labels:
       - 'traefik.backend=lrm-ui'
       - 'traefik.port=8055'
