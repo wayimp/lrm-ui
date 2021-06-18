@@ -20,17 +20,24 @@ const Book = types.model({
   chapters: types.array(Chapter)
 })
 
+const Bible = types.model({
+  id: types.string,
+  abbreviation: types.string,
+  name: types.string,
+  books: types.array(Book)
+})
+
 const Store = types
   .model({
     user: types.optional(types.string, ''),
-    books: types.array(Book)
+    bibles: types.array(Bible)
   })
   .actions(self => ({
     setUser (_user) {
       self.user = _user
     },
-    setBooks (_books) {
-      self.books = _books
+    setBibles (_bibles) {
+      self.bibles = _bibles
     }
   }))
 

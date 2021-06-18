@@ -2,29 +2,128 @@ import React, { useState, useEffect } from 'react'
 import { getSnapshot } from 'mobx-state-tree'
 import { initializeStore } from '../store'
 import axios from 'axios'
+import { bibles } from '../bibles'
+//import { CSBVerses } from '../bibles/CSBVerses'
+//import Select from 'react-select'
 
+import { Dropdown } from 'primereact/dropdown'
 import { CascadeSelect } from 'primereact/cascadeselect'
 
 const Page = props => {
-  const [chapter, setChapter] = useState({})
+  const [bible, setBible] = useState(bibles[0] || {})
+  const [bookStart, setBookStart] = useState({})
+  const [chapterStart, setChapterStart] = useState({})
+  const [versesStart, setVersesStart] = useState({})
+  const [verseStart, setVerseStart] = useState({})
+  const [verseFull, setVerseFull] = useState({})
+
+  const onChangeBible = e => {
+    setBible(e.value)
+    setBookStart({})
+    setChapterStart({})
+    setVersesStart({})
+    setVerseStart({})
+    setVerseFull({})
+  }
+
+  const onChangeBook = e => {
+    setBookStart(e.value)
+    setChapterStart({})
+    setVersesStart({})
+    setVerseStart({})
+    setVerseFull({})
+  }
 
   const onChangeChapter = e => {
+    setChapterStart(e.value)
     const chapterId = e.value && e.value.id ? e.value.id : ''
-    const chapter = axios({
+    axios({
       method: 'get',
-      url: `https://api.scripture.api.bible/v1/bibles/a556c5305ee15c3f-01/chapters/${chapterId}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false`,
+      url: `https://api.scripture.api.bible/v1/bibles/${bible.id}/chapters/${chapterId}/verses`,
       headers: {
         accept: 'application/json',
         'api-key': props.apiKey
       }
-    }).then(response => setChapter(response.data.data))
+    }).then(response => setVersesStart(response.data.data))
+    setVerseStart({})
+    setVerseFull({})
+  }
+
+  const onChangeVerse = e => {
+    setVerseStart(e.value)
+    axios({
+      method: 'get',
+      url: `https://api.scripture.api.bible/v1/bibles/${bible.id}/verses/${e.value.id}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`,
+      headers: {
+        accept: 'application/json',
+        'api-key': props.apiKey
+      }
+    }).then(response => setVerseFull(response.data.data))
   }
 
   return (
     <div className='card'>
-      <h3>Christian Standard Bible</h3>
+      <Dropdown
+        value={bible}
+        options={bibles}
+        onChange={onChangeBible}
+        optionLabel='name'
+        placeholder='Select a Bible Version'
+      />
+      <h3>{bible.name}</h3>
+
+      <Dropdown
+        value={bookStart}
+        options={bible.books}
+        onChange={onChangeBook}
+        optionLabel='name'
+        placeholder='Select a Book'
+        filter
+        showClear
+        filterBy='name'
+      />
+
+      <h3>{bookStart && bookStart.name ? bookStart.name : ''}</h3>
+      <Dropdown
+        value={chapterStart}
+        options={bookStart && bookStart.chapters ? bookStart.chapters : []}
+        onChange={onChangeChapter}
+        optionLabel='number'
+        placeholder='Select a Chapter'
+      />
+
+      <h3>
+        {chapterStart && chapterStart.number
+          ? `Chapter: ${chapterStart.number}`
+          : ''}
+      </h3>
+
+      <Dropdown
+        value={verseStart}
+        options={versesStart || []}
+        onChange={onChangeVerse}
+        optionLabel='reference'
+        placeholder='Select a Verse'
+      />
+
+      <h3>
+        {verseStart && verseStart.reference
+          ? `Verse: ${verseStart.reference}`
+          : ''}
+      </h3>
+
+      {/*
+      <Dropdown
+        value={verseStart}
+        options={CSBVerses || []}
+        onChange={onChangeVerse}
+        filter
+        optionLabel='name'
+        placeholder='Select a Verse'
+      />
+      
       <CascadeSelect
-        options={props.static.books}
+        options={bible.books || []}
         optionLabel={'number'}
         optionGroupLabel={'name'}
         optionGroupChildren={['chapters']}
@@ -32,26 +131,16 @@ const Page = props => {
         placeholder={'Select a Chapter'}
         onChange={onChangeChapter}
       />
-      <h3>{chapter.reference || ''}</h3>
-      <div dangerouslySetInnerHTML={{ __html: chapter.content || '' }} />
+    */}
+      <div dangerouslySetInnerHTML={{ __html: verseFull.content || '' }} />
     </div>
   )
 }
 
 export async function getStaticProps () {
   const store = initializeStore()
+  //store.setBibles(bibles)
 
-  const books = await axios({
-    method: 'get',
-    url:
-      'https://api.scripture.api.bible/v1/bibles/a556c5305ee15c3f-01/books?include-chapters=true',
-    headers: {
-      accept: 'application/json',
-      'api-key': process.env.ABS_API_KEY
-    }
-  }).then(response => response.data.data)
-
-  store.setBooks(books)
   return {
     props: { static: getSnapshot(store), apiKey: process.env.ABS_API_KEY }
   }
