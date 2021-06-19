@@ -3,7 +3,7 @@ import { getSnapshot } from 'mobx-state-tree'
 import { initializeStore } from '../store'
 import axios from 'axios'
 import { bibles } from '../bibles'
-//import { CSBVerses } from '../bibles/CSBVerses'
+import { CSBVersesTree } from '../bibles/CSBVersesTree'
 //import Select from 'react-select'
 
 import { Dropdown } from 'primereact/dropdown'

@@ -1,4 +1,10 @@
-[
+const fs = require('fs')
+const axios = require('axios')
+const flatten = require('lodash.flatten')
+const apiKey = 'abe1c86651b3f72bfdc3ff60319d3b7b'
+const fileName = __dirname + '/CSBVersesTree.json'
+const bibleId = 'a556c5305ee15c3f-01' // CSB
+const CSBVerses = [
   {
     chapterId: 'GEN.1',
     count: 31
@@ -4760,3 +4766,62 @@
     count: 21
   }
 ]
+
+const getVerses = async chapterId => {
+  try {
+    console.log(chapterId)
+
+    const verses = await axios({
+      method: 'get',
+      url: `https://api.scripture.api.bible/v1/bibles/${bibleId}/chapters/${chapterId}/verses`,
+      headers: {
+        accept: 'application/json',
+        'api-key': apiKey
+      }
+    }).then(response => response.data.data)
+
+    let number = 1
+    return verses.map(verse => {
+      verse.number = number++
+      delete verse.orgId
+      delete verse.bookId
+      delete verse.chapterId
+      delete verse.bibleId
+      return verse
+    })
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+const getBooks = async () => {
+  books = await axios({
+    method: 'get',
+    url: `https://api.scripture.api.bible/v1/bibles/${bibleId}/books?include-chapters=true`,
+    headers: {
+      accept: 'application/json',
+      'api-key': apiKey
+    }
+  }).then(response => response.data.data)
+
+  books.map(async book => {
+    delete book.bibleId
+    delete book.abbreviation
+    delete book.nameLong
+    book.chapters = book.chapters.map(chapter => {
+      const findCount = CSBVerses.find(
+        summary => summary.chapterId === chapter.id
+      )
+      return findCount.count
+    })
+
+    return book
+  })
+
+  fs.writeFileSync(fileName, JSON.stringify(books))
+
+  // Start the actual processing
+  //sequential(getVerses(chapters.shift()))
+}
+
+getBooks()

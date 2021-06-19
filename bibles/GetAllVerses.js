@@ -4,8 +4,9 @@ const flatten = require('lodash.flatten')
 const apiKey = 'abe1c86651b3f72bfdc3ff60319d3b7b'
 const fileName = __dirname + '/CSBVerses.json'
 const bibleId = 'a556c5305ee15c3f-01' // CSB
+let books = []
 let chapters = []
-const verses = []
+let chapterMap = []
 
 const getVerses = async chapterId => {
   try {
@@ -20,9 +21,7 @@ const getVerses = async chapterId => {
       }
     }).then(response => response.data.data)
 
-    verses.push(
-      verseQuery.map(verse => ({ name: verse.reference, value: verse.id }))
-    )
+    chapterMap.push({ chapterId, count: verseQuery.length })
   } catch (err) {
     console.log(err)
   }
@@ -30,7 +29,7 @@ const getVerses = async chapterId => {
 
 const sequential = async (fn, isDone = false) => {
   if (isDone) {
-    fs.writeFileSync(fileName, JSON.stringify(flatten(verses)))
+    fs.writeFileSync(fileName, JSON.stringify(chapterMap))
     return
   }
   const chapter = chapters.shift()
@@ -51,6 +50,7 @@ const getBooks = async () => {
   }).then(response => response.data.data)
 
   const chapterIds = []
+
   await books.map(book =>
     chapterIds.push(book.chapters.map(chapter => chapter.id))
   )
