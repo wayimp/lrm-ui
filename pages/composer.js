@@ -84,7 +84,7 @@ const Composer = props => {
   const [sectionEditTitle, setSectionEditTitle] = useState('')
   const [contentConfig, setContentConfig] = useState({})
   const [contentConfigDialog, setContentConfigDialog] = useState(false)
-  const [state, setState] = useState([])
+  const [state, setState] = useState([{ items: [] }])
   const [selectedTopic, setSelectedTopic] = useState({})
 
   const CONTENT_TEMPLATE = {
@@ -164,6 +164,9 @@ const Composer = props => {
             value={selectedTopic.value}
             options={props.topics}
             onChange={handleTopicChange}
+            filter
+            showClear
+            filterBy='label'
             optionLabel='label'
             placeholder='Select Topic'
           />
@@ -179,25 +182,10 @@ const Composer = props => {
       />
 
       <div>
-        <div className='p-grid'>
-          <div className='p-col-3 p-m-3'>
-            <Button
-              label='Add Topic Section'
-              className='p-button-outlined p-button-sm p-button-secondary'
-              icon='pi pi-book'
-              onClick={() => {
-                setSectionEditIndex(-1)
-                setSectionEditTitle('')
-                setSectionEditDialog(true)
-              }}
-            />
-          </div>
-        </div>
-
         <DragDropContext onDragEnd={onDragEnd} isDropDisabled={true}>
           <div className='p-grid'>
             <div className='p-col-1'>
-              <Fieldset legend='Available Controls'>
+              <Fieldset legend='Available Controls' style={{ margin: 10 }}>
                 <Droppable key={99} droppableId={'CONTENT_TEMPLATE'}>
                   {(provided, snapshot) => (
                     <div
@@ -244,33 +232,7 @@ const Composer = props => {
             <div className='p-col-7'>
               {state.map((el, ind) => (
                 <div key={`builder-${ind}`}>
-                  <Fieldset
-                    legend={
-                      <div>
-                        <h5>{el.sectionTitle}</h5>
-                        <Button
-                          label='Edit'
-                          className='p-button-outlined p-button-sm p-button-secondary'
-                          icon='pi pi-book'
-                          onClick={() => {
-                            setSectionEditIndex(ind)
-                            setSectionEditTitle(el.sectionTitle)
-                            setSectionEditDialog(true)
-                          }}
-                        />
-                        <Button
-                          label='Delete Section'
-                          className='p-button-outlined p-button-sm p-button-secondary'
-                          icon='pi pi-minus-circle'
-                          onClick={() => {
-                            const newState = [...state]
-                            newState.splice(ind, 1)
-                            setState(newState)
-                          }}
-                        />
-                      </div>
-                    }
-                  >
+                  <Fieldset legend='Topic Editor' style={{ margin: '10px 0px 10px 40px' }}>
                     <Droppable key={ind} droppableId={`${ind}`}>
                       {(provided, snapshot) => (
                         <div
@@ -352,7 +314,7 @@ const Composer = props => {
               ))}
             </div>
             <div className='p-col-4'>
-              <Fieldset legend='Preview Pane' style={{ marginTop: 20 }}>
+              <Fieldset legend='Preview Pane' style={{ margin: 10 }}>
                 {state.map((el, ind) => (
                   <div key={`display-${ind}`}>
                     <Fieldset legend={el.sectionTitle}>
@@ -374,58 +336,6 @@ const Composer = props => {
         onHide={() => setContentConfigDialog(false)}
       >
         {contentConfig}
-      </Dialog>
-      <Dialog
-        header='Edit Section'
-        visible={sectionEditDialog}
-        style={{ width: '50vw' }}
-        footer={
-          <div>
-            <Button
-              label='Cancel'
-              icon='pi pi-times'
-              onClick={() => {
-                setSectionEditIndex(-1)
-                setSectionEditTitle('')
-                setSectionEditDialog(false)
-              }}
-              className='p-button-text'
-            />
-            <Button
-              label='OK'
-              icon='pi pi-check'
-              onClick={() => {
-                if (sectionEditIndex < 0) {
-                  setState([
-                    ...state,
-                    { sectionTitle: sectionEditTitle, items: [] }
-                  ])
-                } else {
-                  const newState = JSON.parse(JSON.stringify(state))
-                  newState[sectionEditIndex].sectionTitle = sectionEditTitle
-                  setState(newState)
-                }
-                setSectionEditIndex(-1)
-                setSectionEditTitle('')
-                setSectionEditDialog(false)
-              }}
-              autoFocus
-            />
-          </div>
-        }
-        onHide={() => setSectionEditDialog(false)}
-      >
-        <div className='p-field'>
-          <label htmlFor='sectionEditTitle' className='p-d-block'>
-            Title
-          </label>
-          <InputText
-            id='sectionEditTitle'
-            className='p-d-block'
-            value={sectionEditTitle}
-            onChange={e => setSectionEditTitle(e.target.value)}
-          />
-        </div>
       </Dialog>
     </div>
   )

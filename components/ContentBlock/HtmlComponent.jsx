@@ -48,7 +48,7 @@ const HtmlComponent = ({ props, mode, updateValue, updateConfig }) => {
               onTextChange={handleHtmlChange}
             />
           </div>
-          <div>
+          <div className='p-d-flex p-jc-end'>
             <Button
               label='Cancel'
               icon='pi pi-times'

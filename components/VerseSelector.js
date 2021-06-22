@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { CSBVersesTree } from '../bibles/CSBVersesTree'
-const bibleId = 'a556c5305ee15c3f-01' // CSB
-
 import { Dropdown } from 'primereact/dropdown'
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox'
 import { Button } from 'primereact/button'
 
 const VerseSelector = props => {
+  const [bibleId, setBibleId] = useState('a556c5305ee15c3f-01') // CSB
   const [book, setBook] = useState({})
   const [chapters, setChapters] = useState([])
   const [chapter, setChapter] = useState(null)
@@ -22,6 +21,62 @@ const VerseSelector = props => {
   const [checked, setChecked] = useState(false)
   const [extended, setExtended] = useState('')
   const options = [{ value: true, icon: 'pi pi-minus' }]
+
+  useEffect(() => {
+    // If a passage was passed in, set the defaults
+    if (props.passage && props.passage.passageId) {
+      setBibleId(props.passage.bibleId)
+      // Parse the passageId, e.g. 'GEN.1.1-GEN.1.2'
+      const refs = props.passage.passageId.split('-')
+      const start = refs[0].split('.')
+      const findBook = CSBVersesTree.find(b => b.id === start[0])
+      setBook(findBook)
+      setChapters(
+        findBook
+          ? Array.from(
+              { length: findBook.chapters.length },
+              (_, i) => i + 1 + ''
+            )
+          : null
+      )
+      setChaptersEnd(
+        findBook
+          ? Array.from(
+              { length: findBook.chapters.length },
+              (_, i) => i + 1 + ''
+            )
+          : null
+      )
+      setChapter(start[1])
+      if (start[2]) {
+        setVerses(
+          Array.from(
+            { length: findBook.chapters[Number(start[1])] },
+            (_, i) => i + 1 + ''
+          )
+        )
+        setVerse(start[2])
+      }
+      if (refs[1]) {
+        setExtended(true)
+        const end = refs[1].split('.')
+        setChapterEnd(end[1])
+        if (end[2]) {
+          setVersesEnd(
+            Array.from(
+              { length: findBook.chapters[Number(end[1])] },
+              (_, i) => i + 1 + ''
+            )
+          )
+          setVerseEnd(end[2])
+        }
+      }
+      setPassage({
+        content: props.passage.html,
+        reference: props.passage.reference
+      })
+    }
+  }, [])
 
   const onChangeBook = e => {
     setBook(e.value)
@@ -86,89 +141,92 @@ const VerseSelector = props => {
       }
     }).then(response => response.data.data)
     setPassage(response)
+    if (props.setPassage) props.setPassage(response)
     setLoading(false)
   }
 
   return (
-    <div className='p-d-inline-flex'>
-      <Dropdown
-        className='p-mr-2 p-d-inline'
-        value={book}
-        options={CSBVersesTree}
-        onChange={onChangeBook}
-        optionLabel='name'
-        placeholder='Book'
-        filter
-        showClear
-        filterBy='name'
-      />
-      <Dropdown
-        className='p-mr-2 p-d-inline'
-        value={chapter}
-        options={chapters || []}
-        onChange={onChangeChapter}
-        placeholder='Chapter'
-      />
-      <Dropdown
-        className='p-mr-2 p-d-inline'
-        value={verse}
-        options={verses || []}
-        onChange={onChangeVerse}
-        placeholder='Verse'
-      />
-      <MultiStateCheckbox
-        style={{ margin: '0px 8px 8px 8px' }}
-        value={extended}
-        options={options}
-        optionValue='value'
-        onChange={e => setExtended(e.value)}
-      />
+    <>
+      <div className='p-d-inline-flex p-ai-center'>
+        <Dropdown
+          value={book}
+          options={CSBVersesTree}
+          onChange={onChangeBook}
+          optionLabel='name'
+          placeholder='Book'
+          filter
+          showClear
+          filterBy='name'
+        />
+        <Dropdown
+          value={chapter}
+          options={chapters || []}
+          onChange={onChangeChapter}
+          placeholder='Chapter'
+        />
+        <Dropdown
+          value={verse}
+          options={verses || []}
+          onChange={onChangeVerse}
+          placeholder='Verse'
+        />
+        <MultiStateCheckbox
+          style={{ marginLeft: 6, marginRight: 6 }}
+          value={extended}
+          options={options}
+          optionValue='value'
+          onChange={e => setExtended(e.value)}
+        />
 
-      {extended ? (
-        <>
-          <Dropdown
-            className='p-mr-2 p-d-inline'
-            value={chapterEnd}
-            options={chaptersEnd || []}
-            onChange={onChangeChapterEnd}
-            placeholder='Chapter'
-          />
-          <Dropdown
-            className='p-mr-2 p-d-inline'
-            value={verseEnd}
-            options={versesEnd || []}
-            onChange={onChangeVerseEnd}
-            placeholder='Verse'
-          />
-        </>
-      ) : (
-        ''
-      )}
-
-      {book && chapter > 0 && verse > 0 ? (
-        <div className='p-d-inline-flex'>
-          <h3 className='p-mr-2 p-d-inline'>
-            {`${book.name} ${chapter}:${verse}`}
-            {extended && chapterEnd > 0 && verseEnd > 0
-              ? `-${chapterEnd}:${verseEnd}`
-              : ''}
-          </h3>
-          <Button
-            icon='pi pi-cloud-download'
-            className='p-button-rounded p-mr-2 p-d-inline'
-            onClick={fetchPassage}
-          />
-        </div>
-      ) : (
-        ''
-      )}
+        {extended ? (
+          <>
+            <Dropdown
+              value={chapterEnd}
+              options={chaptersEnd || []}
+              onChange={onChangeChapterEnd}
+              placeholder='Chapter'
+            />
+            <Dropdown
+              value={verseEnd}
+              options={versesEnd || []}
+              onChange={onChangeVerseEnd}
+              placeholder='Verse'
+            />
+          </>
+        ) : (
+          ''
+        )}
+      </div>
+      <br />
+      <div className='p-d-inline-flex p-ai-center'>
+        {book && chapter > 0 && verse > 0 ? (
+          <div>
+            <h3>
+              {`${book.name} ${chapter}:${verse}`}
+              {extended && chapterEnd > 0 && verseEnd > 0
+                ? `-${chapterEnd}:${verseEnd}`
+                : ''}
+            </h3>
+            <Button
+              style={{ marginLeft: 6 }}
+              icon='pi pi-cloud-download'
+              className='p-button-rounded'
+              onClick={fetchPassage}
+              iconPos='right'
+              label='Lookup'
+            />
+          </div>
+        ) : (
+          ''
+        )}
+      </div>
       <br />
       {loading ? (
         <i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }}></i>
       ) : (
         <div dangerouslySetInnerHTML={{ __html: passage.content || '' }} />
       )}
-    </div>
+    </>
   )
 }
 
