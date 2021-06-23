@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { getSnapshot } from 'mobx-state-tree'
 import { initializeStore } from '../store'
 import axios from 'axios'
+import { observer } from 'mobx-react'
 import { bibles } from '../bibles'
-import { CSBVersesTree } from '../bibles/CSBVersesTree'
 //import Select from 'react-select'
 
 import { Dropdown } from 'primereact/dropdown'
 import { CascadeSelect } from 'primereact/cascadeselect'
 
-const Page = props => {
-  const [bible, setBible] = useState(bibles[0] || {})
+const Page = observer(props => {
+  const [bible, setBible] = useState(props.bibles[0] || {})
   const [bookStart, setBookStart] = useState({})
   const [chapterStart, setChapterStart] = useState({})
   const [versesStart, setVersesStart] = useState({})
@@ -135,11 +135,11 @@ const Page = props => {
       <div dangerouslySetInnerHTML={{ __html: verseFull.content || '' }} />
     </div>
   )
-}
+})
 
 export async function getStaticProps () {
   const store = initializeStore()
-  //store.setBibles(bibles)
+  store.setBibles(bibles)
 
   return {
     props: { static: getSnapshot(store), apiKey: process.env.ABS_API_KEY }

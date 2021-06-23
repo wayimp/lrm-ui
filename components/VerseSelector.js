@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { CSBVersesTree } from '../bibles/CSBVersesTree'
 import { Dropdown } from 'primereact/dropdown'
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox'
 import { Button } from 'primereact/button'
+import { observer } from 'mobx-react'
+import { bibles } from '../bibles'
 
-const VerseSelector = props => {
-  const [bibleId, setBibleId] = useState('a556c5305ee15c3f-01') // CSB
+const VerseSelector = observer(props => {
+  const [bible, setBible] = useState({})
   const [book, setBook] = useState({})
   const [chapters, setChapters] = useState([])
   const [chapter, setChapter] = useState(null)
@@ -24,12 +25,19 @@ const VerseSelector = props => {
 
   useEffect(() => {
     // If a passage was passed in, set the defaults
-    if (props.passage && props.passage.passageId) {
-      setBibleId(props.passage.bibleId)
+    if (props.version) {
+      // Set the bible version according to the props that were passed in.
+      const findBible = bibles.find(
+        b => b.abbreviation === props.passage.version
+      )
+      setBible(findBible)
+    }
+
+    if (props.passage.passageId) {
       // Parse the passageId, e.g. 'GEN.1.1-GEN.1.2'
       const refs = props.passage.passageId.split('-')
       const start = refs[0].split('.')
-      const findBook = CSBVersesTree.find(b => b.id === start[0])
+      const findBook = bible.books.find(b => b.id === start[0])
       setBook(findBook)
       setChapters(
         findBook
@@ -76,7 +84,7 @@ const VerseSelector = props => {
         reference: props.passage.reference
       })
     }
-  }, [])
+  }, [props])
 
   const onChangeBook = e => {
     setBook(e.value)
@@ -131,7 +139,7 @@ const VerseSelector = props => {
     setLoading(true)
     let ref = `${book.id}.${chapter}.${verse}`
     if (extended) ref += `-${book.id}.${chapterEnd}.${verseEnd}`
-    const url = `https://api.scripture.api.bible/v1/bibles/${bibleId}/passages/${ref}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
+    const url = `https://api.scripture.api.bible/v1/bibles/${bible.id}/passages/${ref}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
     const response = await axios({
       method: 'get',
       url,
@@ -150,7 +158,7 @@ const VerseSelector = props => {
       <div className='p-d-inline-flex p-ai-center'>
         <Dropdown
           value={book}
-          options={CSBVersesTree}
+          options={bible && bible.books ? bible.books : []}
           onChange={onChangeBook}
           optionLabel='name'
           placeholder='Book'
@@ -228,6 +236,6 @@ const VerseSelector = props => {
       )}
     </>
   )
-}
+})
 
 export default VerseSelector

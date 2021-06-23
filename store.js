@@ -3,21 +3,10 @@ import { types, applySnapshot } from 'mobx-state-tree'
 
 let store
 
-const Chapter = types.model({
-  id: types.string,
-  bibleId: types.string,
-  bookId: types.string,
-  number: types.string,
-  position: types.number
-})
-
 const Book = types.model({
   id: types.string,
-  bibleId: types.string,
-  abbreviation: types.string,
   name: types.string,
-  nameLong: types.string,
-  chapters: types.array(Chapter)
+  chapters: types.array(types.integer)
 })
 
 const Bible = types.model({

@@ -8,6 +8,17 @@ export const List = styled.div`
   flex: 0 0 150px;
   font-family: sans-serif;
 `
+export const Notice = styled.div`
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  padding: 0.5rem;
+  margin: 0 0.5rem 0.5rem;
+  border: 1px solid transparent;
+  line-height: 1.5;
+  color: #aaa;
+`;
 
 export const Kiosk = styled(List)`
   position: absolute;

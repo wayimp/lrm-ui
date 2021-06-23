@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { CSBVersesTree } from '../../bibles/CSBVersesTree'
-const bibleId = 'a556c5305ee15c3f-01' // CSB
 import VerseSelector from '../VerseSelector'
 
 import { Dropdown } from 'primereact/dropdown'
@@ -45,6 +43,7 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
         <>
           <VerseSelector
             apiKey={props.apiKey}
+            version={props.version}
             passage={state}
             setPassage={setPassage}
           />
