@@ -33,7 +33,7 @@ const VerseSelector = observer(props => {
       setBible(findBible)
     }
 
-    if (props.passage.passageId) {
+    if (props.passage.passageId && bible.books) {
       // Parse the passageId, e.g. 'GEN.1.1-GEN.1.2'
       const refs = props.passage.passageId.split('-')
       const start = refs[0].split('.')

@@ -1,5 +1,6 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react'
+import React, { useEffect, useState, lazy, Suspense, useRef } from 'react'
 import axios from 'axios'
+import { axiosClient } from '../axiosClient'
 import { getSnapshot } from 'mobx-state-tree'
 import { initializeStore } from '../store'
 import { Button } from 'primereact/button'
@@ -12,6 +13,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { Toolbar } from 'primereact/toolbar'
 import { Fieldset } from 'primereact/fieldset'
 import { Chips } from 'primereact/chips'
+import { Toast } from 'primereact/toast'
 import uuid from 'react-uuid'
 import { bibles } from '../bibles'
 import {
@@ -100,9 +102,12 @@ const Composer = props => {
   const [sectionEditVersion, setSectionEditVersion] = useState('')
   const [contentConfig, setContentConfig] = useState({})
   const [contentConfigDialog, setContentConfigDialog] = useState(false)
-  const [state, setState] = useState([])
-  const [selectedTopic, setSelectedTopic] = useState({})
   const [bible, setBible] = useState({})
+  const [selectedTopic, setSelectedTopic] = useState({})
+  const [currentTopic, setCurrentTopic] = useState({})
+  const [sections, setSections] = useState([])
+
+  const toast = useRef(null)
 
   const CONTENT_TEMPLATE = {
     version: 'CONTENT_TEMPLATE',
@@ -137,23 +142,60 @@ const Composer = props => {
     newItem.html = response.content
     newItem.reference = response.reference
     // Update the item in place whenever you are ready
-    const newState = [...state]
-    newState[sectionEditIndex].items[itemIndex] = newItem
-    setState(newState)
+    const newSections = [...sections]
+    newSections[sectionEditIndex].items[itemIndex] = newItem
+    setSections(newSections)
   }
 
   const onChangeBible = e => {
     setBible(e.value)
   }
 
-  const handleTopicChange = e => {
-    setSelectedTopic(topic)
-    setState(topic.sections)
+  const onChangeTopic = e => {
+    setSelectedTopic(e.value)
   }
 
-  const saveCurrent = () => {
-    const updated = { ...selectedTopic, sections: state }
-    dispatch(updateTopic(updated))
+  const getTopic = async () => {
+    const topic = await axiosClient({
+      method: 'get',
+      url: `/topics/${selectedTopic._id}`
+    })
+      .then(response => {
+        toast.current.show({ severity: 'success', summary: 'Topic Loaded' })
+        return response.data
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Loading Topic',
+          detail: error
+        })
+      })
+
+    setCurrentTopic(topic)
+    setSections(topic.sections)
+  }
+
+  const saveCurrent = async () => {
+    // If a topic has an id, then patch it, or else post it.
+    await axiosClient({
+      method: currentTopic._id ? 'patch' : 'post',
+      url: '/topics',
+      data: { ...currentTopic, sections }
+      //headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(response => {
+        toast.current.show({ severity: 'success', summary: 'Topic Saved' })
+        setCurrentTopic({})
+        setSections([])
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Saving Topic',
+          detail: error
+        })
+      })
   }
 
   function onDragEnd (result) {
@@ -172,45 +214,56 @@ const Composer = props => {
     const dInd = +destination.droppableId
 
     if (source.droppableId === 'CONTENT_TEMPLATE') {
-      const result = copy(CONTENT_TEMPLATE, state[dInd], source, destination)
-      const newState = [...state]
-      newState[dInd] = result[dInd]
-      setState(newState)
+      const result = copy(CONTENT_TEMPLATE, sections[dInd], source, destination)
+      const newSections = [...sections]
+      newSections[dInd] = result[dInd]
+      setSections(newSections)
     } else {
       if (sInd === dInd) {
         const items = reorder(
-          state[sInd].items,
+          sections[sInd].items,
           source.index,
           destination.index
         )
-        const newState = [...state]
-        newState[sInd].items = items
-        setState(newState)
+        const newSections = [...sections]
+        newSections[sInd].items = items
+        setSections(newSections)
       } else {
-        const result = move(state[sInd], state[dInd], source, destination)
-        const newState = [...state]
-        newState[sInd] = result[sInd]
-        newState[dInd] = result[dInd]
-        setState(newState)
+        const result = move(sections[sInd], sections[dInd], source, destination)
+        const newSections = [...sections]
+        newSections[sInd] = result[sInd]
+        newSections[dInd] = result[dInd]
+        setSections(newSections)
       }
     }
   }
 
   return (
     <div>
+      <Toast ref={toast} position='top-right'></Toast>
       <Toolbar
         left={
           <>
             <Dropdown
-              value={selectedTopic.value}
+              value={selectedTopic}
               options={props.topics}
-              onChange={handleTopicChange}
+              onChange={onChangeTopic}
               filter
               showClear
-              filterBy='label'
-              optionLabel='label'
+              filterBy='title'
+              optionLabel='title'
               placeholder='Select Topic'
             />
+            &nbsp;
+            <Button
+              label='Open Topic'
+              className='p-button-outlined p-button-sm p-button-secondary'
+              icon='pi pi-folder-open'
+              onClick={() => {
+                getTopic()
+              }}
+            />
+            &nbsp;
             <Button
               label='Add Section'
               className='p-button-outlined p-button-sm p-button-secondary'
@@ -225,7 +278,7 @@ const Composer = props => {
         }
         right={
           <Button
-            label='Save Current Topic'
+            label='Save Changes'
             icon='pi pi-check'
             className='p-button-success'
             onClick={saveCurrent}
@@ -286,7 +339,20 @@ const Composer = props => {
                 style={{ margin: '10px 0px 10px 40px' }}
                 legend='Topic Editor'
               >
-                {state.map((el, ind) => (
+                <div className='p-d-flex p-jc-end p-ai-center'>
+                  <label htmlFor='topicTitle'>Title&nbsp;</label>
+                  <InputText
+                    id='topicTitle'
+                    value={currentTopic.title || ''}
+                    onChange={e => {
+                      setCurrentTopic({
+                        ...currentTopic,
+                        title: e.target.value
+                      })
+                    }}
+                  />
+                </div>
+                {sections.map((el, ind) => (
                   <div key={`builder-${ind}`}>
                     <Fieldset
                       style={{ margin: '0px 0px 10px 0px' }}
@@ -308,9 +374,9 @@ const Composer = props => {
                             className='p-button-outlined p-button-sm p-button-secondary'
                             icon='pi pi-copy'
                             onClick={() => {
-                              const newState = [...state]
+                              const newSections = [...sections]
                               const copySection = JSON.parse(
-                                JSON.stringify(state[ind])
+                                JSON.stringify(sections[ind])
                               )
                               // Do not copy the uuids, make new ones
                               copySection.items.forEach(function (
@@ -321,8 +387,8 @@ const Composer = props => {
                                 item.id = uuid()
                                 section[itemIndex] = item
                               })
-                              newState.splice(ind, 0, copySection)
-                              setState(newState)
+                              newSections.splice(ind, 0, copySection)
+                              setSections(newSections)
                             }}
                           />
                           <Button
@@ -330,9 +396,9 @@ const Composer = props => {
                             className='p-button-outlined p-button-sm p-button-secondary'
                             icon='pi pi-minus-circle'
                             onClick={() => {
-                              const newState = [...state]
-                              newState.splice(ind, 1)
-                              setState(newState)
+                              const newSections = [...sections]
+                              newSections.splice(ind, 1)
+                              setSections(newSections)
                             }}
                           />
                         </div>
@@ -347,9 +413,9 @@ const Composer = props => {
                             id='topicName'
                             value={el.name}
                             onChange={e => {
-                              const newState = [...state]
-                              newState[ind].name = e.target.value
-                              setState(newState)
+                              const newSections = [...sections]
+                              newSections[ind].name = e.target.value
+                              setSections(newSections)
                             }}
                             className='p-d-block'
                           />
@@ -363,9 +429,9 @@ const Composer = props => {
                             className='p-d-block'
                             value={el.tags}
                             onChange={e => {
-                              const newState = [...state]
-                              newState[ind].tags = e.value
-                              setState(newState)
+                              const newSections = [...sections]
+                              newSections[ind].tags = e.value
+                              setSections(newSections)
                             }}
                           />
                         </div>
@@ -410,11 +476,11 @@ const Composer = props => {
                                             props={item}
                                             mode='entry'
                                             updateValue={value => {
-                                              const newState = [...state]
-                                              newState[ind].items[
+                                              const newSections = [...sections]
+                                              newSections[ind].items[
                                                 index
                                               ].value = value
-                                              setState(newState)
+                                              setSections(newSections)
                                             }}
                                           />
                                           <Button
@@ -431,13 +497,13 @@ const Composer = props => {
                                                       false
                                                     )
                                                     if (json) {
-                                                      const newState = [
-                                                        ...state
+                                                      const newSections = [
+                                                        ...sections
                                                       ]
-                                                      newState[ind].items[
+                                                      newSections[ind].items[
                                                         index
                                                       ] = json
-                                                      setState(newState)
+                                                      setSections(newSections)
                                                     }
                                                   }}
                                                 />
@@ -450,12 +516,12 @@ const Composer = props => {
                                             className='p-button-outlined p-button-sm p-button-secondary'
                                             icon='pi pi-minus-circle'
                                             onClick={() => {
-                                              const newState = [...state]
-                                              newState[ind].items.splice(
+                                              const newSections = [...sections]
+                                              newSections[ind].items.splice(
                                                 index,
                                                 1
                                               )
-                                              setState(newState)
+                                              setSections(newSections)
                                             }}
                                           />
                                         </div>
@@ -477,7 +543,7 @@ const Composer = props => {
             </div>
             <div className='p-col-4'>
               <Fieldset legend='Preview Pane' style={{ margin: 10 }}>
-                {state.map((el, ind) => (
+                {sections.map((el, ind) => (
                   <div key={`display-${ind}`}>
                     <Fieldset
                       style={{ margin: '0px 0px 10px 0px' }}
@@ -493,6 +559,7 @@ const Composer = props => {
             </div>
           </div>
         </DragDropContext>
+        {/*JSON.stringify(props.topics)*/}
       </div>
       <Dialog
         header='Edit Content'
@@ -524,18 +591,18 @@ const Composer = props => {
               icon='pi pi-check'
               onClick={() => {
                 if (sectionEditIndex < 0) {
-                  setState([
-                    ...state,
+                  setSections([
+                    ...sections,
                     { version: bible, name: '', tags: [], items: [] }
                   ])
                 } else {
-                  const newState = [...state]
+                  const newSections = [...sections]
                   // If the version for this section is being changed,
                   // then change all passages in this section
-                  if (newState[sectionEditIndex].version !== bible) {
+                  if (newSections[sectionEditIndex].version !== bible) {
                     const findBible = bibles.find(b => b.abbreviation === bible)
-                    newState[sectionEditIndex].version = bible
-                    newState[sectionEditIndex].items.forEach(function (
+                    newSections[sectionEditIndex].version = bible
+                    newSections[sectionEditIndex].items.forEach(function (
                       item,
                       itemIndex,
                       section
@@ -547,9 +614,9 @@ const Composer = props => {
                       }
                       section[itemIndex] = item
                     })
-                    setState(newState)
+                    setSections(newSections)
                     // Update the async stuff after the fact
-                    newState[sectionEditIndex].items.forEach(function (
+                    newSections[sectionEditIndex].items.forEach(function (
                       item,
                       itemIndex
                     ) {
@@ -583,11 +650,19 @@ const Composer = props => {
   )
 }
 
-export async function getStaticProps () {
+export async function getServerSideProps () {
   const store = initializeStore()
-  //store.setBibles(bibles)
+
+  const topics = await axiosClient
+    .get('/topicTitles')
+    .then(response => response.data)
+
   return {
-    props: { static: getSnapshot(store), apiKey: process.env.ABS_API_KEY }
+    props: {
+      topics,
+      store: getSnapshot(store),
+      apiKey: process.env.ABS_API_KEY
+    }
   }
 }
 

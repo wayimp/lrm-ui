@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import VerseSelector from '../VerseSelector'
-
-import { Dropdown } from 'primereact/dropdown'
-import { MultiStateCheckbox } from 'primereact/multistatecheckbox'
 import { Button } from 'primereact/button'
 
 const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {

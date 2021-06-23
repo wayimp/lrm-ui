@@ -6,7 +6,7 @@ import PassageComponent from './PassageComponent'
 //import TextComponent from './TextComponent'
 //import DropdownComponent from './DropdownComponent'
 
-const QuestionComponent = ({ props, mode, updateValue, updateConfig }) => {
+const ContentBlock = ({ props, mode, updateValue, updateConfig }) => {
   switch (props.type) {
     case 'html':
       return (
@@ -79,4 +79,4 @@ const QuestionComponent = ({ props, mode, updateValue, updateConfig }) => {
   }
 }
 
-export default QuestionComponent
+export default ContentBlock
