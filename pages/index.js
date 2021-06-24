@@ -139,6 +139,7 @@ const Composer = props => {
   const [sectionEditVersion, setSectionEditVersion] = useState('')
   const [contentConfig, setContentConfig] = useState({})
   const [contentConfigDialog, setContentConfigDialog] = useState(false)
+  const [topicTitles, setTopicTitles] = useState(props.store.topicTitles)
   const [bible, setBible] = useState({})
   const [selectedTopic, setSelectedTopic] = useState({})
   const [currentTopic, setCurrentTopic] = useState({
@@ -175,7 +176,7 @@ const Composer = props => {
       .get('/topicTitles?category=topics&showInactive=true')
       .then(response => response.data)
 
-    props.store.setTopicTitles(topicTitles)
+    setTopicTitles(topicTitles)
   }
 
   const lookupPassage = async (sectionEditIndex, itemIndex, item) => {
@@ -235,6 +236,7 @@ const Composer = props => {
         toast.current.show({ severity: 'success', summary: 'Topic Deleted' })
         setCurrentTopic({})
         setSections([])
+        updateTopicTitles()
       })
       .catch(error => {
         toast.current.show({
@@ -341,7 +343,7 @@ const Composer = props => {
           <>
             <Dropdown
               value={selectedTopic}
-              options={props.store.topicTitles}
+              options={topicTitles}
               onChange={onChangeTopic}
               filter
               showClear
