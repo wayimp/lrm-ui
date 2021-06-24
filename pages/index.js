@@ -14,6 +14,7 @@ import { Toolbar } from 'primereact/toolbar'
 import { Fieldset } from 'primereact/fieldset'
 import { Chips } from 'primereact/chips'
 import { Toast } from 'primereact/toast'
+import { confirmPopup } from 'primereact/confirmpopup'
 import uuid from 'react-uuid'
 import { bibles } from '../bibles'
 import {
@@ -140,7 +141,12 @@ const Composer = props => {
   const [contentConfigDialog, setContentConfigDialog] = useState(false)
   const [bible, setBible] = useState({})
   const [selectedTopic, setSelectedTopic] = useState({})
-  const [currentTopic, setCurrentTopic] = useState({})
+  const [currentTopic, setCurrentTopic] = useState({
+    category: 'topics',
+    title: '',
+    active: true,
+    order: 100
+  })
   const [sections, setSections] = useState([])
 
   const toast = useRef(null)
@@ -163,6 +169,14 @@ const Composer = props => {
   }
 
   useEffect(() => {}, [])
+
+  const updateTopicTitles = async () => {
+    const topicTitles = await axiosClient
+      .get('/topicTitles?category=topics&showInactive=true')
+      .then(response => response.data)
+
+    props.store.setTopicTitles(topicTitles)
+  }
 
   const lookupPassage = async (sectionEditIndex, itemIndex, item) => {
     const url = `https://api.scripture.api.bible/v1/bibles/${item.bibleId}/passages/${item.passageId}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
@@ -212,6 +226,35 @@ const Composer = props => {
     setSections(topic.sections)
   }
 
+  const deleteTopic = () => {
+    axiosClient({
+      method: 'delete',
+      url: `/topics/${selectedTopic._id}`
+    })
+      .then(response => {
+        toast.current.show({ severity: 'success', summary: 'Topic Deleted' })
+        setCurrentTopic({})
+        setSections([])
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Deleting Topic',
+          detail: error
+        })
+      })
+  }
+
+  const deleteSelectedTopic = () => {
+    confirmPopup({
+      target: event.currentTarget,
+      message: `Do you want to delete '${selectedTopic.title}' ?`,
+      icon: 'pi pi-info-circle',
+      acceptClassName: 'p-button-danger',
+      deleteTopic
+    })
+  }
+
   const saveCurrent = async () => {
     // If a topic has an id, then patch it, or else post it.
     await axiosClient({
@@ -224,6 +267,7 @@ const Composer = props => {
         toast.current.show({ severity: 'success', summary: 'Topic Saved' })
         setCurrentTopic({})
         setSections([])
+        updateTopicTitles()
       })
       .catch(error => {
         toast.current.show({
@@ -297,7 +341,7 @@ const Composer = props => {
           <>
             <Dropdown
               value={selectedTopic}
-              options={props.topics}
+              options={props.store.topicTitles}
               onChange={onChangeTopic}
               filter
               showClear
@@ -314,6 +358,13 @@ const Composer = props => {
                 getTopic()
               }}
             />
+            &nbsp;
+            <Button
+              onClick={deleteTopic}
+              icon='pi pi-times'
+              label='Delete'
+              className='p-button-danger p-button-outlined'
+            ></Button>
             &nbsp;
             <Button
               label='Add Section'
@@ -703,15 +754,16 @@ const Composer = props => {
 }
 
 export async function getServerSideProps () {
+  const topicTitles = await axiosClient
+    .get('/topicTitles?category=topics&showInactive=true')
+    .then(response => response.data)
+
   const store = initializeStore()
 
-  const topics = await axiosClient
-    .get('/topicTitles')
-    .then(response => response.data)
+  store.setTopicTitles(topicTitles)
 
   return {
     props: {
-      topics,
       store: getSnapshot(store),
       apiKey: process.env.ABS_API_KEY
     }
