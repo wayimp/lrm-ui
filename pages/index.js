@@ -17,15 +17,30 @@ import { Toast } from 'primereact/toast'
 import { confirmPopup } from 'primereact/confirmpopup'
 import uuid from 'react-uuid'
 import { bibles } from '../bibles'
-import {
-  HeaderWrapper,
-  List,
-  Kiosk,
-  Item,
-  Clone,
-  Notice
-} from './ComposerStyled.js'
 const grid = 8
+
+import styled from 'styled-components'
+
+export const List = styled.div`
+  border: 1px ${props => (props.isDraggingOver ? 'dashed #000' : 'solid #ddd')};
+  background: #fff;
+  padding: 0.5rem 0.5rem 0;
+  border-radius: 3px;
+  flex: 0 0 150px;
+  font-family: sans-serif;
+`
+
+const Item = styled.div`
+  user-select: none;
+  padding: 16px;
+  margin: 0px 0px 8px;
+`
+
+const Clone = styled(Item)`
+  ~ div {
+    transform: none !important;
+  }
+`
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
