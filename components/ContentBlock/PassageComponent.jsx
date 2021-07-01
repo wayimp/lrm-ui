@@ -17,6 +17,13 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
     setFetched(true)
   }
 
+  const convertToHtml = () => {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.type = 'html'
+    newState.label = 'HTML'
+    updateConfig(newState)
+  }
+
   switch (mode) {
     case 'display':
       return (
@@ -45,6 +52,12 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
             setPassage={setPassage}
           />
           <div className='p-d-flex p-jc-end'>
+            <Button
+              label='Convert to HTML'
+              icon='pi pi-replay'
+              onClick={convertToHtml}
+              className='p-button-text'
+            />
             <Button
               label='Cancel'
               icon='pi pi-times'

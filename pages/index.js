@@ -24,7 +24,7 @@ import styled from 'styled-components'
 export const List = styled.div`
   border: 1px ${props => (props.isDraggingOver ? 'dashed #000' : 'solid #ddd')};
   background: #fff;
-  padding: 0.5rem 0.5rem 0;
+  padding: 2 2 0;
   border-radius: 3px;
   flex: 0 0 150px;
   font-family: sans-serif;
@@ -32,8 +32,11 @@ export const List = styled.div`
 
 const Item = styled.div`
   user-select: none;
-  padding: 16px;
-  margin: 0px 0px 8px;
+  min-width: 100;
+  padding: 0px;
+  margin: 0px;
+  border: 1px solid black;
+  border-radius: 3px;
 `
 
 const Clone = styled(Item)`
@@ -171,15 +174,15 @@ const Composer = props => {
     version: 'CONTENT_TEMPLATE',
     items: [
       {
-        id: 'html',
-        type: 'html',
-        label: 'HTML'
-      },
-      {
         id: 'passage',
         type: 'passage',
         label: 'Passage',
         apiKey: props.apiKey
+      },
+      {
+        id: 'html',
+        type: 'html',
+        label: 'HTML'
       }
     ]
   }
@@ -219,12 +222,18 @@ const Composer = props => {
 
   const onChangeTopic = e => {
     setSelectedTopic(e.value)
+    if (e.value && e.value._id) {
+      getTopic(e.value._id)
+    } else {
+      setCurrentTopic({})
+      setSections([])
+    }
   }
 
-  const getTopic = async () => {
+  const getTopic = async id => {
     const topic = await axiosClient({
       method: 'get',
-      url: `/topics/${selectedTopic._id}`
+      url: `/topics/${id}`
     })
       .then(response => {
         toast.current.show({ severity: 'success', summary: 'Topic Loaded' })
@@ -249,6 +258,7 @@ const Composer = props => {
     })
       .then(response => {
         toast.current.show({ severity: 'success', summary: 'Topic Deleted' })
+        setSelectedTopic({})
         setCurrentTopic({})
         setSections([])
         updateTopicTitles()
@@ -282,8 +292,6 @@ const Composer = props => {
     })
       .then(response => {
         toast.current.show({ severity: 'success', summary: 'Topic Saved' })
-        setCurrentTopic({})
-        setSections([])
         updateTopicTitles()
       })
       .catch(error => {
@@ -351,68 +359,45 @@ const Composer = props => {
   }
 
   return (
-    <div>
+    <div style={{ marginTop: 100 }}>
       <Toast ref={toast} position='top-right'></Toast>
-      <Toolbar
-        left={
-          <>
-            <Dropdown
-              value={selectedTopic}
-              options={topicTitles}
-              onChange={onChangeTopic}
-              filter
-              showClear
-              filterBy='title'
-              optionLabel='title'
-              placeholder='Select Topic'
-            />
-            &nbsp;
-            <Button
-              label='Open Topic'
-              className='p-button-outlined p-button-sm p-button-secondary'
-              icon='pi pi-folder-open'
-              onClick={() => {
-                getTopic()
-              }}
-            />
-            &nbsp;
-            <Button
-              onClick={deleteTopic}
-              icon='pi pi-times'
-              label='Delete'
-              className='p-button-danger p-button-outlined'
-            ></Button>
-            &nbsp;
-            <Button
-              label='Add Section'
-              className='p-button-outlined p-button-sm p-button-secondary'
-              icon='pi pi-book'
-              onClick={() => {
-                setSectionEditIndex(-1)
-                setSectionEditVersion('')
-                setSectionEditDialog(true)
-              }}
-            />
-          </>
-        }
-        right={
-          <Button
-            label='Save Changes'
-            icon='pi pi-check'
-            className='p-button-success'
-            onClick={saveCurrent}
-          />
-        }
-      />
-
       <div>
         <DragDropContext onDragEnd={onDragEnd} isDropDisabled={true}>
-          <div className='p-grid'>
-            <div className='p-col-1'>
-              <Fieldset legend='Available Controls' style={{ margin: 10 }}>
+          <Toolbar
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              zIndex: 1000
+            }}
+            left={
+              <>
+                <Dropdown
+                  value={selectedTopic}
+                  options={topicTitles}
+                  onChange={onChangeTopic}
+                  filter
+                  showClear
+                  filterBy='title'
+                  optionLabel='title'
+                  placeholder='Select Topic'
+                />
+                <Button
+                  label='Add Section'
+                  className='p-button-outlined p-button-sm p-button-secondary'
+                  icon='pi pi-book'
+                  onClick={() => {
+                    setSectionEditIndex(-1)
+                    setSectionEditVersion('')
+                    setSectionEditDialog(true)
+                  }}
+                />
+                &nbsp;&nbsp;
                 <Droppable key={99} droppableId={'CONTENT_TEMPLATE'}>
                   {(provided, snapshot) => (
                     <div
+                      className='p-d-flex'
                       ref={provided.innerRef}
                       style={getListStyle(snapshot.isDraggingOver)}
                       {...provided.droppableProps}
@@ -438,6 +423,7 @@ const Composer = props => {
                               >
                                 {template.label}
                               </Item>
+
                               {snapshot.isDragging ? (
                                 <Clone>{template.label}</Clone>
                               ) : (
@@ -451,8 +437,27 @@ const Composer = props => {
                     </div>
                   )}
                 </Droppable>
-              </Fieldset>
-            </div>
+              </>
+            }
+            right={
+              <>
+                <Button
+                  onClick={deleteTopic}
+                  icon='pi pi-times'
+                  label='Delete'
+                  className='p-button-danger p-button-outlined'
+                ></Button>
+                &nbsp;
+                <Button
+                  label='Save Changes'
+                  icon='pi pi-check'
+                  className='p-button-success'
+                  onClick={saveCurrent}
+                />
+              </>
+            }
+          />
+          <div className='p-grid' style={{ marginTop: 70 }}>
             <div className='p-col-7'>
               <Fieldset
                 style={{ margin: '10px 0px 10px 40px' }}
@@ -474,6 +479,7 @@ const Composer = props => {
                 {sections.map((el, ind) => (
                   <div key={`builder-${ind}`}>
                     <Fieldset
+                      toggleable
                       style={{ margin: '0px 0px 10px 0px' }}
                       legend={
                         <div>
@@ -681,6 +687,7 @@ const Composer = props => {
         {/*JSON.stringify(props.topics)*/}
       </div>
       <Dialog
+        blockScroll={true}
         header='Edit Content'
         visible={contentConfigDialog}
         style={{ width: '50vw' }}
@@ -690,6 +697,7 @@ const Composer = props => {
       </Dialog>
 
       <Dialog
+        blockScroll={true}
         header='Edit Section'
         visible={sectionEditDialog}
         style={{ width: '50vw' }}

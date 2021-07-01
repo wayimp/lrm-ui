@@ -552,7 +552,6 @@ export const CSB = {
       id: 'PSA',
       name: 'Psalms',
       chapters: [
-        1,
         6,
         12,
         8,
