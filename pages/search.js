@@ -137,7 +137,7 @@ const Search = props => {
         <p />
         <p />
       </div>
-      {selectedTopic ? (
+      {selectedSection ? (
         <Fieldset
           style={{ margin: '0px 0px 10px 0px' }}
           legend={
@@ -161,7 +161,7 @@ const Search = props => {
           }
         >
           {selectedSection.items.map((item, index) => {
-            return <ContentBlock props={item} mode='display' />
+            return <ContentBlock key={index} props={item} mode='display' />
           })}
         </Fieldset>
       ) : (
