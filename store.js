@@ -22,11 +22,18 @@ const TopicTitle = types.model({
   order: types.integer
 })
 
+const TopicTag = types.model({
+  tagName: types.string,
+  topicName: types.string,
+  id: types.string
+})
+
 const Store = types
   .model({
     user: types.optional(types.string, ''),
     bibles: types.array(Bible),
-    topicTitles: types.array(TopicTitle)
+    topicTitles: types.array(TopicTitle),
+    topicTags: types.array(TopicTag)
   })
   .actions(self => ({
     setUser (_user) {
@@ -37,6 +44,9 @@ const Store = types
     },
     setTopicTitles (_topicTitles) {
       self.topicTitles = _topicTitles
+    },
+    setTopicTags (_topicTags) {
+      self.topicTags = _topicTags
     }
   }))
 

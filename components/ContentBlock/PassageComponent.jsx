@@ -19,6 +19,7 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
 
   const convertToHtml = () => {
     const newState = JSON.parse(JSON.stringify(state))
+    newState.html = `<b>${newState.reference}</b><br/><br/>` + newState.html
     newState.type = 'html'
     newState.label = 'HTML'
     updateConfig(newState)
@@ -39,7 +40,23 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
       break
 
     case 'entry':
-      return <h4>{props.reference}</h4>
+      return (
+        <>
+          <VerseSelector
+            apiKey={props.apiKey}
+            version={props.version}
+            passage={state}
+            setPassage={setPassage}
+          />
+          <br/>
+          <h4>{props.reference}</h4>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: props.html
+            }}
+          ></div>
+        </>
+      )
       break
 
     case 'config':

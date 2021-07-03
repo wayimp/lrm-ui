@@ -36,10 +36,6 @@ const HtmlComponent = ({ props, mode, updateValue, updateConfig }) => {
       return (
         <>
           <div className='p-field'>
-            <label htmlFor='labelText' className='p-d-block'>
-              Label Text
-            </label>
-
             <Editor
               style={{ height: '320px' }}
               id='labelText'

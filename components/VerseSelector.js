@@ -36,9 +36,11 @@ const VerseSelector = observer(props => {
   useEffect(() => {
     // If a passage was passed in, set the defaults
     let findBible
-    if (props.version) {
+    if (props.version || props.passage.version) {
       // Set the bible version according to the props that were passed in.
-      findBible = bibles.find(b => b.abbreviation === props.passage.version)
+      findBible = bibles.find(
+        b => b.abbreviation === (props.version || props.passage.version)
+      )
       setBible(findBible)
     }
 

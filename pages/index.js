@@ -32,7 +32,12 @@ export const List = styled.div`
 
 const Item = styled.div`
   user-select: none;
-  min-width: 100;
+  min-width: 100px;
+  max-width: 100px;
+  min-height: 40px;
+  max-height: 40px;
+  text-align: center;
+  vertical-align: top;
   padding: 0px;
   margin: 0px;
   border: 1px solid black;

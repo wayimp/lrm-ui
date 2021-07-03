@@ -11,5 +11,13 @@
             "url": "http://localhost:8055",
             "webRoot": "${workspaceFolder}"
         }
+        {
+            "type": "pwa-chrome",
+            "request": "attach",
+            "name": "Attach to Chrome",
+            "port": 9222,
+            "urlFilter": "http://localhost:8055/*",
+            "webRoot": "${workspaceFolder}"
+          }
     ]
 }
