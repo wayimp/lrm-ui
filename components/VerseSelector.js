@@ -182,7 +182,10 @@ const VerseSelector = observer(props => {
       </div>
       <br />
       {loading ? (
-        <i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }}></i>
+        <i
+          className='pi pi-spin pi-spinner'
+          style={{ margin: 10, fontSize: '4em' }}
+        ></i>
       ) : (
         <div dangerouslySetInnerHTML={{ __html: passage.content || '' }} />
       )}

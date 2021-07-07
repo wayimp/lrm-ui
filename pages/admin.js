@@ -1,0 +1,116 @@
+import React, { useState, useRef } from 'react'
+import Router from 'next/router'
+import TopBar from '../components/AdminTopBar'
+import cookie from 'js-cookie'
+import { axiosClient } from '../axiosClient'
+import { getSnapshot } from 'mobx-state-tree'
+import { initializeStore } from '../store'
+import { InputText } from 'primereact/inputtext'
+import { Button } from 'primereact/button'
+import { Toast } from 'primereact/toast'
+
+const Login = props => {
+  const [authenticating, setAuthenticating] = React.useState(false)
+  const [username, setUsername] = React.useState('')
+  const [password, setPassword] = React.useState('')
+  const token = cookie.get('token')
+  const toast = useRef(null)
+
+  const handleSubmit = async () => {
+    setAuthenticating(true)
+    const body = { username, password }
+    await axiosClient
+      .post('/token', body)
+      .then(response => {
+        setAuthenticating(false)
+        let accessToken,
+          roles = ''
+        if (response && response.data) {
+          accessToken = response.data.access_token
+          roles = response.data.roles
+        }
+        if (accessToken && accessToken.length > 0) {
+          toast.current.show({
+            severity: 'success',
+            summary: 'User Logon Success'
+          })
+
+          cookie.set('username', username)
+          cookie.set('token', accessToken)
+          //props.store.setUser(username)
+          //props.store.setToken(accessToken)
+
+          Router.push('/topics')
+        } else {
+          toast.current.show({
+            severity: 'error',
+            summary: 'User Logon Failure',
+            detail: error
+          })
+          Router.push('/')
+        }
+      })
+      .catch(function (error) {
+        toast.current.show({
+          severity: 'error',
+          summary: 'User Logon Failure',
+          detail: error
+        })
+        Router.push('/')
+      })
+  }
+
+  return (
+    <div>
+      <Toast ref={toast} position='top-right'></Toast>
+      <TopBar />
+      <div className='demo-container p-p-4 p-lg-2' style={{marginTop: 50}}>
+        <div className='card p-d-block p-mx-auto'>
+          <div className='p-field p-grid'>
+            <div className='p-inputgroup'>
+              <span className='p-inputgroup-addon'>
+                <i className='pi pi-user'></i>
+              </span>
+              <InputText
+                placeholder='Username'
+                value={username || ''}
+                onChange={e => {
+                  setUsername(e.target.value)
+                }}
+              />
+            </div>
+          </div>
+          <div className='p-field p-grid'>
+            <div className='p-inputgroup'>
+              <span className='p-inputgroup-addon'>
+                <i className='pi pi-lock'></i>
+              </span>
+              <InputText
+                placeholder='Password'
+                value={password || ''}
+                onChange={e => {
+                  setPassword(e.target.value)
+                }}
+              />
+            </div>
+          </div>
+          <div className='p-field p-grid'>
+            <Button label='Submit' icon='pi pi-check' onClick={handleSubmit} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export async function getServerSideProps () {
+  const store = initializeStore()
+
+  return {
+    props: {
+      store: getSnapshot(store)
+    }
+  }
+}
+
+export default Login

@@ -1,3 +1,11 @@
+* {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+body {
+  background: #efefff;
+}
+
 p.s1 {
   font-weight: bolder;
 }

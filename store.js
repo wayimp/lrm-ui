@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { types, applySnapshot } from 'mobx-state-tree'
+import { createContext } from 'react'
+import { action, decorate, observable, computed } from 'mobx'
 
 let store
 
@@ -31,24 +33,30 @@ const TopicTag = types.model({
 const Store = types
   .model({
     user: types.optional(types.string, ''),
+    token: types.optional(types.string, ''),
     bibles: types.array(Bible),
     topicTitles: types.array(TopicTitle),
     topicTags: types.array(TopicTag)
   })
-  .actions(self => ({
-    setUser (_user) {
+  .actions(self => {
+    function setUser (_user) {
       self.user = _user
-    },
-    setBibles (_bibles) {
+    }
+    function setToken (_token) {
+      self.token = _token
+    }
+    function setBibles (_bibles) {
       self.bibles = _bibles
-    },
-    setTopicTitles (_topicTitles) {
+    }
+    function setTopicTitles (_topicTitles) {
       self.topicTitles = _topicTitles
-    },
-    setTopicTags (_topicTags) {
+    }
+    function setTopicTags (_topicTags) {
       self.topicTags = _topicTags
     }
-  }))
+
+    return { setUser, setToken, setBibles, setTopicTitles, setTopicTags }
+  })
 
 export function initializeStore (snapshot = null) {
   const _store = store ?? Store.create({ lastUpdate: 0 })
@@ -63,7 +71,7 @@ export function initializeStore (snapshot = null) {
   // Create the store once in the client
   if (!store) store = _store
 
-  return store
+  return createContext(observable(store))
 }
 
 export function useStore (initialState) {
