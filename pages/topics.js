@@ -177,23 +177,6 @@ const TopicComposer = props => {
 
   const toast = useRef(null)
 
-  const CONTENT_TEMPLATE = {
-    version: 'CONTENT_TEMPLATE',
-    items: [
-      {
-        id: 'passage',
-        type: 'passage',
-        label: 'Passage',
-        apiKey: props.apiKey
-      },
-      {
-        id: 'html',
-        type: 'html',
-        label: 'HTML'
-      }
-    ]
-  }
-
   useEffect(() => {
     const token = cookie.get('token')
     if (token && token.length > 0) {
@@ -290,13 +273,19 @@ const TopicComposer = props => {
   }
 
   const deleteSelectedTopic = () => {
-    confirmPopup({
-      target: event.currentTarget,
-      message: `Do you want to delete '${selectedTopic.title}' ?`,
-      icon: 'pi pi-info-circle',
-      acceptClassName: 'p-button-danger',
-      deleteTopic
-    })
+    if (selectedTopic && selectedTopic._id) {
+      confirmPopup({
+        target: event.currentTarget,
+        message: `Do you want to delete '${selectedTopic.title}' ?`,
+        icon: 'pi pi-info-circle',
+        acceptClassName: 'p-button-danger',
+        deleteTopic
+      })
+    } else {
+      setSelectedTopic({})
+      setCurrentTopic({})
+      setSections([])
+    }
   }
 
   const saveCurrent = async () => {
@@ -402,65 +391,21 @@ const TopicComposer = props => {
                   placeholder='Select Topic'
                 />
                 <Button
-                  label='Add Section'
+                  label='New Topic'
                   className='p-button-outlined p-button-sm p-button-secondary'
                   icon='pi pi-book'
                   onClick={() => {
-                    setSectionEditIndex(-1)
-                    setSectionEditVersion('')
-                    setSectionEditDialog(true)
+                    setSelectedTopic({})
+                    setCurrentTopic({})
+                    setSections([])
                   }}
                 />
-                &nbsp;&nbsp;
-                <Droppable key={99} droppableId={'CONTENT_TEMPLATE'}>
-                  {(provided, snapshot) => (
-                    <div
-                      className='p-d-flex'
-                      ref={provided.innerRef}
-                      style={getListStyle(snapshot.isDraggingOver)}
-                      {...provided.droppableProps}
-                      innerRef={provided.innerRef}
-                      isDraggingOver={snapshot.isDraggingOver}
-                    >
-                      {CONTENT_TEMPLATE.items.map((template, index) => (
-                        <Draggable
-                          key={template.id}
-                          draggableId={template.id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <>
-                              <Item
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={getItemStyle(
-                                  snapshot.isDragging,
-                                  provided.draggableProps.style
-                                )}
-                              >
-                                {template.label}
-                              </Item>
-
-                              {snapshot.isDragging ? (
-                                <Clone>{template.label}</Clone>
-                              ) : (
-                                ''
-                              )}
-                            </>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
               </>
             }
             right={
               <>
                 <Button
-                  onClick={deleteTopic}
+                  onClick={deleteSelectedTopic}
                   icon='pi pi-times'
                   label='Delete'
                   className='p-button-danger p-button-outlined'
@@ -481,19 +426,32 @@ const TopicComposer = props => {
                 style={{ margin: '10px 0px 10px 40px' }}
                 legend='Topic Editor'
               >
-                <div className='p-d-flex p-jc-end p-ai-center'>
-                  <label htmlFor='topicTitle'>Title&nbsp;</label>
-                  <InputText
-                    id='topicTitle'
-                    value={currentTopic.title || ''}
-                    onChange={e => {
-                      setCurrentTopic({
-                        ...currentTopic,
-                        title: e.target.value
-                      })
+                <div className='p-d-flex' style={{ marginBottom: 10 }}>
+                  <Button
+                    label='Add Version'
+                    className='p-button-outlined p-button-sm p-button-secondary'
+                    icon='pi pi-book'
+                    onClick={() => {
+                      setSectionEditIndex(-1)
+                      setSectionEditVersion('')
+                      setSectionEditDialog(true)
                     }}
                   />
+                  <div className='p-ml-auto p-ai-center'>
+                    <label htmlFor='topicTitle'>Title&nbsp;</label>
+                    <InputText
+                      id='topicTitle'
+                      value={currentTopic.title || ''}
+                      onChange={e => {
+                        setCurrentTopic({
+                          ...currentTopic,
+                          title: e.target.value
+                        })
+                      }}
+                    />
+                  </div>
                 </div>
+
                 {sections.map((el, ind) => (
                   <div key={`builder-${ind}`}>
                     <Fieldset
@@ -586,6 +544,37 @@ const TopicComposer = props => {
                         >
                           Content
                         </label>
+
+                        <Button
+                          label='Passage'
+                          className='p-button-outlined p-button-sm p-button-secondary'
+                          icon='pi pi-plus'
+                          onClick={() => {
+                            const newItem = {
+                              id: uuid(),
+                              type: 'passage',
+                              version: sections[ind].version,
+                              apiKey: props.apiKey
+                            }
+                            const newSections = [...sections]
+                            newSections[ind].items.push(newItem)
+                            setSections(newSections)
+                          }}
+                        />
+                        <Button
+                          label='Html'
+                          className='p-button-outlined p-button-sm p-button-secondary'
+                          icon='pi pi-plus'
+                          onClick={() => {
+                            const newItem = {
+                              id: uuid(),
+                              type: 'html'
+                            }
+                            const newSections = [...sections]
+                            newSections[ind].items.push(newItem)
+                            setSections(newSections)
+                          }}
+                        />
                         <Droppable
                           id={`droppable${ind}`}
                           droppableId={`${ind}`}
@@ -617,7 +606,7 @@ const TopicComposer = props => {
                                         <div>
                                           <ContentBlock
                                             props={item}
-                                            mode='entry'
+                                            mode='display'
                                             updateValue={value => {
                                               const newSections = [...sections]
                                               newSections[ind].items[

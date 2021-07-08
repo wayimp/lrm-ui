@@ -139,7 +139,7 @@ const TopicOrder = props => {
   }
 
   return (
-    <div style={{ marginTop: 70, maxWidth: 400 }}>
+    <div style={{ marginTop: 70 }}>
       <Toast ref={toast} position='top-right'></Toast>
       <TopBar />
       <Button

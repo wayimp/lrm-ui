@@ -35,35 +35,46 @@ const VerseSelector = observer(props => {
 
   useEffect(() => {
     // If a passage was passed in, set the defaults
+    const version = props.version || (props.passage && props.passage.version)
     let findBible
-    if (props.version || props.passage.version) {
+    if (version) {
       // Set the bible version according to the props that were passed in.
-      findBible = bibles.find(
-        b => b.abbreviation === (props.version || props.passage.version)
-      )
+      findBible = bibles.find(b => b.abbreviation === version)
       setBible(findBible)
     }
 
-    if (props.passage.passageId && findBible.books) {
+    const passageId =
+      props.passageId || (props.passage && props.passage.passageId)
+    if (passageId && findBible && findBible.books) {
       // Parse the passageId, e.g. 'GEN.1.1-GEN.1.2'
-      const refs = props.passage.passageId.split('-')
+      const refs = passageId.split('-')
       const start = refs[0].split('.')
       const findBook = findBible.books.find(b => b.id === start[0])
       setBook(findBook)
       const selections = verseSelections(findBook.chapters)
       setVerses(selections)
       setVersesEnd(selections)
-      setVerse(start[1] + ':' + start[2])
+
+      if (start[2]) {
+        setVerse(start[1] + ':' + start[2])
+      } else {
+        setVerse(start[1] + ':1')
+        setExtended(true)
+        setVerseEnd(start[1] + ':' + findBook.chapters[Number(start[1])])
+      }
 
       if (refs[1]) {
         setExtended(true)
         const end = refs[1].split('.')
         setVerseEnd(end[1] + ':' + end[2])
       }
-      setPassage({
-        content: props.passage.html,
-        reference: props.passage.reference
-      })
+
+      if (props.passage && props.passage.html && props.passage.reference) {
+        setPassage({
+          content: props.passage.html,
+          reference: props.passage.reference
+        })
+      }
     }
   }, [props])
 
@@ -137,6 +148,9 @@ const VerseSelector = observer(props => {
           options={verses || []}
           onChange={onChangeVerse}
           placeholder='Verse'
+          editable
+          style={{ width: 100 }}
+          disabled={!book.chapters}
         />
         <MultiStateCheckbox
           style={{ marginLeft: 6, marginRight: 6 }}
@@ -153,6 +167,9 @@ const VerseSelector = observer(props => {
               options={versesEnd || []}
               onChange={onChangeVerseEnd}
               placeholder='Verse'
+              editable
+              style={{ width: 100 }}
+              disabled={!book.chapters}
             />
           </>
         ) : (

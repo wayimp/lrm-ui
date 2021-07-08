@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import VerseSelector from '../VerseSelector'
 import { Button } from 'primereact/button'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { Toast } from 'primereact/toast'
 
 const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
   const [state, setState] = useState(JSON.parse(JSON.stringify(props)))
@@ -40,21 +42,62 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
       break
 
     case 'entry':
+      const toast = useRef(null)
+      const refParts = state.passageId ? state.passageId.split('.') : []
       return (
         <>
+          <Toast ref={toast} position='top-right'></Toast>
           <VerseSelector
             apiKey={props.apiKey}
             version={props.version}
-            passage={state}
+            passageId={props.passageId}
             setPassage={setPassage}
           />
-          <br/>
-          <h4>{props.reference}</h4>
+          <br />
+          <h4>
+            {state.passageId ? (
+              <>
+                {state.reference}&nbsp;&nbsp;
+                <CopyToClipboard
+                  style={{ cursor: 'copy' }}
+                  text={`${
+                    typeof window !== 'undefined'
+                      ? window.location.href.split('?')[0]
+                      : ''
+                  }?r=${state.passageId}&v=${props.version}`}
+                  onCopy={() =>
+                    toast.current.show({
+                      severity: 'success',
+                      summary: 'Link Copied'
+                    })
+                  }
+                >
+                  <i className='pi pi-share-alt'></i>
+                </CopyToClipboard>
+              </>
+            ) : (
+              ''
+            )}
+          </h4>
           <div
             dangerouslySetInnerHTML={{
               __html: props.html
             }}
           ></div>
+          {state.html ? (
+            <Button
+              label='Read Chapter'
+              className='p-button-rounded p-button-text'
+              icon='pi pi-book'
+              onClick={() => {
+                window.open(
+                  `?r=${refParts[0] + '.' + refParts[1]}&v=${props.version}`
+                )
+              }}
+            />
+          ) : (
+            ''
+          )}
         </>
       )
       break

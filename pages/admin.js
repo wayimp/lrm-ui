@@ -88,6 +88,7 @@ const Login = props => {
               <InputText
                 placeholder='Password'
                 value={password || ''}
+                type='password'
                 onChange={e => {
                   setPassword(e.target.value)
                 }}

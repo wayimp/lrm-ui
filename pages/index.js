@@ -23,7 +23,7 @@ const Search = props => {
   const [bible, setBible] = useState('')
 
   useEffect(() => {
-    const { topic, version } = props
+    const { topic, version, reference } = props
 
     if (version) {
       setBible(version)
@@ -109,7 +109,7 @@ const Search = props => {
 
   const movePrevious = () => {
     let findIndex = props.topicNames.findIndex(
-      tn => tn.name === selectedSection.name
+      tn => tn.topicName === selectedSection.name
     )
 
     if (findIndex > 0) {
@@ -123,7 +123,7 @@ const Search = props => {
 
   const moveNext = () => {
     let findIndex = props.topicNames.findIndex(
-      tn => tn.name === selectedSection.name
+      tn => tn.topicName === selectedSection.name
     )
 
     if (findIndex < props.topicNames.length - 1) {
@@ -165,7 +165,7 @@ const Search = props => {
               options={props.topicNames}
               onChange={selectTopic}
               forceSelection
-              optionLabel='name'
+              optionLabel='topicName'
               placeholder='Browse Topics'
             />
           </div>
@@ -181,8 +181,11 @@ const Search = props => {
           />
         }
       />
-      <div className='p-grid' style={{ margin: '80px 10px 10px 10px' }}>
-        <div className='p-col-6'>
+      <div
+        className='p-d-flex p-flex-column p-flex-md-row'
+        style={{ margin: '80px 10px 10px 10px' }}
+      >
+        <div className='p-mb-2 p-mr-2'>
           {selectedSection ? (
             <Fieldset
               style={{ margin: '0px 0px 10px 0px' }}
@@ -228,16 +231,17 @@ const Search = props => {
             ''
           )}
         </div>
-        <div className='p-col-6'>
+        <div className='p-mb-2 p-mr-2'>
           <Fieldset
             style={{ margin: '0px 0px 10px 0px' }}
-            legend='Lookup a passage'
+            legend='Lookup a Passage'
           >
             <ContentBlock
               props={{
                 type: 'passage',
                 version: bible,
-                apiKey: props.apiKey
+                apiKey: props.apiKey,
+                passageId: props.reference ? props.reference : null
               }}
               mode='entry'
             />
@@ -251,6 +255,7 @@ const Search = props => {
 export async function getServerSideProps (context) {
   let topic = {}
   let version = ''
+  let reference = ''
   if (context && context.query) {
     if (context.query.t) {
       topic = await axiosClient
@@ -259,6 +264,9 @@ export async function getServerSideProps (context) {
     }
     if (context.query.v) {
       version = context.query.v
+    }
+    if (context.query.r) {
+      reference = context.query.r
     }
   }
 
@@ -278,6 +286,7 @@ export async function getServerSideProps (context) {
     props: {
       topic,
       version,
+      reference,
       topicNames,
       store: getSnapshot(store),
       apiKey: process.env.ABS_API_KEY
