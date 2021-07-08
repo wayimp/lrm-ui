@@ -23,6 +23,13 @@ import TopBar from '../components/AdminTopBar'
 import cookie from 'js-cookie'
 import styled from 'styled-components'
 
+const categories = [
+  { label: 'Topical Bible', value: 'topics' },
+  { label: 'Fresh Start', value: 'start' },
+  { label: 'Frequently Asked', value: 'faqs' },
+  { label: 'User Submitted', value: 'user' }
+]
+
 export const List = styled.div`
   border: 1px ${props => (props.isDraggingOver ? 'dashed #000' : 'solid #ddd')};
   background: #fff;
@@ -72,34 +79,35 @@ const getListStyle = isDraggingOver => ({
 })
 
 const TopicOrder = props => {
+  const [selectedCategory, setSelectedCategory] = useState('topics')
   const [topicTitles, setTopicTitles] = useState(props.store.topicTitles)
+  const [topicTitlesFiltered, setTopicTitlesFiltered] = useState([])
   const [bible, setBible] = useState({})
   const [token, setToken] = useState(cookie.get('token'))
   const toast = useRef(null)
 
   useEffect(() => {
     if (token && token.length > 0) {
+      setSelectedCategory('topics')
+      filterTopicTitles('topics')
     } else {
       Router.push('/admin')
     }
   }, [])
 
-  const updateTopicTitles = async () => {
-    const topicTitles = await axiosClient
-      .get('/topicTitles?category=topics&showInactive=true')
-      .then(response => response.data)
-
-    setTopicTitles(topicTitles)
+  const onChangeCategory = e => {
+    setSelectedCategory(e.value)
+    filterTopicTitles(e.value)
   }
 
-  const onChangeBible = e => {
-    setBible(e.value)
+  const filterTopicTitles = category => {
+    const cat = category || selectedCategory
+    const filtered = topicTitles.filter(tt => tt.category === cat)
+    setTopicTitlesFiltered(filtered)
   }
 
   const saveCurrent = async () => {
-    // If a topic has an id, then patch it, or else post it.
-
-    const topicOrder = topicTitles.map((tt, index) => ({
+    const topicOrder = topicTitlesFiltered.map((tt, index) => ({
       _id: tt._id,
       order: index
     }))
@@ -112,7 +120,6 @@ const TopicOrder = props => {
     })
       .then(response => {
         toast.current.show({ severity: 'success', summary: 'Order Saved' })
-        updateTopicTitles()
       })
       .catch(error => {
         toast.current.show({
@@ -134,30 +141,55 @@ const TopicOrder = props => {
     const sInd = +source.droppableId
     const dInd = +destination.droppableId
 
-    const items = reorder(topicTitles, source.index, destination.index)
-    setTopicTitles(items)
+    const items = reorder(topicTitlesFiltered, source.index, destination.index)
+    setTopicTitlesFiltered(items)
   }
 
   return (
-    <div style={{ marginTop: 70 }}>
+    <div style={{ marginTop: 150 }}>
       <Toast ref={toast} position='top-right'></Toast>
       <TopBar />
-      <Button
-        label='Save Order'
-        icon='pi pi-check'
-        className='p-button-success'
-        onClick={saveCurrent}
+      <Toolbar
+        style={{
+          position: 'fixed',
+          top: 50,
+          left: 0,
+          width: '100%',
+          zIndex: 1000
+        }}
+        left={
+          <>
+            <Dropdown
+              value={selectedCategory}
+              options={categories}
+              onChange={onChangeCategory}
+              optionLabel='label'
+              placeholder='Select Category'
+            />
+          </>
+        }
+        right={
+          <Button
+            label='Save Order'
+            icon='pi pi-check'
+            className='p-button-success'
+            onClick={saveCurrent}
+          />
+        }
       />
-      <h3>Category: Topics</h3>
+
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable id='topics' droppableId='topics'>
+        <h3>
+          Category: {categories.find(c => c.value === selectedCategory).label}
+        </h3>
+        <Droppable id='categoryOrder' droppableId='categoryOrder'>
           {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
               style={getListStyle(snapshot.isDraggingOver)}
               {...provided.droppableProps}
             >
-              {topicTitles.map((item, index) => {
+              {topicTitlesFiltered.map((item, index) => {
                 return (
                   <Draggable
                     key={item._id}
@@ -201,7 +233,7 @@ const TopicOrder = props => {
 
 export async function getServerSideProps () {
   const topicTitles = await axiosClient
-    .get('/topicTitles?category=topics&showInactive=true')
+    .get('/topicTitles?showInactive=true')
     .then(response => response.data)
 
   const store = initializeStore()

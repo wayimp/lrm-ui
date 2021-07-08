@@ -23,7 +23,14 @@ import TopBar from '../components/AdminTopBar'
 import cookie from 'js-cookie'
 import styled from 'styled-components'
 
-export const List = styled.div`
+const categories = [
+  { label: 'Topical Bible', value: 'topics' },
+  { label: 'Fresh Start', value: 'start' },
+  { label: 'Frequently Asked', value: 'faqs' },
+  { label: 'User Submitted', value: 'user' }
+]
+
+const List = styled.div`
   border: 1px ${props => (props.isDraggingOver ? 'dashed #000' : 'solid #ddd')};
   background: #fff;
   padding: 2 2 0;
@@ -159,19 +166,19 @@ const getListStyle = isDraggingOver => ({
 })
 
 const TopicComposer = props => {
+  const [selectedCategory, setSelectedCategory] = useState('topics')
   const [sectionEditDialog, setSectionEditDialog] = useState(false)
   const [sectionEditIndex, setSectionEditIndex] = useState(-1)
   const [sectionEditVersion, setSectionEditVersion] = useState('')
   const [contentConfig, setContentConfig] = useState({})
   const [contentConfigDialog, setContentConfigDialog] = useState(false)
   const [topicTitles, setTopicTitles] = useState(props.store.topicTitles)
+  const [topicTitlesFiltered, setTopicTitlesFiltered] = useState([])
   const [bible, setBible] = useState({})
   const [selectedTopic, setSelectedTopic] = useState({})
   const [currentTopic, setCurrentTopic] = useState({
-    category: 'topics',
     title: '',
-    active: true,
-    order: 100
+    active: true
   })
   const [sections, setSections] = useState([])
 
@@ -187,6 +194,7 @@ const TopicComposer = props => {
     } else {
       Router.push('/admin')
     }
+    filterTopicTitles()
   }, [])
 
   const updateTopicTitles = async () => {
@@ -195,6 +203,7 @@ const TopicComposer = props => {
       .then(response => response.data)
 
     setTopicTitles(topicTitles)
+    filterTopicTitles()
   }
 
   const lookupPassage = async (sectionEditIndex, itemIndex, item) => {
@@ -218,6 +227,19 @@ const TopicComposer = props => {
 
   const onChangeBible = e => {
     setBible(e.value)
+  }
+
+  const onChangeCategory = e => {
+    setSelectedCategory(e.value)
+    filterTopicTitles(e.value)
+  }
+
+  const filterTopicTitles = category => {
+    const cat = category || selectedCategory
+    setCurrentTopic({})
+    setSections([])
+    const filtered = topicTitles.filter(tt => tt.category === cat)
+    setTopicTitlesFiltered(filtered)
   }
 
   const onChangeTopic = e => {
@@ -293,7 +315,7 @@ const TopicComposer = props => {
     await axiosClient({
       method: currentTopic._id ? 'patch' : 'post',
       url: '/topics',
-      data: { ...currentTopic, sections }
+      data: { ...currentTopic, sections, category: selectedCategory, order: 0 }
       //headers: { Authorization: `Bearer ${token}` }
     })
       .then(response => {
@@ -368,331 +390,327 @@ const TopicComposer = props => {
     <div style={{ marginTop: 150 }}>
       <Toast ref={toast} position='top-right'></Toast>
       <TopBar />
-      <div>
-        <DragDropContext onDragEnd={onDragEnd} isDropDisabled={true}>
-          <Toolbar
-            style={{
-              position: 'fixed',
-              top: 50,
-              left: 0,
-              width: '100%',
-              zIndex: 1000
-            }}
-            left={
-              <>
-                <Dropdown
-                  value={selectedTopic}
-                  options={topicTitles}
-                  onChange={onChangeTopic}
-                  filter
-                  showClear
-                  filterBy='title'
-                  optionLabel='title'
-                  placeholder='Select Topic'
-                />
+      <Toolbar
+        style={{
+          position: 'fixed',
+          top: 50,
+          left: 0,
+          width: '100%',
+          zIndex: 1000
+        }}
+        left={
+          <>
+            <Dropdown
+              value={selectedCategory}
+              options={categories}
+              onChange={onChangeCategory}
+              optionLabel='label'
+              placeholder='Select Category'
+            />
+            <Dropdown
+              value={selectedTopic}
+              options={topicTitlesFiltered}
+              onChange={onChangeTopic}
+              filter
+              showClear
+              filterBy='title'
+              optionLabel='title'
+              placeholder='Select Topic'
+            />
+            <Button
+              label='New Topic'
+              className='p-button-outlined p-button-sm p-button-secondary'
+              icon='pi pi-book'
+              onClick={() => {
+                setSelectedTopic({})
+                setCurrentTopic({})
+                setSections([])
+              }}
+            />
+          </>
+        }
+        right={
+          <>
+            <Button
+              onClick={deleteSelectedTopic}
+              icon='pi pi-times'
+              label='Delete'
+              className='p-button-danger p-button-outlined'
+            ></Button>
+            &nbsp;
+            <Button
+              label='Save Changes'
+              icon='pi pi-check'
+              className='p-button-success'
+              onClick={saveCurrent}
+            />
+          </>
+        }
+      />
+      <DragDropContext onDragEnd={onDragEnd} isDropDisabled={true}>
+        <div className='p-grid' style={{ marginTop: 70 }}>
+          <div className='p-col-7'>
+            <Fieldset
+              style={{ margin: '10px 0px 10px 40px' }}
+              legend='Topic Editor'
+            >
+              <div className='p-d-flex' style={{ marginBottom: 10 }}>
                 <Button
-                  label='New Topic'
+                  label='Add Version'
                   className='p-button-outlined p-button-sm p-button-secondary'
                   icon='pi pi-book'
                   onClick={() => {
-                    setSelectedTopic({})
-                    setCurrentTopic({})
-                    setSections([])
+                    setSectionEditIndex(-1)
+                    setSectionEditVersion('')
+                    setSectionEditDialog(true)
                   }}
                 />
-              </>
-            }
-            right={
-              <>
-                <Button
-                  onClick={deleteSelectedTopic}
-                  icon='pi pi-times'
-                  label='Delete'
-                  className='p-button-danger p-button-outlined'
-                ></Button>
-                &nbsp;
-                <Button
-                  label='Save Changes'
-                  icon='pi pi-check'
-                  className='p-button-success'
-                  onClick={saveCurrent}
-                />
-              </>
-            }
-          />
-          <div className='p-grid' style={{ marginTop: 70 }}>
-            <div className='p-col-7'>
-              <Fieldset
-                style={{ margin: '10px 0px 10px 40px' }}
-                legend='Topic Editor'
-              >
-                <div className='p-d-flex' style={{ marginBottom: 10 }}>
-                  <Button
-                    label='Add Version'
-                    className='p-button-outlined p-button-sm p-button-secondary'
-                    icon='pi pi-book'
-                    onClick={() => {
-                      setSectionEditIndex(-1)
-                      setSectionEditVersion('')
-                      setSectionEditDialog(true)
+                <div className='p-ml-auto p-ai-center'>
+                  <label htmlFor='topicTitle'>Title&nbsp;</label>
+                  <InputText
+                    id='topicTitle'
+                    value={currentTopic.title || ''}
+                    onChange={e => {
+                      setCurrentTopic({
+                        ...currentTopic,
+                        title: e.target.value
+                      })
                     }}
                   />
-                  <div className='p-ml-auto p-ai-center'>
-                    <label htmlFor='topicTitle'>Title&nbsp;</label>
-                    <InputText
-                      id='topicTitle'
-                      value={currentTopic.title || ''}
-                      onChange={e => {
-                        setCurrentTopic({
-                          ...currentTopic,
-                          title: e.target.value
-                        })
-                      }}
-                    />
-                  </div>
                 </div>
+              </div>
 
-                {sections.map((el, ind) => (
-                  <div key={`builder-${ind}`}>
-                    <Fieldset
-                      toggleable
-                      style={{ margin: '0px 0px 10px 0px' }}
-                      legend={
-                        <div>
-                          <h4>{el.version}</h4>
-                          <Button
-                            label='Edit'
-                            className='p-button-outlined p-button-sm p-button-secondary'
-                            icon='pi pi-book'
-                            onClick={() => {
-                              setSectionEditIndex(ind)
-                              setSectionEditVersion(el.version)
-                              setSectionEditDialog(true)
-                            }}
-                          />
-                          <Button
-                            label='Copy'
-                            className='p-button-outlined p-button-sm p-button-secondary'
-                            icon='pi pi-copy'
-                            onClick={() => {
-                              const newSections = [...sections]
-                              const copySection = JSON.parse(
-                                JSON.stringify(sections[ind])
-                              )
-                              // Do not copy the uuids, make new ones
-                              copySection.items.forEach(function (
-                                item,
-                                itemIndex,
-                                section
-                              ) {
-                                item.id = uuid()
-                                section[itemIndex] = item
-                              })
-                              newSections.splice(ind, 0, copySection)
-                              setSections(newSections)
-                            }}
-                          />
-                          <Button
-                            label='Delete Section'
-                            className='p-button-outlined p-button-sm p-button-secondary'
-                            icon='pi pi-minus-circle'
-                            onClick={() => {
-                              const newSections = [...sections]
-                              newSections.splice(ind, 1)
-                              setSections(newSections)
-                            }}
-                          />
-                        </div>
-                      }
-                    >
-                      <div className='p-fluid p-formgrid p-grid'>
-                        <div className='p-field p-col'>
-                          <label htmlFor='topicName' className='p-d-block'>
-                            Name
-                          </label>
-                          <InputText
-                            id='topicName'
-                            value={el.name}
-                            onChange={e => {
-                              const newSections = [...sections]
-                              newSections[ind].name = e.target.value
-                              setSections(newSections)
-                            }}
-                            className='p-d-block'
-                          />
-                        </div>
-                        <div className='p-field p-col'>
-                          <label htmlFor='topicTags' className='p-d-block'>
-                            Tags
-                          </label>
-                          <Chips
-                            id='topicTags'
-                            className='p-d-block'
-                            value={el.tags}
-                            onChange={e => {
-                              const newSections = [...sections]
-                              newSections[ind].tags = e.value
-                              setSections(newSections)
-                            }}
-                          />
-                        </div>
+              {sections.map((el, ind) => (
+                <div key={`builder-${ind}`}>
+                  <Fieldset
+                    toggleable
+                    style={{ margin: '0px 0px 10px 0px' }}
+                    legend={
+                      <div>
+                        <h4>{el.version}</h4>
+                        <Button
+                          label='Edit'
+                          className='p-button-outlined p-button-sm p-button-secondary'
+                          icon='pi pi-book'
+                          onClick={() => {
+                            setSectionEditIndex(ind)
+                            setSectionEditVersion(el.version)
+                            setSectionEditDialog(true)
+                          }}
+                        />
+                        <Button
+                          label='Copy'
+                          className='p-button-outlined p-button-sm p-button-secondary'
+                          icon='pi pi-copy'
+                          onClick={() => {
+                            const newSections = [...sections]
+                            const copySection = JSON.parse(
+                              JSON.stringify(sections[ind])
+                            )
+                            // Do not copy the uuids, make new ones
+                            copySection.items.forEach(function (
+                              item,
+                              itemIndex,
+                              section
+                            ) {
+                              item.id = uuid()
+                              section[itemIndex] = item
+                            })
+                            newSections.splice(ind, 0, copySection)
+                            setSections(newSections)
+                          }}
+                        />
+                        <Button
+                          label='Delete Section'
+                          className='p-button-outlined p-button-sm p-button-secondary'
+                          icon='pi pi-minus-circle'
+                          onClick={() => {
+                            const newSections = [...sections]
+                            newSections.splice(ind, 1)
+                            setSections(newSections)
+                          }}
+                        />
+                      </div>
+                    }
+                  >
+                    <div className='p-fluid p-formgrid p-grid'>
+                      <div className='p-field p-col'>
+                        <label htmlFor='topicName' className='p-d-block'>
+                          Name
+                        </label>
+                        <InputText
+                          id='topicName'
+                          value={el.name}
+                          onChange={e => {
+                            const newSections = [...sections]
+                            newSections[ind].name = e.target.value
+                            setSections(newSections)
+                          }}
+                          className='p-d-block'
+                        />
                       </div>
                       <div className='p-field p-col'>
-                        <label
-                          htmlFor={`droppable${ind}`}
-                          className='p-d-block'
-                        >
-                          Content
+                        <label htmlFor='topicTags' className='p-d-block'>
+                          Tags
                         </label>
-
-                        <Button
-                          label='Passage'
-                          className='p-button-outlined p-button-sm p-button-secondary'
-                          icon='pi pi-plus'
-                          onClick={() => {
-                            const newItem = {
-                              id: uuid(),
-                              type: 'passage',
-                              version: sections[ind].version,
-                              apiKey: props.apiKey
-                            }
+                        <Chips
+                          id='topicTags'
+                          className='p-d-block'
+                          value={el.tags}
+                          onChange={e => {
                             const newSections = [...sections]
-                            newSections[ind].items.push(newItem)
+                            newSections[ind].tags = e.value
                             setSections(newSections)
                           }}
                         />
-                        <Button
-                          label='Html'
-                          className='p-button-outlined p-button-sm p-button-secondary'
-                          icon='pi pi-plus'
-                          onClick={() => {
-                            const newItem = {
-                              id: uuid(),
-                              type: 'html'
-                            }
-                            const newSections = [...sections]
-                            newSections[ind].items.push(newItem)
-                            setSections(newSections)
-                          }}
-                        />
-                        <Droppable
-                          id={`droppable${ind}`}
-                          droppableId={`${ind}`}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              style={getListStyle(snapshot.isDraggingOver)}
-                              {...provided.droppableProps}
-                            >
-                              {el.items.map((item, index) => {
-                                item.version = el.version
-                                return (
-                                  <Draggable
-                                    key={item.id}
-                                    draggableId={item.id}
-                                    index={index}
-                                  >
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={getItemStyle(
-                                          snapshot.isDragging,
-                                          provided.draggableProps.style
-                                        )}
-                                      >
-                                        <div>
-                                          <ContentBlock
-                                            props={item}
-                                            mode='display'
-                                            updateValue={value => {
-                                              const newSections = [...sections]
-                                              newSections[ind].items[
-                                                index
-                                              ].value = value
-                                              setSections(newSections)
-                                            }}
-                                          />
-                                          <Button
-                                            label='Edit'
-                                            className='p-button-outlined p-button-sm p-button-secondary'
-                                            icon='pi pi-window-maximize'
-                                            onClick={() => {
-                                              setContentConfig(
-                                                <ContentBlock
-                                                  props={item}
-                                                  mode='config'
-                                                  updateConfig={json => {
-                                                    setContentConfigDialog(
-                                                      false
-                                                    )
-                                                    if (json) {
-                                                      const newSections = [
-                                                        ...sections
-                                                      ]
-                                                      newSections[ind].items[
-                                                        index
-                                                      ] = json
-                                                      setSections(newSections)
-                                                    }
-                                                  }}
-                                                />
-                                              )
-                                              setContentConfigDialog(true)
-                                            }}
-                                          />
-                                          <Button
-                                            label='Delete'
-                                            className='p-button-outlined p-button-sm p-button-secondary'
-                                            icon='pi pi-minus-circle'
-                                            onClick={() => {
-                                              const newSections = [...sections]
-                                              newSections[ind].items.splice(
-                                                index,
-                                                1
-                                              )
-                                              setSections(newSections)
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                )
-                              })}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
                       </div>
-                    </Fieldset>
-                    {/*JSON.stringify(el)*/}
-                  </div>
-                ))}
-              </Fieldset>
-            </div>
-            <div className='p-col-4'>
-              <Fieldset legend='Preview Pane' style={{ margin: 10 }}>
-                {sections.map((el, ind) => (
-                  <div key={`display-${ind}`}>
-                    <Fieldset
-                      style={{ margin: '0px 0px 10px 0px' }}
-                      legend={el.version}
-                    >
-                      {el.items.map((item, index) => {
-                        return <ContentBlock props={item} mode='display' />
-                      })}
-                    </Fieldset>
-                  </div>
-                ))}
-              </Fieldset>
-            </div>
+                    </div>
+                    <div className='p-field p-col'>
+                      <label htmlFor={`droppable${ind}`} className='p-d-block'>
+                        Content
+                      </label>
+
+                      <Button
+                        label='Passage'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'passage',
+                            version: sections[ind].version,
+                            apiKey: props.apiKey
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                        }}
+                      />
+                      <Button
+                        label='Html'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'html'
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                        }}
+                      />
+                      <Droppable id={`droppable${ind}`} droppableId={`${ind}`}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            style={getListStyle(snapshot.isDraggingOver)}
+                            {...provided.droppableProps}
+                          >
+                            {el.items.map((item, index) => {
+                              item.version = el.version
+                              return (
+                                <Draggable
+                                  key={item.id}
+                                  draggableId={item.id}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      style={getItemStyle(
+                                        snapshot.isDragging,
+                                        provided.draggableProps.style
+                                      )}
+                                    >
+                                      <div>
+                                        <ContentBlock
+                                          props={item}
+                                          mode='display'
+                                          updateValue={value => {
+                                            const newSections = [...sections]
+                                            newSections[ind].items[
+                                              index
+                                            ].value = value
+                                            setSections(newSections)
+                                          }}
+                                        />
+                                        <Button
+                                          label='Edit'
+                                          className='p-button-outlined p-button-sm p-button-secondary'
+                                          icon='pi pi-window-maximize'
+                                          onClick={() => {
+                                            setContentConfig(
+                                              <ContentBlock
+                                                props={item}
+                                                mode='config'
+                                                updateConfig={json => {
+                                                  setContentConfigDialog(false)
+                                                  if (json) {
+                                                    const newSections = [
+                                                      ...sections
+                                                    ]
+                                                    newSections[ind].items[
+                                                      index
+                                                    ] = json
+                                                    setSections(newSections)
+                                                  }
+                                                }}
+                                              />
+                                            )
+                                            setContentConfigDialog(true)
+                                          }}
+                                        />
+                                        <Button
+                                          label='Delete'
+                                          className='p-button-outlined p-button-sm p-button-secondary'
+                                          icon='pi pi-minus-circle'
+                                          onClick={() => {
+                                            const newSections = [...sections]
+                                            newSections[ind].items.splice(
+                                              index,
+                                              1
+                                            )
+                                            setSections(newSections)
+                                          }}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              )
+                            })}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </div>
+                  </Fieldset>
+                  {/*JSON.stringify(el)*/}
+                </div>
+              ))}
+            </Fieldset>
           </div>
-        </DragDropContext>
-        {/*JSON.stringify(props.topics)*/}
-      </div>
+          <div className='p-col-4'>
+            <Fieldset legend='Preview Pane' style={{ margin: 10 }}>
+              {sections.map((el, ind) => (
+                <div key={`display-${ind}`}>
+                  <Fieldset
+                    style={{ margin: '0px 0px 10px 0px' }}
+                    legend={el.version}
+                  >
+                    {el.items.map((item, index) => {
+                      return <ContentBlock props={item} mode='display' />
+                    })}
+                  </Fieldset>
+                </div>
+              ))}
+            </Fieldset>
+          </div>
+        </div>
+      </DragDropContext>
       <Dialog
         blockScroll={true}
         header='Edit Content'
@@ -787,7 +805,7 @@ const TopicComposer = props => {
 
 export async function getServerSideProps (context) {
   const topicTitles = await axiosClient
-    .get('/topicTitles?category=topics&showInactive=true')
+    .get('/topicTitles?showInactive=true')
     .then(response => response.data)
 
   const store = initializeStore()

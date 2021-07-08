@@ -20,6 +20,7 @@ const Bible = types.model({
 
 const TopicTitle = types.model({
   _id: types.string,
+  category: types.string,
   title: types.string,
   order: types.integer
 })
