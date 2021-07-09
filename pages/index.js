@@ -271,11 +271,11 @@ export async function getServerSideProps (context) {
   }
 
   const topicTags = await axiosClient
-    .get('/topicTags')
+    .get('/topicTags?category=topics')
     .then(response => response.data)
 
   const topicNames = await axiosClient
-    .get('/topicNames')
+    .get('/topicNames?category=topics')
     .then(response => response.data)
 
   const store = initializeStore()

@@ -172,7 +172,7 @@ const TopicComposer = props => {
   const [sectionEditVersion, setSectionEditVersion] = useState('')
   const [contentConfig, setContentConfig] = useState({})
   const [contentConfigDialog, setContentConfigDialog] = useState(false)
-  const [topicTitles, setTopicTitles] = useState(props.store.topicTitles)
+  const [topicTitles, setTopicTitles] = useState([])
   const [topicTitlesFiltered, setTopicTitlesFiltered] = useState([])
   const [bible, setBible] = useState({})
   const [selectedTopic, setSelectedTopic] = useState({})
@@ -194,16 +194,15 @@ const TopicComposer = props => {
     } else {
       Router.push('/admin')
     }
-    filterTopicTitles()
+    setTopicTitles(props.store.topicTitles)
   }, [])
 
   const updateTopicTitles = async () => {
-    const topicTitles = await axiosClient
-      .get('/topicTitles?category=topics&showInactive=true')
+    const newTopicTitles = await axiosClient
+      .get('/topicTitles?showInactive=true')
       .then(response => response.data)
 
-    setTopicTitles(topicTitles)
-    filterTopicTitles()
+    setTopicTitles(newTopicTitles)
   }
 
   const lookupPassage = async (sectionEditIndex, itemIndex, item) => {
@@ -229,18 +228,23 @@ const TopicComposer = props => {
     setBible(e.value)
   }
 
-  const onChangeCategory = e => {
-    setSelectedCategory(e.value)
-    filterTopicTitles(e.value)
-  }
-
-  const filterTopicTitles = category => {
-    const cat = category || selectedCategory
-    setCurrentTopic({})
-    setSections([])
-    const filtered = topicTitles.filter(tt => tt.category === cat)
+  const onChangeCategory = async e => {
+    await setSelectedCategory(e.value)
+    const filtered = topicTitles.filter(tt => tt.category === e.value)
     setTopicTitlesFiltered(filtered)
   }
+
+  useEffect(() => {
+    setSelectedTopic({})
+    setCurrentTopic({})
+    setSections([])
+    const filtered = topicTitles.filter(tt => tt.category === selectedCategory)
+    setTopicTitlesFiltered(filtered)
+    toast.current.show({
+      severity: 'success',
+      summary: 'Topic Titles Filtered'
+    })
+  }, [topicTitles])
 
   const onChangeTopic = e => {
     setSelectedTopic(e.value)
@@ -273,12 +277,12 @@ const TopicComposer = props => {
     setSections(topic.sections)
   }
 
-  const deleteTopic = () => {
-    axiosClient({
+  const deleteTopic = async () => {
+    await axiosClient({
       method: 'delete',
       url: `/topics/${selectedTopic._id}`
     })
-      .then(response => {
+      .then(async response => {
         toast.current.show({ severity: 'success', summary: 'Topic Deleted' })
         setSelectedTopic({})
         setCurrentTopic({})
@@ -294,6 +298,12 @@ const TopicComposer = props => {
       })
   }
 
+  const accept = () => {
+    deleteTopic()
+  }
+
+  const reject = () => {}
+
   const deleteSelectedTopic = () => {
     if (selectedTopic && selectedTopic._id) {
       confirmPopup({
@@ -301,7 +311,8 @@ const TopicComposer = props => {
         message: `Do you want to delete '${selectedTopic.title}' ?`,
         icon: 'pi pi-info-circle',
         acceptClassName: 'p-button-danger',
-        deleteTopic
+        accept,
+        reject
       })
     } else {
       setSelectedTopic({})
@@ -311,14 +322,29 @@ const TopicComposer = props => {
   }
 
   const saveCurrent = async () => {
+    // Determine the highest order number for the selected category
+    const lastPlace = Math.max.apply(
+      Math,
+      topicTitlesFiltered.map(function (o) {
+        return o.order
+      })
+    )
+
+    const newTopic = {
+      ...currentTopic,
+      sections,
+      category: selectedCategory,
+      order: lastPlace + 1
+    }
+
     // If a topic has an id, then patch it, or else post it.
     await axiosClient({
       method: currentTopic._id ? 'patch' : 'post',
       url: '/topics',
-      data: { ...currentTopic, sections, category: selectedCategory, order: 0 }
+      data: newTopic
       //headers: { Authorization: `Bearer ${token}` }
     })
-      .then(response => {
+      .then(async response => {
         toast.current.show({ severity: 'success', summary: 'Topic Saved' })
         updateTopicTitles()
       })
@@ -569,37 +595,6 @@ const TopicComposer = props => {
                       <label htmlFor={`droppable${ind}`} className='p-d-block'>
                         Content
                       </label>
-
-                      <Button
-                        label='Passage'
-                        className='p-button-outlined p-button-sm p-button-secondary'
-                        icon='pi pi-plus'
-                        onClick={() => {
-                          const newItem = {
-                            id: uuid(),
-                            type: 'passage',
-                            version: sections[ind].version,
-                            apiKey: props.apiKey
-                          }
-                          const newSections = [...sections]
-                          newSections[ind].items.push(newItem)
-                          setSections(newSections)
-                        }}
-                      />
-                      <Button
-                        label='Html'
-                        className='p-button-outlined p-button-sm p-button-secondary'
-                        icon='pi pi-plus'
-                        onClick={() => {
-                          const newItem = {
-                            id: uuid(),
-                            type: 'html'
-                          }
-                          const newSections = [...sections]
-                          newSections[ind].items.push(newItem)
-                          setSections(newSections)
-                        }}
-                      />
                       <Droppable id={`droppable${ind}`} droppableId={`${ind}`}>
                         {(provided, snapshot) => (
                           <div
@@ -686,6 +681,36 @@ const TopicComposer = props => {
                           </div>
                         )}
                       </Droppable>
+                      <Button
+                        label='Passage'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'passage',
+                            version: sections[ind].version,
+                            apiKey: props.apiKey
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                        }}
+                      />
+                      <Button
+                        label='Html'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'html'
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                        }}
+                      />
                     </div>
                   </Fieldset>
                   {/*JSON.stringify(el)*/}

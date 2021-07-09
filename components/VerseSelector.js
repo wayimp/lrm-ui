@@ -116,7 +116,7 @@ const VerseSelector = observer(props => {
     setLoading(true)
     let ref = `${book.id}.${verse.replace(':', '.')}`
     if (extended) ref += `-${book.id}.${verseEnd.replace(':', '.')}`
-    const url = `https://api.scripture.api.bible/v1/bibles/${bible.id}/passages/${ref}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
+    const url = `https://api.scripture.api.bible/v1/bibles/${bible.id}/passages/${ref}?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
     const response = await axios({
       method: 'get',
       url,

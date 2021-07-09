@@ -12,11 +12,7 @@ import { Button } from 'primereact/button'
 import { Dropdown } from 'primereact/dropdown'
 
 const Topic = props => {
-  const [bible, setBible] = useState('')
-
-  useEffect(() => {
-    //setBible(bibles[0].abbreviation)
-  }, [])
+  useEffect(() => {}, [])
 
   return (
     <Fieldset
