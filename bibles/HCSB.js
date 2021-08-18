@@ -1,7 +1,7 @@
-export const CSB = {
+export const HCSB = {
   id: 'a556c5305ee15c3f-01',
-  name: 'Christian Standard Bible',
-  abbreviation: 'CSB',
+  name: 'Holman Christian Standard Bible',
+  abbreviation: 'HCSB',
   books: [
     {
       id: 'GEN',

@@ -1,5 +1,4 @@
-import { CSB } from './CSB'
+import { HCSB } from './HCSB'
 import { KJV } from './KJV'
-import { RVR09 } from './RVR09'
 
-export const bibles = [CSB, KJV, RVR09]
+export const bibles = [HCSB, KJV]

@@ -547,7 +547,7 @@ const TopicComposer = props => {
                           }}
                         />
                         <Button
-                          label='Delete Section'
+                          label='Delete Version'
                           className='p-button-outlined p-button-sm p-button-secondary'
                           icon='pi pi-minus-circle'
                           onClick={() => {
@@ -748,7 +748,7 @@ const TopicComposer = props => {
 
       <Dialog
         blockScroll={true}
-        header='Edit Section'
+        header='Edit Version'
         visible={sectionEditDialog}
         style={{ width: '50vw' }}
         footer={
@@ -814,7 +814,7 @@ const TopicComposer = props => {
         }
         onHide={() => setSectionEditDialog(false)}
       >
-        <div className='p-field'>Select a Version for this Section</div>
+        <div className='p-field'>Select a Version</div>
         <Dropdown
           value={bible}
           options={bibles}

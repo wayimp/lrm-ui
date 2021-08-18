@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect, useRef } from 'react'
+import { axiosClient } from '../axiosClient'
 import { Dropdown } from 'primereact/dropdown'
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox'
 import { Button } from 'primereact/button'
 import { observer } from 'mobx-react'
 import { bibles } from '../bibles'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { Toast } from 'primereact/toast'
 
 const VerseSelector = observer(props => {
   const [bible, setBible] = useState({})
@@ -18,6 +20,7 @@ const VerseSelector = observer(props => {
   const [checked, setChecked] = useState(false)
   const [extended, setExtended] = useState('')
   const options = [{ value: true, icon: 'pi pi-minus' }]
+  const toast = useRef(null)
 
   const verseSelections = chapters => {
     const verseSelections = []
@@ -29,6 +32,20 @@ const VerseSelector = observer(props => {
       chapterVerses.map(chapterVerse => {
         verseSelections.push(index + 1 + ':' + chapterVerse)
       })
+    })
+    return verseSelections
+  }
+
+  const verseSelectionsEnd = (start, chapter) => {
+    const verseSelections = []
+    const chapterVerses = Array.from(
+      { length: Number(chapter) },
+      (_, i) => i + 1 + ''
+    )
+    chapterVerses.map(chapterVerse => {
+      if (Number(chapterVerse) > Number(start)) {
+        verseSelections.push(chapterVerse)
+      }
     })
     return verseSelections
   }
@@ -46,44 +63,55 @@ const VerseSelector = observer(props => {
     const passageId =
       props.passageId || (props.passage && props.passage.passageId)
     if (passageId && findBible && findBible.books) {
-      // Parse the passageId, e.g. 'GEN.1.1-GEN.1.2'
+      // Parse the passageId, e.g. 'GEN.1.1-2'
       const refs = passageId.split('-')
       const start = refs[0].split('.')
       const findBook = findBible.books.find(b => b.id === start[0])
       setBook(findBook)
       const selections = verseSelections(findBook.chapters)
       setVerses(selections)
-      setVersesEnd(selections)
+      const selectionsEnd = verseSelectionsEnd(
+        start[2],
+        findBook.chapters[start[1]]
+      )
+      setVersesEnd(selectionsEnd)
 
       if (start[2]) {
         setVerse(start[1] + ':' + start[2])
       } else {
         setVerse(start[1] + ':1')
         setExtended(true)
-        setVerseEnd(start[1] + ':' + findBook.chapters[Number(start[1])])
+        setVerseEnd(findBook.chapters[Number(start[1])])
       }
 
       if (refs[1]) {
         setExtended(true)
-        const end = refs[1].split('.')
-        setVerseEnd(end[1] + ':' + end[2])
+        setVerseEnd(refs[1])
       }
 
       if (props.passage && props.passage.html && props.passage.reference) {
         setPassage({
-          content: props.passage.html,
+          html: props.passage.html,
           reference: props.passage.reference
         })
+      } else {
+        setPassage({ reload: true })
       }
     }
   }, [props])
+
+  useEffect(() => {
+    if (passage.reload) {
+      fetchPassage()
+    }
+  }, [passage])
 
   const onChangeBook = e => {
     setBook(e.value)
     if (e.value) {
       const selections = verseSelections(e.value.chapters)
       setVerses(selections)
-      setVersesEnd(selections)
+      setVersesEnd([])
     } else {
       setVerses([])
       setVersesEnd([])
@@ -95,6 +123,9 @@ const VerseSelector = observer(props => {
 
   const onChangeVerse = e => {
     setVerse(e.value)
+    const start = e.value.split(':')
+    const selectionsEnd = verseSelectionsEnd(start[1], book.chapters[start[0]])
+    setVersesEnd(selectionsEnd)
     setPassage({})
   }
 
@@ -112,27 +143,68 @@ const VerseSelector = observer(props => {
     setPassage({})
   }
 
-  const fetchPassage = async () => {
+  const formatVerses = verses => {
+    const passage = {}
+
+    if (Array.isArray(verses) && verses.length > 0) {
+      const book = bible.books.find(b => b.id === verses[0].book)
+      let extended = ''
+      if (verses.length > 1) {
+        extended = `-${verses[verses.length - 1].verse}`
+      }
+      passage.reference = `${book.name} ${verses[0].chapter}:${verses[0].verse}${extended}`
+
+      passage.html = verses
+        .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
+        .join('')
+
+      passage.version = bible.abbreviation
+    }
+
+    passage.reload = false
+
+    return passage
+  }
+
+  const fetchPassage = async setProps => {
     setLoading(true)
     let ref = `${book.id}.${verse.replace(':', '.')}`
-    if (extended) ref += `-${book.id}.${verseEnd.replace(':', '.')}`
-    const url = `https://api.scripture.api.bible/v1/bibles/${bible.id}/passages/${ref}?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
-    const response = await axios({
+    if (extended) ref += `-${verseEnd}`
+    const url = `/verses/${bible.abbreviation}/${ref}`
+    const response = await axiosClient({
       method: 'get',
       url,
       headers: {
-        accept: 'application/json',
-        'api-key': props.apiKey
+        accept: 'application/json'
       }
-    }).then(response => response.data.data)
-    setPassage(response)
-    if (props.setPassage) props.setPassage(response)
+    }).then(response => response.data)
+
+    const formatted = formatVerses(response)
+    formatted.passageId = ref
+
+    setPassage(formatted)
+    if (props.setPassage && setProps) props.setPassage(formatted)
     setLoading(false)
+  }
+
+  const verseRef = `${book.id}.${verse ? verse.replace(':', '.') : ''}${
+    extended && verseEnd ? `-${verseEnd}` : ''
+  }`
+  const chapterRef = `${book.id}.${verse ? verse.split(':')[0] : ''}`
+
+  const openChapter = () => {
+    const url = `${
+      typeof window !== 'undefined'
+        ? window.location.protocol + '//' + window.location.host.split(/\//)[0]
+        : ''
+    }?r=${chapterRef}&v=${bible.abbreviation}`
+    window.open(url)
   }
 
   return (
     <>
       <div className='p-d-inline-flex p-ai-center'>
+        <Toast ref={toast} position='top-right'></Toast>
         <Dropdown
           value={book}
           options={bible && bible.books ? bible.books : []}
@@ -181,14 +253,38 @@ const VerseSelector = observer(props => {
         {book && verse ? (
           <div>
             <h3>
-              {`${book.name} ${verse}`}
-              {extended && verseEnd ? `-${verseEnd}` : ''}
+              {`${book.name} ${verse}${
+                extended && verseEnd ? `-${verseEnd}` : ''
+              } (${bible.abbreviation})`}
+              &nbsp;
+              <CopyToClipboard
+                style={{ cursor: 'copy' }}
+                text={`${
+                  typeof window !== 'undefined'
+                    ? window.location.host.split(/\//)[0]
+                    : ''
+                }?r=${verseRef}&v=${bible.abbreviation}`}
+                onCopy={() =>
+                  toast.current.show({
+                    severity: 'success',
+                    summary: 'Link Copied'
+                  })
+                }
+              >
+                <i className='pi pi-share-alt'></i>
+              </CopyToClipboard>
             </h3>
+            <Button
+              label='Read Chapter'
+              className='p-button-rounded p-button-text'
+              icon='pi pi-book'
+              onClick={openChapter}
+            />
             <Button
               style={{ marginLeft: 6 }}
               icon='pi pi-cloud-download'
               className='p-button-rounded'
-              onClick={fetchPassage}
+              onClick={() => fetchPassage(true)}
               iconPos='right'
               label='Lookup'
             />
@@ -204,7 +300,10 @@ const VerseSelector = observer(props => {
           style={{ margin: 10, fontSize: '4em' }}
         ></i>
       ) : (
-        <div dangerouslySetInnerHTML={{ __html: passage.content || '' }} />
+        <div
+          className='p-mt-5'
+          dangerouslySetInnerHTML={{ __html: passage.html || '' }}
+        />
       )}
     </>
   )

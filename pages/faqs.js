@@ -71,9 +71,9 @@ const Faqs = props => {
                     style={{ cursor: 'copy' }}
                     text={`${
                       typeof window !== 'undefined'
-                        ? window.location.href.split('?')[0]
+                        ? window.location.host.split(/\//)[0]
                         : ''
-                    }?t=${selectedTopic._id}&v=CSB`}
+                    }?t=${selectedTopic._id}&v=HCSB`}
                     onCopy={() =>
                       toast.current.show({
                         severity: 'success',

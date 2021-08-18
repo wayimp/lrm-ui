@@ -145,7 +145,7 @@ const Search = props => {
               {selectedSection.name}&nbsp;&nbsp;
               <CopyToClipboard
                 style={{ cursor: 'copy' }}
-                text={`${window.location.href.split('?')[0]}?t=${
+                text={`${window.location.host.split(/\//)[0]}?t=${
                   selectedTopic._id
                 }&v=${bible}`}
                 onCopy={() =>

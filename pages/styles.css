@@ -13,3 +13,7 @@ p.s1 {
 span.v {
   padding-right: 0.5em;
 }
+
+.ql-image {
+  display: none !important;
+}
