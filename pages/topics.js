@@ -76,7 +76,6 @@ const move = (source, destination, droppableSource, droppableDestination) => {
   const result = {}
 
   result[droppableSource.droppableId] = {
-    bibleId: source.bibleId,
     version: source.version,
     name: source.name,
     tags: source.tags,
@@ -84,7 +83,6 @@ const move = (source, destination, droppableSource, droppableDestination) => {
   }
 
   result[droppableDestination.droppableId] = {
-    bibleId: destination.bibleId,
     version: destination.version,
     name: destination.name,
     tags: destination.tags,
@@ -104,7 +102,6 @@ const copy = (source, destination, droppableSource, droppableDestination) => {
   const result = {}
 
   result[droppableDestination.droppableId] = {
-    bibleId: destination.bibleId,
     version: destination.version,
     name: destination.name,
     tags: destination.tags,
@@ -129,7 +126,6 @@ const copymove = (
   const result = {}
 
   result[droppableSource.droppableId] = {
-    bibleId: source.bibleId,
     version: source.version,
     name: source.name,
     tags: source.tags,
@@ -137,7 +133,6 @@ const copymove = (
   }
 
   result[droppableDestination.droppableId] = {
-    bibleId: destination.bibleId,
     version: destination.version,
     name: destination.name,
     tags: destination.tags,
@@ -203,25 +198,6 @@ const TopicComposer = props => {
       .then(response => response.data)
 
     setTopicTitles(newTopicTitles)
-  }
-
-  const lookupPassage = async (sectionEditIndex, itemIndex, item) => {
-    const url = `https://api.scripture.api.bible/v1/bibles/${item.bibleId}/passages/${item.passageId}?content-type=html&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false&use-org-id=false`
-    const response = await axios({
-      method: 'get',
-      url,
-      headers: {
-        accept: 'application/json',
-        'api-key': item.apiKey
-      }
-    }).then(response => response.data.data)
-    const newItem = JSON.parse(JSON.stringify(item))
-    newItem.html = response.content
-    newItem.reference = response.reference
-    // Update the item in place whenever you are ready
-    const newSections = [...sections]
-    newSections[sectionEditIndex].items[itemIndex] = newItem
-    setSections(newSections)
   }
 
   const onChangeBible = e => {
@@ -404,7 +380,6 @@ const TopicComposer = props => {
         )
         if (itemClone.type === 'passage') {
           // Take on the version of the section in which you land
-          itemClone.bibleId = newSections[dInd].bibleId
           itemClone.version = newSections[dInd].version
           lookupPassage(dInd, destination.index, itemClone)
         }
@@ -689,8 +664,7 @@ const TopicComposer = props => {
                           const newItem = {
                             id: uuid(),
                             type: 'passage',
-                            version: sections[ind].version,
-                            apiKey: props.apiKey
+                            version: sections[ind].version
                           }
                           const newSections = [...sections]
                           newSections[ind].items.push(newItem)
@@ -778,7 +752,6 @@ const TopicComposer = props => {
                   // then change all passages in this section
                   if (newSections[sectionEditIndex].version !== bible) {
                     const findBible = bibles.find(b => b.abbreviation === bible)
-                    newSections[sectionEditIndex].bibleId = findBible.id
                     newSections[sectionEditIndex].version = bible
                     newSections[sectionEditIndex].items.forEach(function (
                       item,
@@ -788,7 +761,6 @@ const TopicComposer = props => {
                       item.id = uuid()
                       if (item.type === 'passage') {
                         item.version = bible
-                        item.bibleId = findBible.id
                       }
                       section[itemIndex] = item
                     })
@@ -847,8 +819,7 @@ export async function getServerSideProps (context) {
   return {
     props: {
       topicTitle,
-      store: getSnapshot(store),
-      apiKey: process.env.ABS_API_KEY
+      store: getSnapshot(store)
     }
   }
 }

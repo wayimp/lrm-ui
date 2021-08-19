@@ -240,7 +240,6 @@ const Search = props => {
               props={{
                 type: 'passage',
                 version: bible,
-                apiKey: props.apiKey,
                 passageId: props.reference ? props.reference : null
               }}
               mode='entry'
@@ -288,8 +287,7 @@ export async function getServerSideProps (context) {
       version,
       reference,
       topicNames,
-      store: getSnapshot(store),
-      apiKey: process.env.ABS_API_KEY
+      store: getSnapshot(store)
     }
   }
 }

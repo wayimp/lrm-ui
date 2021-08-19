@@ -37,8 +37,7 @@ const Read = props => {
       <ContentBlock
         props={{
           type: 'passage',
-          version: bible,
-          apiKey: props.apiKey
+          version: bible
         }}
         mode='entry'
       />
@@ -51,8 +50,7 @@ export async function getServerSideProps () {
 
   return {
     props: {
-      store: getSnapshot(store),
-      apiKey: process.env.ABS_API_KEY
+      store: getSnapshot(store)
     }
   }
 }

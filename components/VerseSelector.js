@@ -7,6 +7,7 @@ import { observer } from 'mobx-react'
 import { bibles } from '../bibles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { Toast } from 'primereact/toast'
+import { Tooltip } from 'primereact/tooltip'
 
 const VerseSelector = observer(props => {
   const [bible, setBible] = useState({})
@@ -91,11 +92,8 @@ const VerseSelector = observer(props => {
 
       if (props.passage && props.passage.html && props.passage.reference) {
         setPassage({
-          html: props.passage.html,
-          reference: props.passage.reference
+          ...props.passage
         })
-      } else {
-        setPassage({ reload: true })
       }
     }
   }, [props])
@@ -126,21 +124,32 @@ const VerseSelector = observer(props => {
     const start = e.value.split(':')
     const selectionsEnd = verseSelectionsEnd(start[1], book.chapters[start[0]])
     setVersesEnd(selectionsEnd)
-    setPassage({})
+    setPassage({ reload: true })
   }
 
-  const onChangeChapterEnd = e => {
-    setChapterEnd(e.value)
-    setVersesEnd(
-      Array.from({ length: book.chapters[e.value - 1] }, (_, i) => i + 1 + '')
-    )
-    setVerseEnd(1)
-    setPassage({})
+  const onChangeExtended = e => {
+    if (!e.value) {
+      setVerseEnd(null)
+      setPassage({ reload: true })
+    } else {
+      const start = verse.split(':')
+      const selectionsEnd = verseSelectionsEnd(
+        start[1],
+        book.chapters[start[0]]
+      )
+      setVersesEnd(selectionsEnd)
+    }
+
+    setExtended(e.value)
   }
 
   const onChangeVerseEnd = e => {
     setVerseEnd(e.value)
-    setPassage({})
+    if (book) {
+      setPassage({ reload: true })
+    } else {
+      setPassage({})
+    }
   }
 
   const formatVerses = verses => {
@@ -148,11 +157,11 @@ const VerseSelector = observer(props => {
 
     if (Array.isArray(verses) && verses.length > 0) {
       const book = bible.books.find(b => b.id === verses[0].book)
-      let extended = ''
+      let endRef = ''
       if (verses.length > 1) {
-        extended = `-${verses[verses.length - 1].verse}`
+        endRef = `-${verses[verses.length - 1].verse}`
       }
-      passage.reference = `${book.name} ${verses[0].chapter}:${verses[0].verse}${extended}`
+      passage.reference = `${book.name} ${verses[0].chapter}:${verses[0].verse}${endRef}`
 
       passage.html = verses
         .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
@@ -166,10 +175,10 @@ const VerseSelector = observer(props => {
     return passage
   }
 
-  const fetchPassage = async setProps => {
+  const fetchPassage = async () => {
     setLoading(true)
     let ref = `${book.id}.${verse.replace(':', '.')}`
-    if (extended) ref += `-${verseEnd}`
+    if (extended && verseEnd) ref += `-${verseEnd}`
     const url = `/verses/${bible.abbreviation}/${ref}`
     const response = await axiosClient({
       method: 'get',
@@ -181,9 +190,10 @@ const VerseSelector = observer(props => {
 
     const formatted = formatVerses(response)
     formatted.passageId = ref
+    formatted.reload = false
 
     setPassage(formatted)
-    if (props.setPassage && setProps) props.setPassage(formatted)
+    if (props.setPassage && passage.reload) props.setPassage(formatted)
     setLoading(false)
   }
 
@@ -229,9 +239,8 @@ const VerseSelector = observer(props => {
           value={extended}
           options={options}
           optionValue='value'
-          onChange={e => setExtended(e.value)}
+          onChange={onChangeExtended}
         />
-
         {extended ? (
           <>
             <Dropdown
@@ -251,44 +260,38 @@ const VerseSelector = observer(props => {
       <br />
       <div className='p-d-inline-flex p-ai-center'>
         {book && verse ? (
-          <div>
+          <>
             <h3>
               {`${book.name} ${verse}${
                 extended && verseEnd ? `-${verseEnd}` : ''
               } (${bible.abbreviation})`}
-              &nbsp;
-              <CopyToClipboard
-                style={{ cursor: 'copy' }}
-                text={`${
-                  typeof window !== 'undefined'
-                    ? window.location.host.split(/\//)[0]
-                    : ''
-                }?r=${verseRef}&v=${bible.abbreviation}`}
-                onCopy={() =>
-                  toast.current.show({
-                    severity: 'success',
-                    summary: 'Link Copied'
-                  })
-                }
-              >
-                <i className='pi pi-share-alt'></i>
-              </CopyToClipboard>
             </h3>
+            &nbsp;
             <Button
-              label='Read Chapter'
               className='p-button-rounded p-button-text'
               icon='pi pi-book'
               onClick={openChapter}
+              tooltip='Open Chapter'
+              tooltipOptions={{ position: 'left' }}
             />
-            <Button
-              style={{ marginLeft: 6 }}
-              icon='pi pi-cloud-download'
-              className='p-button-rounded'
-              onClick={() => fetchPassage(true)}
-              iconPos='right'
-              label='Lookup'
-            />
-          </div>
+            &nbsp;
+            <CopyToClipboard
+              style={{ cursor: 'copy' }}
+              text={`${
+                typeof window !== 'undefined'
+                  ? window.location.host.split(/\//)[0]
+                  : ''
+              }?r=${verseRef}&v=${bible.abbreviation}`}
+              onCopy={() =>
+                toast.current.show({
+                  severity: 'success',
+                  summary: 'Link Copied'
+                })
+              }
+            >
+              <i className='pi pi-share-alt'></i>
+            </CopyToClipboard>
+          </>
         ) : (
           ''
         )}
@@ -300,10 +303,7 @@ const VerseSelector = observer(props => {
           style={{ margin: 10, fontSize: '4em' }}
         ></i>
       ) : (
-        <div
-          className='p-mt-5'
-          dangerouslySetInnerHTML={{ __html: passage.html || '' }}
-        />
+        <div dangerouslySetInnerHTML={{ __html: passage.html || '' }} />
       )}
     </>
   )

@@ -45,8 +45,7 @@ export async function getServerSideProps (context) {
   return {
     props: {
       topic,
-      version,
-      apiKey: process.env.ABS_API_KEY
+      version
     }
   }
 }

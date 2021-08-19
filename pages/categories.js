@@ -242,8 +242,7 @@ export async function getServerSideProps () {
 
   return {
     props: {
-      store: getSnapshot(store),
-      apiKey: process.env.ABS_API_KEY
+      store: getSnapshot(store)
     }
   }
 }
