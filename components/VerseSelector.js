@@ -70,18 +70,19 @@ const VerseSelector = observer(props => {
       setBook(findBook)
       const selections = verseSelections(findBook.chapters)
       setVerses(selections)
-      const selectionsEnd = verseSelectionsEnd(
-        start[2],
-        findBook.chapters[start[1]]
-      )
+
+      const _rangeStart = start[2] || 1
+      const _rangeEnd = findBook.chapters[Number(start[1]) - 1]
+      const selectionsEnd = verseSelectionsEnd(_rangeStart, _rangeEnd)
       setVersesEnd(selectionsEnd)
 
       if (start[2]) {
         setVerse(start[1] + ':' + start[2])
       } else {
+        // This is a reference to the entire chapter
         setVerse(start[1] + ':1')
         setExtended(true)
-        setVerseEnd(findBook.chapters[Number(start[1])])
+        setVerseEnd(_rangeEnd - 1)
       }
 
       if (refs[1]) {
@@ -119,8 +120,11 @@ const VerseSelector = observer(props => {
   const onChangeVerse = e => {
     setVerse(e.value)
     const start = e.value.split(':')
-    const selectionsEnd = verseSelectionsEnd(start[1], book.chapters[start[0]])
+    const _rangeStart = Number(start[1])
+    const _rangeEnd = book.chapters[Number(start[0]) - 1]
+    const selectionsEnd = verseSelectionsEnd(_rangeStart, _rangeEnd)
     setVersesEnd(selectionsEnd)
+    setVerseEnd(null)
   }
 
   const onChangeExtended = e => {
@@ -162,22 +166,23 @@ const VerseSelector = observer(props => {
     }).then(response => response.data)
 
     const formatted = formatVerses(response)
-    formatted.passageId = ref
-    formatted.reload = false
 
     setPassage(formatted)
+    if (props.setPassage) props.setPassage(formatted)
     setLoading(false)
   }
 
   const formatVerses = verses => {
-    const passage = {}
+    const _passage = {}
 
     if (Array.isArray(verses) && verses.length > 0) {
+      let _bible = {}
       let _book = {}
       if (bible && bible.books) {
+        _bible = bible
         _book = bible.books.find(b => b.id === verses[0].book)
       } else {
-        const _bible = bibles.find(b => b.abbreviation === props.version)
+        _bible = bibles.find(b => b.abbreviation === props.version)
         _book = _bible.books.find(b => b.id === verses[0].book)
       }
 
@@ -185,21 +190,26 @@ const VerseSelector = observer(props => {
       if (verses.length > 1) {
         endRef = `-${verses[verses.length - 1].verse}`
       }
-      passage.reference = `${book.name} ${verses[0].chapter}:${verses[0].verse}${endRef}`
-      passage.html = verses
+
+      _passage.version = _bible.abbreviation
+      _passage.passageId = `${_book.id}.${verses[0].chapter}.${verses[0].verse}${endRef}`
+      _passage.reference = `${_book.name} ${verses[0].chapter}:${verses[0].verse}${endRef}`
+      _passage.html = verses
         .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
         .join('')
-      passage.version = bible.abbreviation
     }
-    return passage
+
+    return _passage
   }
 
   const verseRef = `${book.id}.${verse ? verse.replace(':', '.') : ''}${
     extended && verseEnd ? `-${verseEnd}` : ''
   }`
-  const chapterRef = `${book.id}.${verse ? verse.split(':')[0] : ''}`
 
-  const openChapter = () => {
+  const chapterNumber = Number(verse ? verse.split(':')[0] : 0)
+
+  const openChapter = _chapterNumber => {
+    const chapterRef = `${book.id}.${_chapterNumber}`
     const url = `${
       typeof window !== 'undefined'
         ? window.location.protocol + '//' + window.location.host.split(/\//)[0]
@@ -208,53 +218,69 @@ const VerseSelector = observer(props => {
     window.open(url)
   }
 
+  const readChapter = _chapterNumber => {
+    const _rangeStart = 1
+    const _rangeEnd = book.chapters[_chapterNumber]
+    const selectionsEnd = verseSelectionsEnd(_rangeStart, _rangeEnd)
+    setVersesEnd(selectionsEnd)
+    setVerse(`${_chapterNumber}:1`)
+    setExtended(true)
+    setVerseEnd(_rangeEnd - 1)
+  }
+
   return (
     <>
-      <div className='p-d-inline-flex p-ai-center'>
-        <Toast ref={toast} position='top-right'></Toast>
-        <Dropdown
-          value={book}
-          options={bible && bible.books ? bible.books : []}
-          onChange={onChangeBook}
-          optionLabel='name'
-          placeholder='Book'
-          filter
-          showClear
-          filterBy='name'
-        />
-        <Dropdown
-          value={verse}
-          options={verses || []}
-          onChange={onChangeVerse}
-          placeholder='Verse'
-          editable
-          style={{ width: 100 }}
-          disabled={!book.chapters}
-        />
-        <MultiStateCheckbox
-          style={{ marginLeft: 6, marginRight: 6 }}
-          value={extended}
-          options={options}
-          optionValue='value'
-          onChange={onChangeExtended}
-        />
-        {extended ? (
-          <>
+      <Toast ref={toast} position='top-right'></Toast>
+      {props.readOnly ? (
+        ''
+      ) : (
+        <>
+          <div className='p-d-inline-flex p-ai-center'>
             <Dropdown
-              value={verseEnd}
-              options={versesEnd || []}
-              onChange={onChangeVerseEnd}
+              value={book}
+              options={bible && bible.books ? bible.books : []}
+              onChange={onChangeBook}
+              optionLabel='name'
+              placeholder='Book'
+              filter
+              showClear
+              filterBy='name'
+            />
+            <Dropdown
+              value={verse}
+              options={verses || []}
+              onChange={onChangeVerse}
               placeholder='Verse'
               editable
               style={{ width: 100 }}
               disabled={!book.chapters}
             />
-          </>
-        ) : (
-          ''
-        )}
-      </div>
-      <br />
+            <MultiStateCheckbox
+              style={{ marginLeft: 6, marginRight: 6 }}
+              value={extended}
+              options={options}
+              optionValue='value'
+              onChange={onChangeExtended}
+            />
+            {extended ? (
+              <>
+                <Dropdown
+                  value={verseEnd}
+                  options={versesEnd || []}
+                  onChange={onChangeVerseEnd}
+                  placeholder='Verse'
+                  editable
+                  style={{ width: 100 }}
+                  disabled={!book.chapters}
+                />
+              </>
+            ) : (
+              ''
+            )}
+          </div>
+          <br />
+        </>
+      )}
       <div className='p-d-inline-flex p-ai-center'>
         {book && verse ? (
           <>
@@ -264,10 +290,40 @@ const VerseSelector = observer(props => {
               } (${bible.abbreviation})`}
             </h3>
             &nbsp;
+            {chapterNumber > 1 ? (
+              <Button
+                className='p-button-rounded p-button-text'
+                icon='pi pi-arrow-circle-left'
+                onClick={() => readChapter(chapterNumber - 1)}
+                tooltip='Previous Chapter'
+                tooltipOptions={{ position: 'left' }}
+              />
+            ) : (
+              ''
+            )}
             <Button
               className='p-button-rounded p-button-text'
               icon='pi pi-book'
-              onClick={openChapter}
+              onClick={() => readChapter(chapterNumber)}
+              tooltip='Read Chapter'
+              tooltipOptions={{ position: 'left' }}
+            />
+            {chapterNumber < book.chapters.length ? (
+              <Button
+                className='p-button-rounded p-button-text'
+                icon='pi pi-arrow-circle-right'
+                onClick={() => readChapter(chapterNumber + 1)}
+                tooltip='Next Chapter'
+                tooltipOptions={{ position: 'left' }}
+              />
+            ) : (
+              ''
+            )}
+            &nbsp;
+            <Button
+              className='p-button-rounded p-button-text'
+              icon='pi pi-window-maximize'
+              onClick={() => openChapter(chapterNumber)}
               tooltip='Open Chapter'
               tooltipOptions={{ position: 'left' }}
             />

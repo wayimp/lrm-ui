@@ -107,11 +107,13 @@ const Search = props => {
       })
   }
 
-  const movePrevious = () => {
-    let findIndex = props.topicNames.findIndex(
-      tn => tn.topicName === selectedSection.name
-    )
+  const topicIndex =
+    selectedSection && selectedSection.name
+      ? props.topicNames.findIndex(tn => tn.topicName === selectedSection.name)
+      : 0
 
+  const movePrevious = () => {
+    let findIndex = topicIndex
     if (findIndex > 0) {
       findIndex--
     } else {
@@ -122,10 +124,7 @@ const Search = props => {
   }
 
   const moveNext = () => {
-    let findIndex = props.topicNames.findIndex(
-      tn => tn.topicName === selectedSection.name
-    )
-
+    let findIndex = topicIndex
     if (findIndex < props.topicNames.length - 1) {
       findIndex++
     } else {
@@ -190,8 +189,20 @@ const Search = props => {
             <Fieldset
               style={{ margin: '0px 0px 10px 0px' }}
               legend={
-                <div>
+                <div className='p-d-inline-flex p-ai-center'>
                   {selectedSection.name}&nbsp;&nbsp;
+                  <Button
+                    className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                    icon='pi pi-times'
+                    onClick={() => {
+                      setSelectedSection(null)
+                      setSearchTerm(null)
+                      setSelectedTopic(null)
+                    }}
+                    tooltip='Remove'
+                    tooltipOptions={{ position: 'left' }}
+                  />
+                  &nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
                     text={`${window.location.host.split(/\//)[0]}?t=${
@@ -210,18 +221,26 @@ const Search = props => {
               }
             >
               <div className='p-d-flex p-p-3'>
-                <Button
-                  type='button'
-                  icon='pi pi-arrow-left'
-                  className='p-button-rounded p-button-outlined'
-                  onClick={movePrevious}
-                />
-                <Button
-                  type='button'
-                  icon='pi pi-arrow-right'
-                  className='p-ml-auto p-button-rounded p-button-outlined'
-                  onClick={moveNext}
-                />
+                {topicIndex > 0 ? (
+                  <Button
+                    type='button'
+                    icon='pi pi-arrow-left'
+                    className='p-button-rounded p-button-outlined'
+                    onClick={movePrevious}
+                  />
+                ) : (
+                  ''
+                )}
+                {topicIndex < props.topicNames.length - 1 ? (
+                  <Button
+                    type='button'
+                    icon='pi pi-arrow-right'
+                    className='p-ml-auto p-button-rounded p-button-outlined'
+                    onClick={moveNext}
+                  />
+                ) : (
+                  ''
+                )}
               </div>
               {selectedSection.items.map((item, index) => {
                 return <ContentBlock key={index} props={item} mode='display' />

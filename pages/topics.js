@@ -176,8 +176,19 @@ const TopicComposer = props => {
     active: true
   })
   const [sections, setSections] = useState([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
   const toast = useRef(null)
+
+  useEffect(() => {
+    if (isLoaded) {
+      if (currentTopic && Array.isArray(sections) && sections.length > 0) {
+        saveCurrent()
+      }
+    } else {
+      setIsLoaded(true)
+    }
+  }, [sections, currentTopic.title])
 
   useEffect(() => {
     const token = cookie.get('token')
@@ -194,10 +205,12 @@ const TopicComposer = props => {
 
   const updateTopicTitles = async () => {
     const newTopicTitles = await axiosClient
-      .get('/topicTitles?showInactive=true')
+      .get('/topicTitles')
       .then(response => response.data)
 
-    setTopicTitles(newTopicTitles)
+    if (JSON.stringify(topicTitles) !== JSON.stringify(newTopicTitles)) {
+      setTopicTitles(newTopicTitles)
+    }
   }
 
   const onChangeBible = e => {
@@ -228,6 +241,7 @@ const TopicComposer = props => {
       getTopic(e.value._id)
     } else {
       setCurrentTopic({})
+      setIsLoaded(false)
       setSections([])
     }
   }
@@ -250,6 +264,7 @@ const TopicComposer = props => {
       })
 
     setCurrentTopic(topic)
+    setIsLoaded(false)
     setSections(topic.sections)
   }
 
@@ -322,7 +337,7 @@ const TopicComposer = props => {
     })
       .then(async response => {
         toast.current.show({ severity: 'success', summary: 'Topic Saved' })
-        updateTopicTitles()
+        //updateTopicTitles()
       })
       .catch(error => {
         toast.current.show({
@@ -438,13 +453,6 @@ const TopicComposer = props => {
               label='Delete'
               className='p-button-danger p-button-outlined'
             ></Button>
-            &nbsp;
-            <Button
-              label='Save Changes'
-              icon='pi pi-check'
-              className='p-button-success'
-              onClick={saveCurrent}
-            />
           </>
         }
       />
@@ -477,6 +485,7 @@ const TopicComposer = props => {
                         title: e.target.value
                       })
                     }}
+                    className={!currentTopic.title ? 'p-invalid' : ''}
                   />
                 </div>
               </div>
@@ -547,7 +556,7 @@ const TopicComposer = props => {
                             newSections[ind].name = e.target.value
                             setSections(newSections)
                           }}
-                          className='p-d-block'
+                          className={!el.name ? 'p-invalid p-d-block' : 'p-d-block'}
                         />
                       </div>
                       <div className='p-field p-col'>

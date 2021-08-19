@@ -13,10 +13,10 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
 
   const setPassage = passage => {
     const newState = JSON.parse(JSON.stringify(state))
-    newState.html = passage.html
     newState.version = passage.version
     newState.passageId = passage.passageId
     newState.reference = passage.reference
+    newState.html = passage.html
     setState(newState)
   }
 
@@ -46,38 +46,12 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
   switch (mode) {
     case 'display':
       return (
-        <>
-          <Toast ref={toast} position='top-right'></Toast>
-          <div className='p-d-inline-flex p-ai-center'>
-            <h3>{`${props.reference} (${props.version})`}</h3>
-            &nbsp;
-            <Button
-              className='p-button-rounded p-button-text'
-              icon='pi pi-book'
-              onClick={openChapter}
-              tooltip='Open Chapter'
-              tooltipOptions={{ position: 'left' }}
-            />
-            &nbsp;
-            <CopyToClipboard
-              style={{ cursor: 'copy' }}
-              text={`${
-                typeof window !== 'undefined'
-                  ? window.location.host.split(/\//)[0]
-                  : ''
-              }?r=${props.passageId}&v=${props.version}`}
-              onCopy={() =>
-                toast.current.show({
-                  severity: 'success',
-                  summary: 'Link Copied'
-                })
-              }
-            >
-              <i className='pi pi-share-alt'></i>
-            </CopyToClipboard>
-          </div>
-          <div dangerouslySetInnerHTML={{ __html: props.html || '' }} />
-        </>
+        <VerseSelector
+          readOnly={true}
+          version={props.version}
+          passageId={props.passageId}
+          setPassage={setPassage}
+        />
       )
       break
 
@@ -97,7 +71,6 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
           <VerseSelector
             version={props.version}
             passageId={props.passageId}
-            passage={state}
             setPassage={setPassage}
           />
           <div className='p-ai-center p-mt-2'>
