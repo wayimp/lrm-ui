@@ -52,8 +52,8 @@ const VerseSelector = observer(props => {
   }
 
   useEffect(() => {
-    // If a passage was passed in, set the defaults
-    const version = props.version || (props.passage && props.passage.version)
+    // If a version or passageId is passed in, render that
+    const version = props.version || bible.abbreviation
     let findBible
     if (version) {
       // Set the bible version according to the props that were passed in.
@@ -61,8 +61,7 @@ const VerseSelector = observer(props => {
       setBible(findBible)
     }
 
-    const passageId =
-      props.passageId || (props.passage && props.passage.passageId)
+    const passageId = props.passageId || passage.passageId
     if (passageId && findBible && findBible.books) {
       // Parse the passageId, e.g. 'GEN.1.1-2'
       const refs = passageId.split('-')
@@ -89,20 +88,18 @@ const VerseSelector = observer(props => {
         setExtended(true)
         setVerseEnd(refs[1])
       }
-
-      if (props.passage && props.passage.html && props.passage.reference) {
-        setPassage({
-          ...props.passage
-        })
-      }
     }
-  }, [props])
+  }, [props.version, props.passageId])
 
   useEffect(() => {
-    if (passage.reload) {
-      fetchPassage()
+    // Retrieve the passage afresh if parameters change
+    if (verse) {
+      const _passageId = `${book.id}.${verse.replace(':', '.')}${
+        extended && verseEnd ? `-${verseEnd}` : ''
+      }`
+      fetchPassage(props.version, _passageId)
     }
-  }, [passage])
+  }, [props.version, verse, extended, verseEnd])
 
   const onChangeBook = e => {
     setBook(e.value)
@@ -124,13 +121,11 @@ const VerseSelector = observer(props => {
     const start = e.value.split(':')
     const selectionsEnd = verseSelectionsEnd(start[1], book.chapters[start[0]])
     setVersesEnd(selectionsEnd)
-    setPassage({ reload: true })
   }
 
   const onChangeExtended = e => {
     if (!e.value) {
       setVerseEnd(null)
-      setPassage({ reload: true })
     } else {
       const start = verse.split(':')
       const selectionsEnd = verseSelectionsEnd(
@@ -139,47 +134,25 @@ const VerseSelector = observer(props => {
       )
       setVersesEnd(selectionsEnd)
     }
-
     setExtended(e.value)
   }
 
   const onChangeVerseEnd = e => {
     setVerseEnd(e.value)
-    if (book) {
-      setPassage({ reload: true })
-    } else {
+    if (!verse) {
       setPassage({})
     }
   }
 
-  const formatVerses = verses => {
-    const passage = {}
-
-    if (Array.isArray(verses) && verses.length > 0) {
-      const book = bible.books.find(b => b.id === verses[0].book)
-      let endRef = ''
-      if (verses.length > 1) {
-        endRef = `-${verses[verses.length - 1].verse}`
-      }
-      passage.reference = `${book.name} ${verses[0].chapter}:${verses[0].verse}${endRef}`
-
-      passage.html = verses
-        .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
-        .join('')
-
-      passage.version = bible.abbreviation
-    }
-
-    passage.reload = false
-
-    return passage
-  }
-
-  const fetchPassage = async () => {
+  const fetchPassage = async (version, passageId) => {
     setLoading(true)
-    let ref = `${book.id}.${verse.replace(':', '.')}`
-    if (extended && verseEnd) ref += `-${verseEnd}`
-    const url = `/verses/${bible.abbreviation}/${ref}`
+    let ref =
+      passageId ||
+      `${book.id}.${verse.replace(':', '.')}${
+        extended && verseEnd ? `-${verseEnd}` : ''
+      }`
+
+    const url = `/verses/${version || bible.abbreviation}/${ref}`
     const response = await axiosClient({
       method: 'get',
       url,
@@ -193,8 +166,32 @@ const VerseSelector = observer(props => {
     formatted.reload = false
 
     setPassage(formatted)
-    if (props.setPassage && passage.reload) props.setPassage(formatted)
     setLoading(false)
+  }
+
+  const formatVerses = verses => {
+    const passage = {}
+
+    if (Array.isArray(verses) && verses.length > 0) {
+      let _book = {}
+      if (bible && bible.books) {
+        _book = bible.books.find(b => b.id === verses[0].book)
+      } else {
+        const _bible = bibles.find(b => b.abbreviation === props.version)
+        _book = _bible.books.find(b => b.id === verses[0].book)
+      }
+
+      let endRef = ''
+      if (verses.length > 1) {
+        endRef = `-${verses[verses.length - 1].verse}`
+      }
+      passage.reference = `${book.name} ${verses[0].chapter}:${verses[0].verse}${endRef}`
+      passage.html = verses
+        .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
+        .join('')
+      passage.version = bible.abbreviation
+    }
+    return passage
   }
 
   const verseRef = `${book.id}.${verse ? verse.replace(':', '.') : ''}${

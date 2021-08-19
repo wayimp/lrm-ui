@@ -14,8 +14,8 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
   const setPassage = passage => {
     const newState = JSON.parse(JSON.stringify(state))
     newState.html = passage.html
-    newState.passageId = passage.passageId
     newState.version = passage.version
+    newState.passageId = passage.passageId
     newState.reference = passage.reference
     setState(newState)
   }
@@ -96,6 +96,7 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
         <>
           <VerseSelector
             version={props.version}
+            passageId={props.passageId}
             passage={state}
             setPassage={setPassage}
           />
