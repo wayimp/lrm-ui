@@ -12,6 +12,7 @@ import { Button } from 'primereact/button'
 import { Dropdown } from 'primereact/dropdown'
 import ContentBlock from '../components/ContentBlock'
 import { Toolbar } from 'primereact/toolbar'
+import Link from 'next/link'
 
 const Search = props => {
   const toast = useRef(null)
@@ -21,6 +22,10 @@ const Search = props => {
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [selectedSection, setSelectedSection] = useState(null)
   const [bible, setBible] = useState('')
+  const [selectedQuestion, setSelectedQuestion] = useState(null)
+  const [selectedQuestionSection, setSelectedQuestionSection] = useState(null)
+  const [selectedStart, setSelectedStart] = useState(null)
+  const [selectedStartSection, setSelectedStartSection] = useState(null)
 
   useEffect(() => {
     const { topic, version, reference } = props
@@ -40,6 +45,8 @@ const Search = props => {
       setSearchTerm(findSection.name)
       setSelectedTopic(topic)
     }
+
+    selectStart({ value: props.startNames[0] })
   }, [])
 
   const onChangeBible = e => {
@@ -91,7 +98,7 @@ const Search = props => {
         setSelectedTopic(response.data)
         if (response.data && response.data.sections) {
           let findSection = response.data.sections.find(
-            section => section.version === e.value
+            section => section.version === bible
           )
           if (!findSection) findSection = response.data.sections[0]
           setSelectedSection(findSection)
@@ -107,12 +114,34 @@ const Search = props => {
       })
   }
 
+  const selectQuestion = async e => {
+    axiosClient({
+      method: 'get',
+      url: `/topics/${e.value.id}`
+    })
+      .then(response => {
+        setSelectedQuestion(response.data)
+        let findSection = response.data.sections.find(
+          section => section.version === bible
+        )
+        if (!findSection) findSection = response.data.sections[0]
+        setSelectedQuestionSection(findSection)
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Loading Question',
+          detail: error
+        })
+      })
+  }
+
   const topicIndex =
     selectedSection && selectedSection.name
       ? props.topicNames.findIndex(tn => tn.topicName === selectedSection.name)
       : 0
 
-  const movePrevious = () => {
+  const movePreviousTopic = () => {
     let findIndex = topicIndex
     if (findIndex > 0) {
       findIndex--
@@ -123,7 +152,7 @@ const Search = props => {
     selectTopic({ value: props.topicNames[findIndex] })
   }
 
-  const moveNext = () => {
+  const moveNextTopic = () => {
     let findIndex = topicIndex
     if (findIndex < props.topicNames.length - 1) {
       findIndex++
@@ -132,6 +161,86 @@ const Search = props => {
     }
 
     selectTopic({ value: props.topicNames[findIndex] })
+  }
+
+  const questionIndex =
+    selectedQuestionSection && selectedQuestionSection.name
+      ? props.questionNames.findIndex(
+          tn => tn.topicName === selectedQuestionSection.name
+        )
+      : 0
+
+  const movePreviousQuestion = () => {
+    let findIndex = questionIndex
+    if (findIndex > 0) {
+      findIndex--
+    } else {
+      findIndex = props.questionNames.length - 1
+    }
+
+    selectQuestion({ value: props.questionNames[findIndex] })
+  }
+
+  const moveNextQuestion = () => {
+    let findIndex = questionIndex
+    if (findIndex < props.questionNames.length - 1) {
+      findIndex++
+    } else {
+      findIndex = 0
+    }
+
+    selectQuestion({ value: props.questionNames[findIndex] })
+  }
+
+  const selectStart = async e => {
+    axiosClient({
+      method: 'get',
+      url: `/topics/${e.value.id}`
+    })
+      .then(response => {
+        setSelectedStart(response.data)
+        let findSection = response.data.sections.find(
+          section => section.version === bible
+        )
+        if (!findSection) findSection = response.data.sections[0]
+        setSelectedStartSection(findSection)
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Loading Start',
+          detail: error
+        })
+      })
+  }
+
+  const startIndex =
+    selectedStartSection && selectedStartSection.name
+      ? props.startNames.findIndex(
+          tn => tn.topicName === selectedStartSection.name
+        )
+      : 0
+
+  const movePreviousStart = () => {
+    let findIndex = startIndex
+    if (findIndex > 0) {
+      findIndex--
+    } else {
+      findIndex = props.startNames.length - 1
+    }
+
+    selectStart({ value: props.startNames[findIndex] })
+  }
+
+  const moveNextStart = () => {
+    let findIndex = startIndex
+    if (findIndex < props.startNames.length - 1) {
+      findIndex++
+    } else {
+      findIndex = 0
+    }
+
+    selectStart({ value: props.startNames[findIndex] })
   }
 
   return (
@@ -159,13 +268,21 @@ const Search = props => {
               onSelect={selectTopic}
               forceSelection
             />
-            &nbsp;&nbsp;&nbsp;
+            &nbsp;
             <Dropdown
               options={props.topicNames}
               onChange={selectTopic}
               forceSelection
               optionLabel='topicName'
               placeholder='Browse Topics'
+            />
+            &nbsp;
+            <Dropdown
+              options={props.questionNames}
+              onChange={selectQuestion}
+              forceSelection
+              optionLabel='topicName'
+              placeholder='Questions'
             />
           </div>
         }
@@ -181,16 +298,162 @@ const Search = props => {
         }
       />
       <div
-        className='p-d-flex p-flex-column p-flex-md-row'
+        className='p-d-flex p-flex-row-reverse'
         style={{ margin: '80px 10px 10px 10px' }}
       >
-        <div className='p-mb-2 p-mr-2'>
-          {selectedSection ? (
+        <div className='p-m-2'>
+          <Fieldset
+            style={{ margin: '0px 0px 10px 0px' }}
+            legend='Lookup a Passage'
+          >
+            <ContentBlock
+              props={{
+                type: 'passage',
+                version: bible,
+                passageId: props.reference ? props.reference : null
+              }}
+              mode='entry'
+            />
+          </Fieldset>
+          <Fieldset
+            style={{ margin: '0px 0px 10px 0px' }}
+            legend='Need a Fresh Start?'
+          >
+            <div className='p-grid'>
+              <div className='p-col'>
+                {startIndex > 0 ? (
+                  <Button
+                    type='button'
+                    icon='pi pi-arrow-left'
+                    className='p-button-rounded p-button-outlined'
+                    onClick={movePreviousStart}
+                  />
+                ) : (
+                  <span />
+                )}
+              </div>
+              {selectedStartSection ? (
+                <div className='p-d-inline-flex p-ai-center p-col'>
+                  <h3>{selectedStartSection.name}</h3>&nbsp;&nbsp;
+                  <CopyToClipboard
+                    style={{ cursor: 'copy' }}
+                    text={`${window.location.host.split(/\//)[0]}?t=${
+                      selectedStart._id
+                    }&v=${bible}`}
+                    onCopy={() =>
+                      toast.current.show({
+                        severity: 'success',
+                        summary: 'Link Copied'
+                      })
+                    }
+                  >
+                    <i className='pi pi-share-alt'></i>
+                  </CopyToClipboard>
+                </div>
+              ) : (
+                ''
+              )}
+              <div className='p-col'>
+                {startIndex < props.startNames.length - 1 ? (
+                  <Button
+                    type='button'
+                    icon='pi pi-arrow-right'
+                    className='p-ml-auto p-button-rounded p-button-outlined'
+                    onClick={moveNextStart}
+                  />
+                ) : (
+                  <span />
+                )}
+              </div>
+            </div>
+            {(selectedStartSection && selectedStartSection.items
+              ? selectedStartSection.items
+              : []
+            ).map((item, index) => {
+              return <ContentBlock key={index} props={item} mode='display' />
+            })}
+          </Fieldset>
+        </div>
+
+        {selectedQuestionSection ? (
+          <div className='p-m-2'>
             <Fieldset
               style={{ margin: '0px 0px 10px 0px' }}
               legend={
-                <div className='p-d-inline-flex p-ai-center'>
-                  {selectedSection.name}&nbsp;&nbsp;
+                <>
+                  <h3>Questions</h3>
+                  <Button
+                    className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                    icon='pi pi-times'
+                    onClick={() => {
+                      setSelectedQuestion(null)
+                      setSelectedQuestionSection(null)
+                    }}
+                    tooltip='Close'
+                    tooltipOptions={{ position: 'left' }}
+                  />
+                </>
+              }
+            >
+              <div className='p-grid'>
+                <div className='p-col'>
+                  {questionIndex > 0 ? (
+                    <Button
+                      type='button'
+                      icon='pi pi-arrow-left'
+                      className='p-button-rounded p-button-outlined'
+                      onClick={movePreviousQuestion}
+                    />
+                  ) : (
+                    <span />
+                  )}
+                </div>
+                <div className='p-d-inline-flex p-ai-center p-col'>
+                  <h3>{selectedQuestionSection.name}</h3>&nbsp;&nbsp;
+                  <CopyToClipboard
+                    style={{ cursor: 'copy' }}
+                    text={`${window.location.host.split(/\//)[0]}?t=${
+                      selectedQuestion._id
+                    }&v=${bible}`}
+                    onCopy={() =>
+                      toast.current.show({
+                        severity: 'success',
+                        summary: 'Link Copied'
+                      })
+                    }
+                  >
+                    <i className='pi pi-share-alt'></i>
+                  </CopyToClipboard>
+                </div>
+                <div className='p-col'>
+                  {questionIndex < props.questionNames.length - 1 ? (
+                    <Button
+                      type='button'
+                      icon='pi pi-arrow-right'
+                      className='p-ml-auto p-button-rounded p-button-outlined'
+                      onClick={moveNextQuestion}
+                    />
+                  ) : (
+                    <span />
+                  )}
+                </div>
+              </div>
+              {selectedQuestionSection.items.map((item, index) => {
+                return <ContentBlock key={index} props={item} mode='display' />
+              })}
+            </Fieldset>
+          </div>
+        ) : (
+          ''
+        )}
+
+        {selectedSection ? (
+          <div className='p-m-2'>
+            <Fieldset
+              style={{ margin: '0px 0px 10px 0px' }}
+              legend={
+                <>
+                  <h3>Topics</h3>
                   <Button
                     className='p-button-rounded p-button-text p-button-danger p-button-outlined'
                     icon='pi pi-times'
@@ -199,10 +462,27 @@ const Search = props => {
                       setSearchTerm(null)
                       setSelectedTopic(null)
                     }}
-                    tooltip='Remove'
+                    tooltip='Close'
                     tooltipOptions={{ position: 'left' }}
                   />
-                  &nbsp;
+                </>
+              }
+            >
+              <div className='p-grid'>
+                <div className='p-col'>
+                  {questionIndex > 0 ? (
+                    <Button
+                      type='button'
+                      icon='pi pi-arrow-left'
+                      className='p-button-rounded p-button-outlined'
+                      onClick={movePreviousTopic}
+                    />
+                  ) : (
+                    <span />
+                  )}
+                </div>
+                <div className='p-d-inline-flex p-ai-center p-col'>
+                  <h3>{selectedSection.name}</h3>&nbsp;&nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
                     text={`${window.location.host.split(/\//)[0]}?t=${
@@ -218,53 +498,27 @@ const Search = props => {
                     <i className='pi pi-share-alt'></i>
                   </CopyToClipboard>
                 </div>
-              }
-            >
-              <div className='p-d-flex p-p-3'>
-                {topicIndex > 0 ? (
-                  <Button
-                    type='button'
-                    icon='pi pi-arrow-left'
-                    className='p-button-rounded p-button-outlined'
-                    onClick={movePrevious}
-                  />
-                ) : (
-                  ''
-                )}
-                {topicIndex < props.topicNames.length - 1 ? (
-                  <Button
-                    type='button'
-                    icon='pi pi-arrow-right'
-                    className='p-ml-auto p-button-rounded p-button-outlined'
-                    onClick={moveNext}
-                  />
-                ) : (
-                  ''
-                )}
+                <div className='p-col'>
+                  {topicIndex < props.topicNames.length - 1 ? (
+                    <Button
+                      type='button'
+                      icon='pi pi-arrow-right'
+                      className='p-ml-auto p-button-rounded p-button-outlined'
+                      onClick={moveNextTopic}
+                    />
+                  ) : (
+                    <span />
+                  )}
+                </div>
               </div>
               {selectedSection.items.map((item, index) => {
                 return <ContentBlock key={index} props={item} mode='display' />
               })}
             </Fieldset>
-          ) : (
-            ''
-          )}
-        </div>
-        <div className='p-mb-2 p-mr-2'>
-          <Fieldset
-            style={{ margin: '0px 0px 10px 0px' }}
-            legend='Lookup a Passage'
-          >
-            <ContentBlock
-              props={{
-                type: 'passage',
-                version: bible,
-                passageId: props.reference ? props.reference : null
-              }}
-              mode='entry'
-            />
-          </Fieldset>
-        </div>
+          </div>
+        ) : (
+          ''
+        )}
       </div>
     </div>
   )
@@ -292,9 +546,15 @@ export async function getServerSideProps (context) {
     .get('/topicTags?category=topics')
     .then(response => response.data)
 
-  const topicNames = await axiosClient
-    .get('/topicNames?category=topics')
+  const topicNamesAll = await axiosClient
+    .get('/topicNames')
     .then(response => response.data)
+
+  const topicNames = topicNamesAll.filter(t => t.category === 'topics')
+
+  const questionNames = topicNamesAll.filter(t => t.category === 'faqs')
+
+  const startNames = topicNamesAll.filter(t => t.category === 'start')
 
   const store = initializeStore()
 
@@ -306,6 +566,8 @@ export async function getServerSideProps (context) {
       version,
       reference,
       topicNames,
+      questionNames,
+      startNames,
       store: getSnapshot(store)
     }
   }

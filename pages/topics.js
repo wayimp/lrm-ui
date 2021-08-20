@@ -177,6 +177,7 @@ const TopicComposer = props => {
   })
   const [sections, setSections] = useState([])
   const [isLoaded, setIsLoaded] = useState(false)
+  const [refresh, setRefresh] = useState(uuid())
 
   const toast = useRef(null)
 
@@ -184,7 +185,7 @@ const TopicComposer = props => {
     if (currentTopic.title && Array.isArray(sections) && sections.length > 0) {
       if (isLoaded) {
         saveCurrent()
-      } else {
+        setRefresh(uuid())
       }
     }
   }, [currentTopic.title, sections])
@@ -456,7 +457,11 @@ const TopicComposer = props => {
           </>
         }
       />
-      <DragDropContext onDragEnd={onDragEnd} isDropDisabled={true}>
+      <DragDropContext
+        onDragEnd={onDragEnd}
+        isDropDisabled={true}
+        key={refresh}
+      >
         <div className='p-grid' style={{ marginTop: 70 }}>
           <div className='p-col-7'>
             <Fieldset
@@ -628,6 +633,7 @@ const TopicComposer = props => {
                                                 props={item}
                                                 mode='config'
                                                 updateConfig={json => {
+                                                  setIsLoaded(true)
                                                   setContentConfigDialog(false)
                                                   if (json) {
                                                     const newSections = [
@@ -649,6 +655,7 @@ const TopicComposer = props => {
                                           className='p-button-outlined p-button-sm p-button-secondary'
                                           icon='pi pi-minus-circle'
                                           onClick={() => {
+                                            setIsLoaded(true)
                                             const newSections = [...sections]
                                             newSections[ind].items.splice(
                                               index,

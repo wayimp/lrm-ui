@@ -291,38 +291,42 @@ const VerseSelector = observer(props => {
       <div className='p-d-inline-flex p-ai-center'>
         {book && verse ? (
           <>
-            <h3>
-              {`${passage.reference} (${bible.abbreviation})`}
-            </h3>
-            &nbsp;
-            {chapterNumber > 1 ? (
-              <Button
-                className='p-button-rounded p-button-text'
-                icon='pi pi-arrow-circle-left'
-                onClick={() => readChapter(chapterNumber - 1)}
-                tooltip='Previous Chapter'
-                tooltipOptions={{ position: 'left' }}
-              />
-            ) : (
+            <h3>{`${passage.reference} (${bible.abbreviation})`}</h3>
+            {props.readOnly ? (
               ''
-            )}
-            <Button
-              className='p-button-rounded p-button-text'
-              icon='pi pi-book'
-              onClick={() => readChapter(chapterNumber)}
-              tooltip='Read Chapter'
-              tooltipOptions={{ position: 'left' }}
-            />
-            {chapterNumber < book.chapters.length ? (
-              <Button
-                className='p-button-rounded p-button-text'
-                icon='pi pi-arrow-circle-right'
-                onClick={() => readChapter(chapterNumber + 1)}
-                tooltip='Next Chapter'
-                tooltipOptions={{ position: 'left' }}
-              />
             ) : (
-              ''
+              <>
+                &nbsp;
+                {chapterNumber > 1 ? (
+                  <Button
+                    className='p-button-rounded p-button-text'
+                    icon='pi pi-arrow-circle-left'
+                    onClick={() => readChapter(chapterNumber - 1)}
+                    tooltip='Previous Chapter'
+                    tooltipOptions={{ position: 'left' }}
+                  />
+                ) : (
+                  ''
+                )}
+                <Button
+                  className='p-button-rounded p-button-text'
+                  icon='pi pi-book'
+                  onClick={() => readChapter(chapterNumber)}
+                  tooltip='Read Chapter'
+                  tooltipOptions={{ position: 'left' }}
+                />
+                {chapterNumber < book.chapters.length ? (
+                  <Button
+                    className='p-button-rounded p-button-text'
+                    icon='pi pi-arrow-circle-right'
+                    onClick={() => readChapter(chapterNumber + 1)}
+                    tooltip='Next Chapter'
+                    tooltipOptions={{ position: 'left' }}
+                  />
+                ) : (
+                  ''
+                )}
+              </>
             )}
             &nbsp;
             <Button
