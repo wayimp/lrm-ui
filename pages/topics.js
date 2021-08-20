@@ -181,14 +181,13 @@ const TopicComposer = props => {
   const toast = useRef(null)
 
   useEffect(() => {
-    if (isLoaded) {
-      if (currentTopic && Array.isArray(sections) && sections.length > 0) {
+    if (currentTopic.title && Array.isArray(sections) && sections.length > 0) {
+      if (isLoaded) {
         saveCurrent()
+      } else {
       }
-    } else {
-      setIsLoaded(true)
     }
-  }, [sections, currentTopic.title])
+  }, [currentTopic.title, sections])
 
   useEffect(() => {
     const token = cookie.get('token')
@@ -240,13 +239,15 @@ const TopicComposer = props => {
     if (e.value && e.value._id) {
       getTopic(e.value._id)
     } else {
-      setCurrentTopic({})
       setIsLoaded(false)
+      setCurrentTopic({})
       setSections([])
     }
   }
 
   const getTopic = async id => {
+    setIsLoaded(false)
+
     const topic = await axiosClient({
       method: 'get',
       url: `/topics/${id}`
@@ -264,7 +265,6 @@ const TopicComposer = props => {
       })
 
     setCurrentTopic(topic)
-    setIsLoaded(false)
     setSections(topic.sections)
   }
 
@@ -556,7 +556,9 @@ const TopicComposer = props => {
                             newSections[ind].name = e.target.value
                             setSections(newSections)
                           }}
-                          className={!el.name ? 'p-invalid p-d-block' : 'p-d-block'}
+                          className={
+                            !el.name ? 'p-invalid p-d-block' : 'p-d-block'
+                          }
                         />
                       </div>
                       <div className='p-field p-col'>
@@ -710,7 +712,13 @@ const TopicComposer = props => {
                     legend={el.version}
                   >
                     {el.items.map((item, index) => {
-                      return <ContentBlock props={item} mode='display' />
+                      return (
+                        <ContentBlock
+                          props={item}
+                          mode='display'
+                          readOnly={true}
+                        />
+                      )
                     })}
                   </Fieldset>
                 </div>
@@ -750,6 +758,7 @@ const TopicComposer = props => {
               label='OK'
               icon='pi pi-check'
               onClick={() => {
+                setIsLoaded(true)
                 if (sectionEditIndex < 0) {
                   setSections([
                     ...sections,

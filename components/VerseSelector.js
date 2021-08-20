@@ -93,6 +93,11 @@ const VerseSelector = observer(props => {
   }, [props.version, props.passageId])
 
   useEffect(() => {
+    if (props.readOnly) {
+      const { reference, html } = props
+      setPassage({ reference, html })
+      return
+    }
     // Retrieve the passage afresh if parameters change
     if (verse) {
       const _passageId = `${book.id}.${verse.replace(':', '.')}${
@@ -197,6 +202,7 @@ const VerseSelector = observer(props => {
       _passage.html = verses
         .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
         .join('')
+        .trim()
     }
 
     return _passage
@@ -281,13 +287,12 @@ const VerseSelector = observer(props => {
           <br />
         </>
       )}
+
       <div className='p-d-inline-flex p-ai-center'>
         {book && verse ? (
           <>
             <h3>
-              {`${book.name} ${verse}${
-                extended && verseEnd ? `-${verseEnd}` : ''
-              } (${bible.abbreviation})`}
+              {`${passage.reference} (${bible.abbreviation})`}
             </h3>
             &nbsp;
             {chapterNumber > 1 ? (

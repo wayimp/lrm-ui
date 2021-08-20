@@ -12,7 +12,7 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
   const toast = useRef(null)
 
   const setPassage = passage => {
-    const newState = JSON.parse(JSON.stringify(state))
+    const newState = { ...state }
     newState.version = passage.version
     newState.passageId = passage.passageId
     newState.reference = passage.reference
@@ -21,13 +21,13 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
   }
 
   const handleRefChange = e => {
-    const newState = JSON.parse(JSON.stringify(state))
+    const newState = { ...state }
     newState.reference = e.target.value
     setState(newState)
   }
 
   const handleHtmlChange = e => {
-    const newState = JSON.parse(JSON.stringify(state))
+    const newState = { ...state }
     newState.html = e.htmlValue
     setState(newState)
   }
@@ -50,6 +50,8 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
           readOnly={true}
           version={props.version}
           passageId={props.passageId}
+          reference={props.reference}
+          html={props.html}
           setPassage={setPassage}
         />
       )
