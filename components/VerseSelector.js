@@ -226,7 +226,7 @@ const VerseSelector = observer(props => {
 
   const readChapter = _chapterNumber => {
     const _rangeStart = 1
-    const _rangeEnd = book.chapters[_chapterNumber]
+    const _rangeEnd = book.chapters[_chapterNumber-1]
     const selectionsEnd = verseSelectionsEnd(_rangeStart, _rangeEnd)
     setVersesEnd(selectionsEnd)
     setVerse(`${_chapterNumber}:1`)
@@ -236,7 +236,7 @@ const VerseSelector = observer(props => {
 
   return (
     <>
-      <Toast ref={toast} position='top-right'></Toast>
+      <Toast ref={toast} position='bottom-right'></Toast>
       {props.readOnly ? (
         ''
       ) : (

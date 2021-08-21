@@ -80,11 +80,12 @@ const getListStyle = isDraggingOver => ({
 
 const TopicOrder = props => {
   const [selectedCategory, setSelectedCategory] = useState('topics')
-  const [topicTitles, setTopicTitles] = useState(props.store.topicTitles)
+  const [topicTitles, setTopicTitles] = useState([...props.store.topicTitles])
   const [topicTitlesFiltered, setTopicTitlesFiltered] = useState([])
   const [bible, setBible] = useState({})
   const [token, setToken] = useState(cookie.get('token'))
   const toast = useRef(null)
+  const [refresh, setRefresh] = useState(uuid())
 
   useEffect(() => {
     if (token && token.length > 0) {
@@ -102,20 +103,39 @@ const TopicOrder = props => {
 
   const filterTopicTitles = category => {
     const cat = category || selectedCategory
-    const filtered = topicTitles.filter(tt => tt.category === cat)
+    const filtered = topicTitles
+      .filter(tt => tt.category === cat)
+      .sort((a, b) => (a.order > b.order ? 1 : -1))
     setTopicTitlesFiltered(filtered)
   }
 
-  const saveCurrent = async () => {
-    const topicOrder = topicTitlesFiltered.map((tt, index) => ({
-      _id: tt._id,
+  const saveCurrent = async items => {
+    const topicOrder = await items.map((to, index) => ({
+      ...to,
+      order: index
+    }))
+
+    setTopicTitlesFiltered(topicOrder)
+
+    const _topicTitles = await topicTitles.map(tt => {
+      const update = topicOrder.find(to => to._id === tt._id)
+      if (update) {
+        tt.order = update.order
+      }
+      return tt
+    })
+    setTopicTitles(_topicTitles)
+    setRefresh(uuid())
+
+    const stripped = await topicOrder.map((to, index) => ({
+      _id: to._id,
       order: index
     }))
 
     await axiosClient({
       method: 'patch',
       url: '/topicOrder',
-      data: topicOrder,
+      data: stripped,
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(response => {
@@ -124,8 +144,7 @@ const TopicOrder = props => {
       .catch(error => {
         toast.current.show({
           severity: 'error',
-          summary: 'Error Saving Order',
-          detail: error
+          summary: 'Error Saving Order'
         })
       })
   }
@@ -142,12 +161,13 @@ const TopicOrder = props => {
     const dInd = +destination.droppableId
 
     const items = reorder(topicTitlesFiltered, source.index, destination.index)
-    setTopicTitlesFiltered(items)
+
+    saveCurrent(items)
   }
 
   return (
     <div style={{ marginTop: 150 }}>
-      <Toast ref={toast} position='top-right'></Toast>
+      <Toast ref={toast} position='bottom-right'></Toast>
       <TopBar />
       <Toolbar
         style={{
@@ -168,17 +188,9 @@ const TopicOrder = props => {
             />
           </>
         }
-        right={
-          <Button
-            label='Save Order'
-            icon='pi pi-check'
-            className='p-button-success'
-            onClick={saveCurrent}
-          />
-        }
       />
 
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd} key={refresh}>
         <h3>
           Category: {categories.find(c => c.value === selectedCategory).label}
         </h3>

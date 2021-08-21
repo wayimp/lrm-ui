@@ -52,7 +52,7 @@ const Faqs = props => {
         className='p-d-flex p-flex-column p-flex-md-row'
         style={{ margin: '10px 10px 10px 10px' }}
       >
-        <Toast ref={toast} position='top-right'></Toast>
+        <Toast ref={toast} position='bottom-right'></Toast>
         <ListBox
           value={selectedTopic}
           options={props.topics}

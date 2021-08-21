@@ -44,8 +44,7 @@ const Login = props => {
         } else {
           toast.current.show({
             severity: 'error',
-            summary: 'User Logon Failure',
-            detail: error
+            summary: 'User Logon Failure'
           })
           Router.push('/')
         }
@@ -53,8 +52,7 @@ const Login = props => {
       .catch(function (error) {
         toast.current.show({
           severity: 'error',
-          summary: 'User Logon Failure',
-          detail: error
+          summary: 'User Logon Failure'
         })
         Router.push('/')
       })
@@ -62,9 +60,9 @@ const Login = props => {
 
   return (
     <div>
-      <Toast ref={toast} position='top-right'></Toast>
+      <Toast ref={toast} position='bottom-right'></Toast>
       <TopBar />
-      <div className='demo-container p-p-4 p-lg-2' style={{marginTop: 50}}>
+      <div className='demo-container p-p-4 p-lg-2' style={{ marginTop: 50 }}>
         <div className='card p-d-block p-mx-auto'>
           <div className='p-field p-grid'>
             <div className='p-inputgroup'>

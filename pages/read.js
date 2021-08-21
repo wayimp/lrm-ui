@@ -25,7 +25,7 @@ const Read = props => {
 
   return (
     <div>
-      <Toast ref={toast} position='top-right'></Toast>
+      <Toast ref={toast} position='bottom-right'></Toast>
       <Dropdown
         value={bible}
         options={bibles}

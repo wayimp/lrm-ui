@@ -92,9 +92,7 @@ const Search = props => {
       .catch(error => {
         toast.current.show({
           severity: 'error',
-          summary: 'Error Loading Topic',
-          detail: error
-        })
+          summary: 'Error Loading Topic'})
       })
 
     setSelectedTopic(topic)
@@ -110,7 +108,7 @@ const Search = props => {
 
   return (
     <div>
-      <Toast ref={toast} position='top-right'></Toast>
+      <Toast ref={toast} position='bottom-right'></Toast>
       <Dropdown
         value={bible}
         options={bibles}

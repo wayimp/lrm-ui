@@ -178,6 +178,7 @@ const TopicComposer = props => {
   const [sections, setSections] = useState([])
   const [isLoaded, setIsLoaded] = useState(false)
   const [refresh, setRefresh] = useState(uuid())
+  const [token, setToken] = useState(cookie.get('token'))
 
   const toast = useRef(null)
 
@@ -260,8 +261,7 @@ const TopicComposer = props => {
       .catch(error => {
         toast.current.show({
           severity: 'error',
-          summary: 'Error Loading Topic',
-          detail: error
+          summary: 'Error Loading Topic'
         })
       })
 
@@ -284,8 +284,7 @@ const TopicComposer = props => {
       .catch(error => {
         toast.current.show({
           severity: 'error',
-          summary: 'Error Deleting Topic',
-          detail: error
+          summary: 'Error Deleting Topic'
         })
       })
   }
@@ -333,18 +332,20 @@ const TopicComposer = props => {
     await axiosClient({
       method: currentTopic._id ? 'patch' : 'post',
       url: '/topics',
-      data: newTopic
-      //headers: { Authorization: `Bearer ${token}` }
+      data: newTopic,
+      headers: { Authorization: `Bearer ${token}` }
     })
       .then(async response => {
+        if (response.data.insertedId) {
+          setCurrentTopic({ ...currentTopic, _id: response.data.insertedId })
+        }
         toast.current.show({ severity: 'success', summary: 'Topic Saved' })
         //updateTopicTitles()
       })
       .catch(error => {
         toast.current.show({
           severity: 'error',
-          summary: 'Error Saving Topic',
-          detail: error
+          summary: 'Error Saving Topic'
         })
       })
   }
@@ -403,9 +404,61 @@ const TopicComposer = props => {
     }
   }
 
+  const lookupPassage = async (sectionEditIndex, itemIndex, item) => {
+    const url = `/verses/${item.version}/${item.passageId}`
+    const response = await axiosClient({
+      method: 'get',
+      url,
+      headers: {
+        accept: 'application/json'
+      }
+    }).then(response => response.data)
+
+    const formatted = formatVerses(response)
+    const newItem = JSON.parse(JSON.stringify(item))
+    newItem.reference = formatted.reference
+    newItem.html = formatted.html
+
+    // Update the item in place whenever you are ready
+    const newSections = [...sections]
+    newSections[sectionEditIndex].items[itemIndex] = newItem
+    setSections(newSections)
+  }
+
+  const formatVerses = verses => {
+    const _passage = {}
+
+    if (Array.isArray(verses) && verses.length > 0) {
+      let _bible = {}
+      let _book = {}
+      if (bible && bible.books) {
+        _bible = bible
+        _book = bible.books.find(b => b.id === verses[0].book)
+      } else {
+        _bible = bibles.find(b => b.abbreviation === bible)
+        _book = _bible.books.find(b => b.id === verses[0].book)
+      }
+
+      let endRef = ''
+      if (verses.length > 1) {
+        endRef = `-${verses[verses.length - 1].verse}`
+      }
+
+      _passage.version = _bible.abbreviation
+      _passage.passageId = `${_book.id}.${verses[0].chapter}.${verses[0].verse}${endRef}`
+      _passage.reference = `${_book.name} ${verses[0].chapter}:${verses[0].verse}${endRef}`
+      _passage.html = verses
+        .map(v => ` <sup>${v.verse}</sup> ${v.text}`)
+        .join('')
+        .trim()
+    }
+
+    return _passage
+  }
+
   return (
     <div style={{ marginTop: 150 }}>
-      <Toast ref={toast} position='top-right'></Toast>
+      <Toast ref={toast} position='bottom-right'></Toast>
       <TopBar />
       <Toolbar
         style={{
@@ -557,8 +610,14 @@ const TopicComposer = props => {
                           id='topicName'
                           value={el.name}
                           onChange={e => {
+                            setIsLoaded(false)
                             const newSections = [...sections]
                             newSections[ind].name = e.target.value
+                            setSections(newSections)
+                          }}
+                          onBlur={e => {
+                            setIsLoaded(true)
+                            const newSections = [...sections]
                             setSections(newSections)
                           }}
                           className={
