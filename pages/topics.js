@@ -634,6 +634,7 @@ const TopicComposer = props => {
                           className='p-d-block'
                           value={el.tags}
                           onChange={e => {
+                            setIsLoaded(true)
                             const newSections = [...sections]
                             newSections[ind].tags = e.value
                             setSections(newSections)
