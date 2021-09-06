@@ -16,6 +16,8 @@ import { Toolbar } from 'primereact/toolbar'
 import { Sidebar } from 'primereact/sidebar'
 import Link from 'next/link'
 import { Tooltip } from 'primereact/tooltip'
+import { TreeSelect } from 'primereact/treeselect'
+import uuid from 'react-uuid'
 
 const Search = props => {
   const toast = useRef(null)
@@ -112,12 +114,18 @@ const Search = props => {
     setFilteredTags(_filteredTags)
   }
 
-  const selectTopic = async e => {
+  const selectTreeTopic = async e => {
+    if (e.value && e.value.length > 1) {
+      selectTopic(e.value)
+    }
+  }
+
+  const selectTopic = async id => {
     setSearchTerm('')
 
     axiosClient({
       method: 'get',
-      url: `/topics/${e.value.id}`
+      url: `/topics/${id}`
     })
       .then(response => {
         // toast.current.show({ severity: 'success', summary: 'Topic Loaded' })
@@ -154,7 +162,7 @@ const Search = props => {
       findIndex = props.topicNames.length - 1
     }
 
-    selectTopic({ value: props.topicNames[findIndex] })
+    selectTopic(props.topicNames[findIndex].id)
   }
 
   const moveNextTopic = () => {
@@ -165,7 +173,7 @@ const Search = props => {
       findIndex = 0
     }
 
-    selectTopic({ value: props.topicNames[findIndex] })
+    selectTopic(props.topicNames[findIndex].id)
   }
 
   return (
@@ -181,18 +189,19 @@ const Search = props => {
         }}
         left={
           <>
-            {visibleSidebar ? (
-              ''
-            ) : (
-              <Button
-                className='p-button-rounded p-button-text p-button-outlined p-mr-1'
-                icon='pi pi-list'
-                onClick={() => setVisibleSidebar(true)}
-                tooltip='Browse Topics'
-                tooltipOptions={{ position: 'right' }}
-              />
-            )}
-
+            <img
+              src='/images/logo.png'
+              alt='Life Reference Manual'
+              style={{ margin: 0, padding: 0, height: 44 }}
+            />
+            <TreeSelect
+              className='p-ml-3 p-mr-3'
+              options={props.tree}
+              onChange={selectTreeTopic}
+              selectionMode='single'
+              filter
+              placeholder='Browse Topics'
+            ></TreeSelect>
             <div>
               What does the Bible say about...&nbsp;&nbsp;
               <AutoComplete
@@ -203,15 +212,10 @@ const Search = props => {
                 field='tagName'
                 itemTemplate={itemTemplate}
                 onChange={e => setSearchTerm(e.value)}
-                onSelect={selectTopic}
+                onSelect={e => selectTopic(e.value.id)}
                 forceSelection
               />
             </div>
-            <img
-              src='/images/logo.png'
-              alt='Life Reference Manual'
-              style={{ margin: 0, padding: 0, height: 44 }}
-            />
           </>
         }
         right={
@@ -222,7 +226,10 @@ const Search = props => {
               <Button
                 className='p-button-rounded p-button-text p-button-outlined p-mr-1'
                 icon='pi pi-book'
-                onClick={() => setShowPassage(true)}
+                onClick={() => {
+                  setShowPassage(true)
+                  setVisibleSidebar(false)
+                }}
                 tooltip='Open Passage Loolup'
                 tooltipOptions={{ position: 'left' }}
               />
@@ -247,21 +254,6 @@ const Search = props => {
           </>
         }
       />
-      <Sidebar
-        visible={visibleSidebar}
-        onHide={() => setVisibleSidebar(false)}
-        style={{ marginTop: 60 }}
-      >
-        <ListBox
-          options={props.categories}
-          onChange={selectTopic}
-          forceSelection
-          optionLabel='topicName'
-          optionGroupLabel='key'
-          optionGroupChildren='items'
-          optionGroupTemplate={groupedItemTemplate}
-        />
-      </Sidebar>
       <div
         className='p-grid p-dir-row'
         style={{ margin: '80px 10px 10px 10px' }}
@@ -407,10 +399,37 @@ export async function getServerSideProps (context) {
     topicsByCategory[topic.category].push(topic)
   })
 
-  const categories = []
-  for (const [key, value] of Object.entries(topicsByCategory)) {
-    categories.push({ key, items: value })
-  }
+  const tree = []
+  tree.push({
+    key: '0',
+    label: 'Need a Fresh Start?',
+    children: topicsByCategory.start.map(t => {
+      return {
+        key: t.id,
+        label: t.topicName
+      }
+    })
+  })
+  tree.push({
+    key: '1',
+    label: 'Frequently Asked Questions',
+    children: topicsByCategory.faqs.map(t => {
+      return {
+        key: t.id,
+        label: t.topicName
+      }
+    })
+  })
+  tree.push({
+    key: '2',
+    label: 'Topical Bible',
+    children: topicsByCategory.topics.map(t => {
+      return {
+        key: t.id,
+        label: t.topicName
+      }
+    })
+  })
 
   const store = initializeStore()
 
@@ -422,7 +441,7 @@ export async function getServerSideProps (context) {
       version,
       reference,
       topicNames,
-      categories,
+      tree,
       store: getSnapshot(store)
     }
   }
