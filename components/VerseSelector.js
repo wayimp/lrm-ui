@@ -108,8 +108,8 @@ const VerseSelector = observer(props => {
   }, [props.version, verse, extended, verseEnd])
 
   const onChangeBook = e => {
-    setBook(e.value)
     if (e.value) {
+      setBook(e.value)
       const selections = verseSelections(e.value.chapters)
       setVerses(selections)
       setVersesEnd([])
@@ -208,9 +208,11 @@ const VerseSelector = observer(props => {
     return _passage
   }
 
-  const verseRef = `${book.id}.${verse ? verse.replace(':', '.') : ''}${
-    extended && verseEnd ? `-${verseEnd}` : ''
-  }`
+  const verseRef = book
+    ? `${book.id}.${verse ? verse.replace(':', '.') : ''}${
+        extended && verseEnd ? `-${verseEnd}` : ''
+      }`
+    : ''
 
   const chapterNumber = Number(verse ? verse.split(':')[0] : 0)
 
@@ -226,7 +228,7 @@ const VerseSelector = observer(props => {
 
   const readChapter = _chapterNumber => {
     const _rangeStart = 1
-    const _rangeEnd = book.chapters[_chapterNumber-1]
+    const _rangeEnd = book.chapters[_chapterNumber - 1]
     const selectionsEnd = verseSelectionsEnd(_rangeStart, _rangeEnd)
     setVersesEnd(selectionsEnd)
     setVerse(`${_chapterNumber}:1`)
@@ -247,10 +249,10 @@ const VerseSelector = observer(props => {
               options={bible && bible.books ? bible.books : []}
               onChange={onChangeBook}
               optionLabel='name'
+              filterBy='name'
               placeholder='Book'
               filter
               showClear
-              filterBy='name'
             />
             <Dropdown
               value={verse}
@@ -259,7 +261,7 @@ const VerseSelector = observer(props => {
               placeholder='Verse'
               editable
               style={{ width: 100 }}
-              disabled={!book.chapters}
+              disabled={!book || !book.chapters}
             />
             <MultiStateCheckbox
               style={{ marginLeft: 6, marginRight: 6 }}
@@ -341,7 +343,7 @@ const VerseSelector = observer(props => {
               style={{ cursor: 'copy' }}
               text={`${
                 typeof window !== 'undefined'
-                  ? window.location.host.split(/\//)[0]
+                  ? window.location.origin
                   : ''
               }?r=${verseRef}&v=${bible.abbreviation}`}
               onCopy={() =>

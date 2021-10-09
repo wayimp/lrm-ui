@@ -179,7 +179,6 @@ const TopicComposer = props => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [refresh, setRefresh] = useState(uuid())
   const [token, setToken] = useState(cookie.get('token'))
-
   const toast = useRef(null)
 
   useEffect(() => {
@@ -609,15 +608,10 @@ const TopicComposer = props => {
                         <InputText
                           id='topicName'
                           value={el.name}
-                          onChange={e => {
+                          onBlur={e => {
                             setIsLoaded(false)
                             const newSections = [...sections]
                             newSections[ind].name = e.target.value
-                            setSections(newSections)
-                          }}
-                          onBlur={e => {
-                            setIsLoaded(true)
-                            const newSections = [...sections]
                             setSections(newSections)
                           }}
                           className={

@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { Tooltip } from 'primereact/tooltip'
 import { TreeSelect } from 'primereact/treeselect'
 import uuid from 'react-uuid'
+import { useMediaQuery } from 'react-responsive'
 
 const Search = props => {
   const toast = useRef(null)
@@ -29,6 +30,7 @@ const Search = props => {
   const [bible, setBible] = useState('')
   const [showPassage, setShowPassage] = useState(false)
   const [visibleSidebar, setVisibleSidebar] = useState(true)
+  const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
 
   useEffect(() => {
     const { topic, version, reference } = props
@@ -179,81 +181,87 @@ const Search = props => {
   return (
     <div style={{ marginTop: 50 }}>
       <Toast ref={toast} position='bottom-right'></Toast>
-      <Toolbar
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          zIndex: 1000
-        }}
-        left={
-          <>
-            <img
-              src='/images/logo.png'
-              alt='Life Reference Manual'
-              style={{ margin: 0, padding: 0, height: 44 }}
-            />
-            <TreeSelect
-              className='p-ml-3 p-mr-3'
-              options={props.tree}
-              onChange={selectTreeTopic}
-              selectionMode='single'
-              filter
-              placeholder='Browse Topics'
-            ></TreeSelect>
-            <div>
-              What does the Bible say about...&nbsp;&nbsp;
-              <AutoComplete
-                style={{ width: 300 }}
-                value={searchTerm}
-                suggestions={filteredTags}
-                completeMethod={searchTags}
-                field='tagName'
-                itemTemplate={itemTemplate}
-                onChange={e => setSearchTerm(e.value)}
-                onSelect={e => selectTopic(e.value.id)}
-                forceSelection
+      {isMobile ? (
+        <div>MOBILE</div>
+      ) : (
+        <Toolbar
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            zIndex: 1000
+          }}
+          left={
+            <div className='p-d-inline-flex'>
+              <img
+                src='/images/logo.png'
+                alt='Life Reference Manual'
+                style={{ margin: 0, padding: 0, height: 44 }}
+              />
+              <TreeSelect
+                className='p-ml-3 p-mr-3'
+                options={props.tree}
+                onChange={selectTreeTopic}
+                selectionMode='single'
+                filter
+                placeholder='Browse Topics'
+              ></TreeSelect>
+              <div>
+                What does the Bible say about...&nbsp;&nbsp;
+                <AutoComplete
+                  style={{ width: 300 }}
+                  value={searchTerm}
+                  suggestions={filteredTags}
+                  completeMethod={searchTags}
+                  field='tagName'
+                  itemTemplate={itemTemplate}
+                  onChange={e => setSearchTerm(e.value)}
+                  onSelect={e => selectTopic(e.value.id)}
+                  forceSelection
+                />
+              </div>
+            </div>
+          }
+          right={
+            <div className='p-d-inline-flex'>
+              {showPassage ? (
+                ''
+              ) : (
+                <Button
+                  className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+                  icon='pi pi-book'
+                  onClick={() => {
+                    setShowPassage(true)
+                    setVisibleSidebar(false)
+                  }}
+                  tooltip='Open Passage Loolup'
+                  tooltipOptions={{ position: 'left' }}
+                />
+              )}
+              <Dropdown
+                value={bible}
+                options={bibles}
+                onChange={onChangeBible}
+                optionValue='abbreviation'
+                optionLabel='name'
+                placeholder='Select a Bible Version'
+              />
+              &nbsp;&nbsp;
+              <Tooltip target='.go' content='Purchase Bibles and Support Us' />
+              <img
+                className='go'
+                src='/images/go.png'
+                alt='Go Therefore Ministries'
+                onClick={() =>
+                  window.open('https://gothereforeministries.org/')
+                }
+                style={{ margin: 0, padding: 0, height: 44 }}
               />
             </div>
-          </>
-        }
-        right={
-          <>
-            {showPassage ? (
-              ''
-            ) : (
-              <Button
-                className='p-button-rounded p-button-text p-button-outlined p-mr-1'
-                icon='pi pi-book'
-                onClick={() => {
-                  setShowPassage(true)
-                  setVisibleSidebar(false)
-                }}
-                tooltip='Open Passage Loolup'
-                tooltipOptions={{ position: 'left' }}
-              />
-            )}
-            <Dropdown
-              value={bible}
-              options={bibles}
-              onChange={onChangeBible}
-              optionValue='abbreviation'
-              optionLabel='name'
-              placeholder='Select a Bible Version'
-            />
-            &nbsp;&nbsp;
-            <Tooltip target='.go' content='Purchase Bibles and Support Us' />
-            <img
-              className='go'
-              src='/images/go.png'
-              alt='Go Therefore Ministries'
-              onClick={() => window.open('https://gothereforeministries.org/')}
-              style={{ margin: 0, padding: 0, height: 44 }}
-            />
-          </>
-        }
-      />
+          }
+        />
+      )}
       <div
         className='p-grid p-dir-row'
         style={{ margin: '80px 10px 10px 10px' }}
@@ -296,9 +304,7 @@ const Search = props => {
                   <h3>{selectedSection.name}</h3>&nbsp;&nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
-                    text={`${window.location.host.split(/\//)[0]}?t=${
-                      selectedTopic._id
-                    }&v=${bible}`}
+                    text={`${window.location.origin}?t=${selectedTopic._id}&v=${bible}`}
                     onCopy={() =>
                       toast.current.show({
                         severity: 'success',

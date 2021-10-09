@@ -550,7 +550,7 @@ export const HCSB = {
     },
     {
       id: 'PSA',
-      name: 'Psalms',
+      name: 'Psalm',
       chapters: [
         6,
         12,

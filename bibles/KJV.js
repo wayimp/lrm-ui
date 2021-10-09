@@ -550,7 +550,7 @@ export const KJV = {
     },
     {
       id: 'PSA',
-      name: 'Psalms',
+      name: 'Psalm',
       chapters: [
         6,
         12,

@@ -143,7 +143,7 @@ const Search = props => {
               {selectedSection.name}&nbsp;&nbsp;
               <CopyToClipboard
                 style={{ cursor: 'copy' }}
-                text={`${window.location.host.split(/\//)[0]}?t=${
+                text={`${window.location.origin}?t=${
                   selectedTopic._id
                 }&v=${bible}`}
                 onCopy={() =>
