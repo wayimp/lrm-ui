@@ -455,6 +455,25 @@ const TopicComposer = props => {
     return _passage
   }
 
+  const openEditDialog = (item, ind, index) => {
+    setContentConfig(
+      <ContentBlock
+        props={item}
+        mode='config'
+        updateConfig={json => {
+          setIsLoaded(true)
+          setContentConfigDialog(false)
+          if (json) {
+            const newSections = [...sections]
+            newSections[ind].items[index] = json
+            setSections(newSections)
+          }
+        }}
+      />
+    )
+    setContentConfigDialog(true)
+  }
+
   return (
     <div style={{ marginTop: 150 }}>
       <Toast ref={toast} position='bottom-right'></Toast>
@@ -681,28 +700,9 @@ const TopicComposer = props => {
                                           label='Edit'
                                           className='p-button-outlined p-button-sm p-button-secondary'
                                           icon='pi pi-window-maximize'
-                                          onClick={() => {
-                                            setContentConfig(
-                                              <ContentBlock
-                                                props={item}
-                                                mode='config'
-                                                updateConfig={json => {
-                                                  setIsLoaded(true)
-                                                  setContentConfigDialog(false)
-                                                  if (json) {
-                                                    const newSections = [
-                                                      ...sections
-                                                    ]
-                                                    newSections[ind].items[
-                                                      index
-                                                    ] = json
-                                                    setSections(newSections)
-                                                  }
-                                                }}
-                                              />
-                                            )
-                                            setContentConfigDialog(true)
-                                          }}
+                                          onClick={() =>
+                                            openEditDialog(item, ind, index)
+                                          }
                                         />
                                         <Button
                                           label='Delete'
@@ -741,6 +741,11 @@ const TopicComposer = props => {
                           const newSections = [...sections]
                           newSections[ind].items.push(newItem)
                           setSections(newSections)
+                          openEditDialog(
+                            newItem,
+                            ind,
+                            newSections[ind].items.length - 1
+                          )
                         }}
                       />
                       <Button
@@ -755,6 +760,11 @@ const TopicComposer = props => {
                           const newSections = [...sections]
                           newSections[ind].items.push(newItem)
                           setSections(newSections)
+                          openEditDialog(
+                            newItem,
+                            ind,
+                            newSections[ind].items.length - 1
+                          )
                         }}
                       />
                     </div>

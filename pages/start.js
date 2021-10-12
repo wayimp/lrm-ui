@@ -71,7 +71,9 @@ const Start = props => {
                     style={{ cursor: 'copy' }}
                     text={`${
                       typeof window !== 'undefined'
-                        ? window.location.origin
+                        ? window.location.protocol +
+                          '//' +
+                          window.location.host.split(/\//)[0]
                         : ''
                     }?t=${selectedTopic._id}&v=HCSB`}
                     onCopy={() =>

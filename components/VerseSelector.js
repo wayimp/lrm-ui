@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, createRef } from 'react'
 import { axiosClient } from '../axiosClient'
 import { Dropdown } from 'primereact/dropdown'
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox'
@@ -114,6 +114,7 @@ const VerseSelector = observer(props => {
       setVerses(selections)
       setVersesEnd([])
     } else {
+      setBook({})
       setVerses([])
       setVersesEnd([])
     }
@@ -253,6 +254,9 @@ const VerseSelector = observer(props => {
               placeholder='Book'
               filter
               showClear
+              autoFocus
+              showOnFocus
+              filterInputAutoFocus
             />
             <Dropdown
               value={verse}
@@ -342,9 +346,7 @@ const VerseSelector = observer(props => {
             <CopyToClipboard
               style={{ cursor: 'copy' }}
               text={`${
-                typeof window !== 'undefined'
-                  ? window.location.origin
-                  : ''
+                typeof window !== 'undefined' ? window.location.origin : ''
               }?r=${verseRef}&v=${bible.abbreviation}`}
               onCopy={() =>
                 toast.current.show({
