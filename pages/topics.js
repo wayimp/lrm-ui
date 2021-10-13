@@ -22,13 +22,7 @@ const grid = 8
 import TopBar from '../components/AdminTopBar'
 import cookie from 'js-cookie'
 import styled from 'styled-components'
-
-const categories = [
-  { label: 'Topical Bible', value: 'topics' },
-  { label: 'Fresh Start', value: 'start' },
-  { label: 'Frequently Asked', value: 'faqs' },
-  { label: 'User Submitted', value: 'user' }
-]
+import { categories } from './static'
 
 const List = styled.div`
   border: 1px ${props => (props.isDraggingOver ? 'dashed #000' : 'solid #ddd')};
@@ -229,10 +223,6 @@ const TopicComposer = props => {
     setSections([])
     const filtered = topicTitles.filter(tt => tt.category === selectedCategory)
     setTopicTitlesFiltered(filtered)
-    toast.current.show({
-      severity: 'success',
-      summary: 'Topic Titles Filtered'
-    })
   }, [topicTitles])
 
   const onChangeTopic = e => {
@@ -323,8 +313,11 @@ const TopicComposer = props => {
     const newTopic = {
       ...currentTopic,
       sections,
-      category: selectedCategory,
-      order: lastPlace + 1
+      category: selectedCategory
+    }
+
+    if (!newTopic.hasOwnProperty('order')) {
+      newTopic.order = lastPlace + 1
     }
 
     // If a topic has an id, then patch it, or else post it.
@@ -556,6 +549,14 @@ const TopicComposer = props => {
                     id='topicTitle'
                     value={currentTopic.title || ''}
                     onChange={e => {
+                      setIsLoaded(false)
+                      setCurrentTopic({
+                        ...currentTopic,
+                        title: e.target.value
+                      })
+                    }}
+                    onBlur={e => {
+                      setIsLoaded(true)
                       setCurrentTopic({
                         ...currentTopic,
                         title: e.target.value
@@ -627,8 +628,14 @@ const TopicComposer = props => {
                         <InputText
                           id='topicName'
                           value={el.name}
-                          onBlur={e => {
+                          onChange={e => {
                             setIsLoaded(false)
+                            const newSections = [...sections]
+                            newSections[ind].name = e.target.value
+                            setSections(newSections)
+                          }}
+                          onBlur={e => {
+                            setIsLoaded(true)
                             const newSections = [...sections]
                             newSections[ind].name = e.target.value
                             setSections(newSections)
@@ -652,6 +659,54 @@ const TopicComposer = props => {
                             newSections[ind].tags = e.value
                             setSections(newSections)
                           }}
+                        />
+                      </div>
+                    </div>
+                    <div className='p-fluid p-formgrid p-grid'>
+                      <div className='p-field p-col'>
+                        <label htmlFor='topicLinks' className='p-d-block'>
+                          Related Topics
+                        </label>
+                        <Chips
+                          id='topicLinks'
+                          className='p-d-block'
+                          value={
+                            Array.isArray(el.links)
+                              ? el.links.map(l => l.title)
+                              : []
+                          }
+                          onRemove={e => {
+                            setIsLoaded(true)
+                            const newSections = [...sections]
+                            newSections[ind].links = newSections[
+                              ind
+                            ].links.filter(l => !e.value.includes(l.title))
+                            setSections(newSections)
+                          }}
+                        />
+                      </div>
+                      <div className='p-field p-col'>
+                        <label htmlFor='addLink' className='p-d-block'>
+                          Add Link
+                        </label>
+                        <Dropdown
+                          id='addLink'
+                          options={topicTitles}
+                          onChange={e => {
+                            setIsLoaded(true)
+                            const newSections = [...sections]
+                            if (Array.isArray(newSections[ind].links)) {
+                              newSections[ind].links.push(e.value)
+                            } else {
+                              newSections[ind].links = [e.value]
+                            }
+                            setSections(newSections)
+                          }}
+                          filter
+                          showClear
+                          filterBy='title'
+                          optionLabel='title'
+                          placeholder='Select Topic'
                         />
                       </div>
                     </div>
@@ -687,7 +742,7 @@ const TopicComposer = props => {
                                       <div>
                                         <ContentBlock
                                           props={item}
-                                          mode='display'
+                                          mode='lean'
                                           updateValue={value => {
                                             const newSections = [...sections]
                                             newSections[ind].items[

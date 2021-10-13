@@ -14,14 +14,14 @@ import { Dropdown } from 'primereact/dropdown'
 import { ListBox } from 'primereact/listbox'
 import ContentBlock from '../components/ContentBlock'
 import { Toolbar } from 'primereact/toolbar'
-import { Sidebar } from 'primereact/sidebar'
 import Link from 'next/link'
 import { Tooltip } from 'primereact/tooltip'
 import { TreeSelect } from 'primereact/treeselect'
 import uuid from 'react-uuid'
 import { useMediaQuery } from 'react-responsive'
+import { categories } from './static'
 
-const Search = props => {
+const Index = props => {
   const toast = useRef(null)
 
   const [searchTerm, setSearchTerm] = useState(null)
@@ -30,7 +30,11 @@ const Search = props => {
   const [selectedSection, setSelectedSection] = useState(null)
   const [bible, setBible] = useState('')
   const [showPassage, setShowPassage] = useState(false)
-  const [visibleSidebar, setVisibleSidebar] = useState(true)
+  const [showCategory, setShowCategory] = useState(true)
+  const [categoryLabel, setCategoryLabel] = useState(
+    'Welcome to the Life Reference Manual'
+  )
+  const [selectedCategory, setSelectedCategory] = useState(props.front || [])
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
 
   useEffect(() => {
@@ -54,7 +58,6 @@ const Search = props => {
 
     if (reference) {
       setShowPassage(true)
-      setVisibleSidebar(false)
     }
   }, [])
 
@@ -119,8 +122,33 @@ const Search = props => {
 
   const selectTreeTopic = async e => {
     if (e.value && e.value.length > 1) {
-      selectTopic(e.value)
+      if (['topics', 'start', 'faqs'].includes(e.value)) {
+        selectCategory(e.value)
+      } else {
+        selectTopic(e.value)
+      }
     }
+  }
+
+  const selectCategory = async name => {
+    setSearchTerm('')
+
+    const c = categories.find(c => c.value === name)
+    setCategoryLabel(c.label)
+
+    axiosClient({
+      method: 'get',
+      url: `/category/${name}`
+    })
+      .then(response => {
+        setSelectedCategory(response.data || [])
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Loading Section'
+        })
+      })
   }
 
   const selectTopic = async id => {
@@ -148,8 +176,6 @@ const Search = props => {
           summary: 'Error Loading Topic'
         })
       })
-
-    setVisibleSidebar(false)
   }
 
   const topicIndex =
@@ -213,27 +239,38 @@ const Search = props => {
               filter
               placeholder='Browse Topics'
             ></TreeSelect>
-            {!isMobile ? (
-              <div>
-                What does the Bible say about...&nbsp;&nbsp;
-                <AutoComplete
-                  style={{ width: 300 }}
-                  value={searchTerm}
-                  suggestions={filteredTags}
-                  completeMethod={searchTags}
-                  field='tagName'
-                  itemTemplate={itemTemplate}
-                  onChange={e => setSearchTerm(e.value)}
-                  onSelect={e => selectTopic(e.value.id)}
-                  forceSelection
-                />
-              </div>
-            ) : (
-              ''
-            )}
           </div>
         }
         right={
+          !isMobile ? (
+            <div>
+              What does the Bible say about...&nbsp;&nbsp;
+              <AutoComplete
+                style={{ width: 300 }}
+                value={searchTerm}
+                suggestions={filteredTags}
+                completeMethod={searchTags}
+                field='tagName'
+                itemTemplate={itemTemplate}
+                onChange={e => setSearchTerm(e.value)}
+                onSelect={e => selectTopic(e.value.id)}
+                forceSelection
+              />
+            </div>
+          ) : (
+            ''
+          )
+        }
+      />
+      <Toolbar
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          zIndex: 1000
+        }}
+        left={
           <div className='p-d-inline-flex'>
             {showPassage ? (
               ''
@@ -243,46 +280,45 @@ const Search = props => {
                 icon='pi pi-book'
                 onClick={() => {
                   setShowPassage(true)
-                  setVisibleSidebar(false)
                 }}
                 tooltip='Open Passage Loolup'
                 tooltipOptions={{ position: 'left' }}
               />
             )}
             {!isMobile ? (
-              <>
-                <Dropdown
-                  value={bible}
-                  options={bibles}
-                  onChange={onChangeBible}
-                  optionValue='abbreviation'
-                  optionLabel='name'
-                  placeholder='Select a Bible Version'
-                />
-                &nbsp;&nbsp;
-                <Tooltip
-                  target='.go'
-                  content='Purchase Bibles and Support Us'
-                />
-                <img
-                  className='go'
-                  src='/images/go.png'
-                  alt='Go Therefore Ministries'
-                  onClick={() =>
-                    window.open('https://gothereforeministries.org/')
-                  }
-                  style={{ margin: 0, padding: 0, height: 44 }}
-                />
-              </>
+              <Dropdown
+                value={bible}
+                options={bibles}
+                onChange={onChangeBible}
+                optionValue='abbreviation'
+                optionLabel='name'
+                placeholder='Select a Bible Version'
+              />
             ) : (
               ''
             )}
           </div>
         }
+        right={
+          <div className='p-d-inline-flex p-ai-center p-m-3'>
+            <span style={{ fontSize: 'xx-small' }}>
+              LifeReferenceManaul.net was created by Go Therefore Ministries. If
+              you'd like to support this ministry or order physical copies of
+              the Life Reference Manual, visit www.gothereforeministries.org
+            </span>
+            <img
+              className='go pointer'
+              src='/images/go.png'
+              alt='Go Therefore Ministries'
+              onClick={() => window.open('https://gothereforeministries.org/')}
+              style={{ margin: 0, padding: 0, height: 44 }}
+            />
+          </div>
+        }
       />
       <div
         className='p-grid p-dir-row'
-        style={{ margin: '80px 10px 10px 10px' }}
+        style={{ margin: '80px 10px 100px 10px' }}
       >
         {selectedSection ? (
           <div className='p-m-2 p-col'>
@@ -334,7 +370,7 @@ const Search = props => {
                       })
                     }
                   >
-                    <i className='pi pi-share-alt'></i>
+                    <i className='pi pi-upload'></i>
                   </CopyToClipboard>
                   <div>
                     {topicIndex < props.topicNames.length - 1 ? (
@@ -353,6 +389,56 @@ const Search = props => {
               {selectedSection.items.map((item, index) => {
                 return <ContentBlock key={index} props={item} mode='display' />
               })}
+
+              <div className='p-grid'>
+                <div className='p-d-inline-flex p-ai-center p-m-3'>
+                  <div>
+                    {topicIndex > 0 ? (
+                      <Button
+                        label={props.topicNames[topicIndex - 1].topicName}
+                        type='button'
+                        icon='pi pi-arrow-left'
+                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                        onClick={movePreviousTopic}
+                      />
+                    ) : (
+                      <span />
+                    )}
+                  </div>
+                  <div>
+                    {topicIndex < props.topicNames.length - 1 ? (
+                      <Button
+                        label={props.topicNames[topicIndex + 1].topicName}
+                        type='button'
+                        icon='pi pi-arrow-right'
+                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                        onClick={moveNextTopic}
+                      />
+                    ) : (
+                      <span />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className='p-grid'>
+                {selectedSection.links &&
+                Array.isArray(selectedSection.links) ? (
+                  <div className='p-d-inline-flex p-ai-center'>
+                    <h3>Related Topics</h3>
+                    {selectedSection.links.map(link => (
+                      <Button
+                        label={link.title}
+                        type='button'
+                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                        onClick={() => selectTopic(link._id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  ''
+                )}
+              </div>
             </Fieldset>
           </div>
         ) : (
@@ -385,6 +471,48 @@ const Search = props => {
               />
             </Fieldset>
           </div>
+        ) : (
+          ''
+        )}
+        {showCategory && !selectedSection ? (
+          <Fieldset
+            key='category'
+            style={{ margin: '20px 0px 0px 0px' }}
+            legend={
+              <>
+                <h3>{categoryLabel}</h3>
+                <Button
+                  className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                  icon='pi pi-times'
+                  onClick={() => setShowCategory(false)}
+                  tooltip='Close'
+                  tooltipOptions={{ position: 'left' }}
+                />
+              </>
+            }
+          >
+            {selectedCategory.map((t, i) => {
+              const section = t.sections.find(
+                s => s.version === (bible || 'HCSB')
+              )
+              if (section && section.items) {
+                return (
+                  <div>
+                    <h3>{section.name}</h3>
+                    {section.items.map((item, index) => {
+                      return (
+                        <ContentBlock
+                          key={`front-${index}`}
+                          props={item}
+                          mode='display'
+                        />
+                      )
+                    })}
+                  </div>
+                )
+              }
+            })}
+          </Fieldset>
         ) : (
           ''
         )}
@@ -429,7 +557,7 @@ export async function getServerSideProps (context) {
 
   const tree = []
   tree.push({
-    key: '0',
+    key: 'start',
     label: 'Need a Fresh Start?',
     children: topicsByCategory.start.map(t => {
       return {
@@ -439,7 +567,7 @@ export async function getServerSideProps (context) {
     })
   })
   tree.push({
-    key: '1',
+    key: 'faqs',
     label: 'Frequently Asked Questions',
     children: topicsByCategory.faqs.map(t => {
       return {
@@ -449,7 +577,7 @@ export async function getServerSideProps (context) {
     })
   })
   tree.push({
-    key: '2',
+    key: 'topics',
     label: 'Topical Bible',
     children: topicsByCategory.topics.map(t => {
       return {
@@ -458,6 +586,10 @@ export async function getServerSideProps (context) {
       }
     })
   })
+
+  const front = await axiosClient
+    .get('/category/front')
+    .then(response => response.data)
 
   const store = initializeStore()
 
@@ -470,9 +602,10 @@ export async function getServerSideProps (context) {
       reference,
       topicNames,
       tree,
+      front,
       store: getSnapshot(store)
     }
   }
 }
 
-export default Search
+export default Index

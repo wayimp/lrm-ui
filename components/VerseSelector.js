@@ -355,7 +355,7 @@ const VerseSelector = observer(props => {
                 })
               }
             >
-              <i className='pi pi-share-alt'></i>
+              <i className='pi pi-upload'></i>
             </CopyToClipboard>
           </>
         ) : (
@@ -368,6 +368,8 @@ const VerseSelector = observer(props => {
           className='pi pi-spin pi-spinner'
           style={{ margin: 10, fontSize: '4em' }}
         ></i>
+      ) : props.refOnly ? (
+        ''
       ) : (
         <div dangerouslySetInnerHTML={{ __html: passage.html || '' }} />
       )}

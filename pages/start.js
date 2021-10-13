@@ -83,7 +83,7 @@ const Start = props => {
                       })
                     }
                   >
-                    <i className='pi pi-share-alt'></i>
+                    <i className='pi pi-upload'></i>
                   </CopyToClipboard>
                 </div>
               }

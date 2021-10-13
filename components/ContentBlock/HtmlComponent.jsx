@@ -12,6 +12,10 @@ const HtmlComponent = ({ props, mode, updateValue, updateConfig }) => {
   }
 
   switch (mode) {
+    case 'lean':
+      return <div>Custom HTML</div>
+      break
+
     case 'display':
       return (
         <div

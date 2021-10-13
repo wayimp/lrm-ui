@@ -17,3 +17,7 @@ span.v {
 .ql-image {
   display: none !important;
 }
+
+img.pointer {
+  cursor: pointer;
+}

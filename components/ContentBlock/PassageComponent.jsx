@@ -44,6 +44,20 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
   }
 
   switch (mode) {
+    case 'lean':
+      return (
+        <VerseSelector
+          refOnly={true}
+          readOnly={true}
+          version={props.version}
+          passageId={props.passageId}
+          reference={props.reference}
+          html={props.html}
+          setPassage={setPassage}
+        />
+      )
+      break
+
     case 'display':
       return (
         <VerseSelector
