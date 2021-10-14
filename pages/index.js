@@ -19,7 +19,7 @@ import { Tooltip } from 'primereact/tooltip'
 import { TreeSelect } from 'primereact/treeselect'
 import uuid from 'react-uuid'
 import { useMediaQuery } from 'react-responsive'
-import { categories } from './static'
+import { categories } from '../static'
 
 const Index = props => {
   const toast = useRef(null)

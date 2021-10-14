@@ -22,7 +22,7 @@ const grid = 8
 import TopBar from '../components/AdminTopBar'
 import cookie from 'js-cookie'
 import styled from 'styled-components'
-import { categories } from './static'
+import { categories } from '../static'
 
 const List = styled.div`
   border: 1px ${props => (props.isDraggingOver ? 'dashed #000' : 'solid #ddd')};
