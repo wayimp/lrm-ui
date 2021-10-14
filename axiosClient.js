@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL = 'http://localhost:8041' // 'https://api.gothereforeministries.org' //
+const baseURL = 'https://api.gothereforeministries.org' // 'http://localhost:8041' // 
 
 const axiosClient = axios.create({
   baseURL
