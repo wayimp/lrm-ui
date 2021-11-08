@@ -20,6 +20,7 @@ import { TreeSelect } from 'primereact/treeselect'
 import uuid from 'react-uuid'
 import { useMediaQuery } from 'react-responsive'
 import { categories } from '../static'
+import { Menu } from 'primereact/menu'
 
 const Index = props => {
   const toast = useRef(null)
@@ -32,10 +33,26 @@ const Index = props => {
   const [showPassage, setShowPassage] = useState(false)
   const [showCategory, setShowCategory] = useState(true)
   const [categoryLabel, setCategoryLabel] = useState(
-    'Welcome to the Life Reference Manual'
+    'Welcome to the Life Reference Manual Online'
   )
   const [selectedCategory, setSelectedCategory] = useState(props.front || [])
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
+
+  const popState = e => {
+    if (e.state) {
+      const { t, v } = e.state
+      if (t) {
+        const url = new URL(window.location)
+        url.searchParams.set('t', t)
+        url.searchParams.set('v', v)
+        window.location.href = url
+      }
+    }
+  }
+
+  useEffect(() => {
+    window.onpopstate = popState
+  }, [])
 
   useEffect(() => {
     const { topic, version, reference } = props
@@ -106,18 +123,20 @@ const Index = props => {
   }
 
   const searchTags = event => {
-    let query = event.query
-    let _filteredTags = []
+    if (typeof event.query === 'string' || event.query instanceof String) {
+      let queryWords = event.query.toLowerCase().split(' ')
+      let _filteredTags = []
 
-    if (!event.query.trim().length) {
-      _filteredTags = [...props.store.topicTags]
-    } else {
-      _filteredTags = props.store.topicTags.filter(tag => {
-        return tag.tagName.toLowerCase().startsWith(event.query.toLowerCase())
-      })
+      if (!event.query.trim().length) {
+        _filteredTags = [...props.store.topicTags]
+      } else {
+        _filteredTags = props.store.topicTags.filter(tag =>
+          queryWords.some(word => tag.tagName.toLowerCase().includes(word))
+        )
+      }
+
+      setFilteredTags(_filteredTags)
     }
-
-    setFilteredTags(_filteredTags)
   }
 
   const selectTreeTopic = async e => {
@@ -153,6 +172,11 @@ const Index = props => {
 
   const selectTopic = async id => {
     setSearchTerm('')
+
+    const url = new URL(window.location)
+    url.searchParams.set('t', id)
+    url.searchParams.set('v', bible)
+    window.history.pushState({ t: id, v: bible }, 'topic', url)
 
     axiosClient({
       method: 'get',
@@ -229,7 +253,8 @@ const Index = props => {
             <img
               src='/images/logo.png'
               alt='Life Reference Manual'
-              style={{ margin: 0, padding: 0, height: 44 }}
+              style={{ margin: 0, padding: 0, height: 44, cursor: 'pointer' }}
+              onClick={() => (window.location.href = '/')}
             />
             <TreeSelect
               className='p-ml-3 p-mr-3'
@@ -242,24 +267,39 @@ const Index = props => {
           </div>
         }
         right={
-          !isMobile ? (
-            <div>
-              What does the Bible say about...&nbsp;&nbsp;
-              <AutoComplete
-                style={{ width: 300 }}
-                value={searchTerm}
-                suggestions={filteredTags}
-                completeMethod={searchTags}
-                field='tagName'
-                itemTemplate={itemTemplate}
-                onChange={e => setSearchTerm(e.value)}
-                onSelect={e => selectTopic(e.value.id)}
-                forceSelection
-              />
-            </div>
-          ) : (
-            ''
-          )
+          <>
+            {!isMobile ? (
+              <div>
+                What does the Bible say about...&nbsp;&nbsp;
+                <AutoComplete
+                  style={{ width: 300 }}
+                  value={searchTerm}
+                  suggestions={filteredTags}
+                  completeMethod={searchTags}
+                  field='tagName'
+                  itemTemplate={itemTemplate}
+                  onChange={e => setSearchTerm(e.value)}
+                  onSelect={e => selectTopic(e.value.id)}
+                  forceSelection
+                />
+              </div>
+            ) : (
+              ''
+            )}
+            <Button
+              className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+              icon='pi pi-question-circle'
+              onClick={() => {
+                // Generate a random number
+                const random = Math.floor(
+                  Math.random() * props.topicNames.length
+                )
+                selectTopic(props.topicNames[random].id)
+              }}
+              tooltip='Random Topic'
+              tooltipOptions={{ position: 'left' }}
+            />
+          </>
         }
       />
       <Toolbar
@@ -281,7 +321,7 @@ const Index = props => {
                 onClick={() => {
                   setShowPassage(true)
                 }}
-                tooltip='Open Passage Loolup'
+                tooltip='Open Passage Lookup'
                 tooltipOptions={{ position: 'left' }}
               />
             )}
