@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { bibles } from '../bibles'
 import { AutoComplete } from 'primereact/autocomplete'
 import { Fieldset } from 'primereact/fieldset'
@@ -39,8 +37,6 @@ export async function getServerSideProps (context) {
       version = context.query.v
     }
   }
-
-  const store = initializeStore()
 
   return {
     props: {

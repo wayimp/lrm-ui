@@ -2,8 +2,6 @@ import React, { useEffect, useState, lazy, Suspense, useRef } from 'react'
 import axios from 'axios'
 import Router from 'next/router'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { Button } from 'primereact/button'
 import { confirmDialog } from 'primereact/confirmdialog'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
@@ -194,7 +192,7 @@ const TopicComposer = props => {
     } else {
       Router.push('/admin')
     }
-    setTopicTitles(props.store.topicTitles)
+    setTopicTitles(props.topicTitles)
   }, [])
 
   const updateTopicTitles = async () => {
@@ -949,10 +947,6 @@ export async function getServerSideProps (context) {
     .get('/topicTitles?showInactive=true')
     .then(response => response.data)
 
-  const store = initializeStore()
-
-  store.setTopicTitles(topicTitles)
-
   let topicTitle = ''
   if (context && context.query) {
     if (context.query.id) {
@@ -963,7 +957,7 @@ export async function getServerSideProps (context) {
   return {
     props: {
       topicTitle,
-      store: getSnapshot(store)
+      topicTitles
     }
   }
 }

@@ -3,8 +3,6 @@ import Head from 'next/head'
 import axios from 'axios'
 import { bibles } from '../bibles'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { AutoComplete } from 'primereact/autocomplete'
 import { Fieldset } from 'primereact/fieldset'
 import { Toast } from 'primereact/toast'
@@ -21,12 +19,15 @@ import uuid from 'react-uuid'
 import { useMediaQuery } from 'react-responsive'
 import { categories } from '../static'
 import { Menu } from 'primereact/menu'
+import { useQueryClient } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
 
 const Index = props => {
   const toast = useRef(null)
 
   const [searchTerm, setSearchTerm] = useState(null)
   const [filteredTags, setFilteredTags] = useState(null)
+  const [topicId, setTopicId] = useState(null)
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [selectedSection, setSelectedSection] = useState(null)
   const [bible, setBible] = useState('')
@@ -37,6 +38,7 @@ const Index = props => {
   )
   const [selectedCategory, setSelectedCategory] = useState(props.front || [])
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
+  const queryClient = useQueryClient()
 
   const popState = e => {
     if (e.state) {
@@ -128,9 +130,9 @@ const Index = props => {
       let _filteredTags = []
 
       if (!event.query.trim().length) {
-        _filteredTags = [...props.store.topicTags]
+        _filteredTags = [...props.topicTags]
       } else {
-        _filteredTags = props.store.topicTags.filter(tag =>
+        _filteredTags = props.topicTags.filter(tag =>
           queryWords.some(word => tag.tagName.toLowerCase().includes(word))
         )
       }
@@ -170,42 +172,78 @@ const Index = props => {
       })
   }
 
+  const getTopic = async id => {
+    const url = `/topics/${id}`
+    const { data } = await axiosClient({
+      method: 'get',
+      url
+    })
+    return data
+  }
+
   const selectTopic = async id => {
+    if (!id) return
     setSearchTerm('')
+    setShowCategory(false)
 
     const url = new URL(window.location)
     url.searchParams.set('t', id)
     url.searchParams.set('v', bible)
     window.history.pushState({ t: id, v: bible }, 'topic', url)
 
-    axiosClient({
-      method: 'get',
-      url: `/topics/${id}`
-    })
-      .then(response => {
-        // toast.current.show({ severity: 'success', summary: 'Topic Loaded' })
-        setSelectedTopic(response.data)
-        if (response.data && response.data.sections) {
-          let findSection = response.data.sections.find(
-            section => section.version === bible
-          )
-          if (!findSection) findSection = response.data.sections[0]
-          setSelectedSection(findSection)
-          setSearchTerm('')
+    try {
+      const topic = await queryClient.fetchQuery({
+        queryKey: ['topic', id],
+        queryFn: () => getTopic(id),
+        options: {
+          cacheTime: 600000
         }
       })
-      .catch(error => {
-        toast.current.show({
-          severity: 'error',
-          summary: 'Error Loading Topic'
-        })
+
+      if (topic && topic.sections) {
+        setSelectedTopic(topic)
+        let findSection = topic.sections.find(
+          section => section.version === bible
+        )
+        if (!findSection) findSection = topic.sections[0]
+        setSelectedSection(findSection)
+      }
+    } catch {
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error Loading Topic'
       })
+    }
+
+    setTopicId(id)
   }
 
   const topicIndex =
     selectedSection && selectedSection.name
       ? props.topicNames.findIndex(tn => tn.topicName === selectedSection.name)
       : 0
+
+  if (topicIndex > 0) {
+    const previousId = props.topicNames[topicIndex - 1].id
+    queryClient.prefetchQuery({
+      queryKey: ['topic', previousId],
+      queryFn: () => getTopic(previousId),
+      options: {
+        cacheTime: 600000
+      }
+    })
+  }
+
+  if (topicIndex < props.topicNames.length - 1) {
+    const nextId = props.topicNames[topicIndex + 1].id
+    queryClient.prefetchQuery({
+      queryKey: ['topic', nextId],
+      queryFn: () => getTopic(nextId),
+      options: {
+        cacheTime: 600000
+      }
+    })
+  }
 
   const movePreviousTopic = () => {
     let findIndex = topicIndex
@@ -232,7 +270,14 @@ const Index = props => {
   return (
     <div style={{ marginTop: 50 }}>
       <Head>
-        <meta property='og:title' content='Life Reference Manual' />
+        <meta
+          property='og:title'
+          content={
+            props.topic && props.version
+              ? props.topic.sections.find(s => s.version === props.version).name
+              : 'Life Reference Manual'
+          }
+        />
         <meta property='og:description' content='Online Topical Bible' />
         <meta
           property='og:image'
@@ -557,6 +602,7 @@ const Index = props => {
           ''
         )}
       </div>
+      <ReactQueryDevtools />
     </div>
   )
 }
@@ -616,6 +662,7 @@ export async function getServerSideProps (context) {
       }
     })
   })
+
   tree.push({
     key: 'topics',
     label: 'Topical Bible',
@@ -631,19 +678,15 @@ export async function getServerSideProps (context) {
     .get('/category/front')
     .then(response => response.data)
 
-  const store = initializeStore()
-
-  store.setTopicTags(topicTags)
-
   return {
     props: {
       topic,
       version,
       reference,
+      topicTags,
       topicNames,
       tree,
-      front,
-      store: getSnapshot(store)
+      front
     }
   }
 }

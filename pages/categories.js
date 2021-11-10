@@ -2,8 +2,6 @@ import React, { useEffect, useState, lazy, Suspense, useRef } from 'react'
 import axios from 'axios'
 import Router from 'next/router'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { Button } from 'primereact/button'
 import { confirmDialog } from 'primereact/confirmdialog'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
@@ -74,7 +72,7 @@ const getListStyle = isDraggingOver => ({
 
 const TopicOrder = props => {
   const [selectedCategory, setSelectedCategory] = useState('topics')
-  const [topicTitles, setTopicTitles] = useState([...props.store.topicTitles])
+  const [topicTitles, setTopicTitles] = useState([...props.topicTitles])
   const [topicTitlesFiltered, setTopicTitlesFiltered] = useState([])
   const [bible, setBible] = useState({})
   const [token, setToken] = useState(cookie.get('token'))
@@ -242,13 +240,9 @@ export async function getServerSideProps () {
     .get('/topicTitles?showInactive=true')
     .then(response => response.data)
 
-  const store = initializeStore()
-
-  store.setTopicTitles(topicTitles)
-
   return {
     props: {
-      store: getSnapshot(store)
+      topicTitles
     }
   }
 }

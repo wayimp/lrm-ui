@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { bibles } from '../bibles'
 import { AutoComplete } from 'primereact/autocomplete'
 import { Fieldset } from 'primereact/fieldset'
@@ -46,8 +44,8 @@ const Faqs = props => {
   }
 
   return (
-    <div className="p-flex-column p-jc-center" >
-      <h3 style={{marginLeft: 30}}>Frequently Asked Questions</h3>
+    <div className='p-flex-column p-jc-center'>
+      <h3 style={{ marginLeft: 30 }}>Frequently Asked Questions</h3>
       <div
         className='p-d-flex p-flex-column p-flex-md-row'
         style={{ margin: '10px 10px 10px 10px' }}
@@ -71,7 +69,9 @@ const Faqs = props => {
                     style={{ cursor: 'copy' }}
                     text={`${
                       typeof window !== 'undefined'
-                        ? window.location.protocol + '//' + window.location.host.split(/\//)[0]
+                        ? window.location.protocol +
+                          '//' +
+                          window.location.host.split(/\//)[0]
                         : ''
                     }?t=${selectedTopic._id}&v=HCSB`}
                     onCopy={() =>
@@ -114,16 +114,13 @@ const Faqs = props => {
 }
 
 export async function getServerSideProps () {
-  const store = initializeStore()
-
   const topics = await axiosClient
     .get('/topics?category=faqs')
     .then(response => response.data)
 
   return {
     props: {
-      topics,
-      store: getSnapshot(store)
+      topics
     }
   }
 }

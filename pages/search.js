@@ -2,8 +2,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { bibles } from '../bibles'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { AutoComplete } from 'primereact/autocomplete'
 import { Fieldset } from 'primereact/fieldset'
 import { Toast } from 'primereact/toast'
@@ -68,9 +66,9 @@ const Search = props => {
     let _filteredTags = []
 
     if (!event.query.trim().length) {
-      _filteredTags = [...props.store.topicTags]
+      _filteredTags = [...props.topicTags]
     } else {
-      _filteredTags = props.store.topicTags.filter(tag => {
+      _filteredTags = props.topicTags.filter(tag => {
         return tag.tagName.toLowerCase().startsWith(event.query.toLowerCase())
       })
     }
@@ -92,7 +90,8 @@ const Search = props => {
       .catch(error => {
         toast.current.show({
           severity: 'error',
-          summary: 'Error Loading Topic'})
+          summary: 'Error Loading Topic'
+        })
       })
 
     setSelectedTopic(topic)
@@ -143,7 +142,9 @@ const Search = props => {
               {selectedSection.name}&nbsp;&nbsp;
               <CopyToClipboard
                 style={{ cursor: 'copy' }}
-                text={`${window.location.protocol + '//' + window.location.host.split(/\//)[0]}?t=${
+                text={`${window.location.protocol +
+                  '//' +
+                  window.location.host.split(/\//)[0]}?t=${
                   selectedTopic._id
                 }&v=${bible}`}
                 onCopy={() =>
@@ -166,16 +167,15 @@ const Search = props => {
         ''
       )}
       <div>
-      <p>Lookup a passage</p>
-      <ContentBlock
-        props={{
-          type: 'passage',
-          version: bible
-        }}
-        mode='entry'
-      />
+        <p>Lookup a passage</p>
+        <ContentBlock
+          props={{
+            type: 'passage',
+            version: bible
+          }}
+          mode='entry'
+        />
       </div>
-      {/*JSON.stringify(props.store.topicTags)*/}
     </div>
   )
 }
@@ -198,15 +198,11 @@ export async function getServerSideProps (context) {
     .get('/topicTags')
     .then(response => response.data)
 
-  const store = initializeStore()
-
-  store.setTopicTags(topicTags)
-
   return {
     props: {
       topic,
       version,
-      store: getSnapshot(store)
+      topicTags
     }
   }
 }

@@ -3,13 +3,12 @@ import { axiosClient } from '../axiosClient'
 import { Dropdown } from 'primereact/dropdown'
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox'
 import { Button } from 'primereact/button'
-import { observer } from 'mobx-react'
 import { bibles } from '../bibles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { Toast } from 'primereact/toast'
 import { Tooltip } from 'primereact/tooltip'
 
-const VerseSelector = observer(props => {
+const VerseSelector = props => {
   const [bible, setBible] = useState({})
   const [book, setBook] = useState({})
   const [verses, setVerses] = useState([])
@@ -375,6 +374,6 @@ const VerseSelector = observer(props => {
       )}
     </>
   )
-})
+}
 
 export default VerseSelector

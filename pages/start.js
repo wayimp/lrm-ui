@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { bibles } from '../bibles'
 import { AutoComplete } from 'primereact/autocomplete'
 import { Fieldset } from 'primereact/fieldset'
@@ -116,16 +114,13 @@ const Start = props => {
 }
 
 export async function getServerSideProps () {
-  const store = initializeStore()
-
   const topics = await axiosClient
     .get('/topics?category=start')
     .then(response => response.data)
 
   return {
     props: {
-      topics,
-      store: getSnapshot(store)
+      topics
     }
   }
 }

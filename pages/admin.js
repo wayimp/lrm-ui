@@ -3,8 +3,6 @@ import Router from 'next/router'
 import TopBar from '../components/AdminTopBar'
 import cookie from 'js-cookie'
 import { axiosClient } from '../axiosClient'
-import { getSnapshot } from 'mobx-state-tree'
-import { initializeStore } from '../store'
 import { InputText } from 'primereact/inputtext'
 import { Button } from 'primereact/button'
 import { Toast } from 'primereact/toast'
@@ -37,8 +35,6 @@ const Login = props => {
 
           cookie.set('username', username)
           cookie.set('token', accessToken)
-          //props.store.setUser(username)
-          //props.store.setToken(accessToken)
 
           Router.push('/topics')
         } else {
@@ -100,16 +96,6 @@ const Login = props => {
       </div>
     </div>
   )
-}
-
-export async function getServerSideProps () {
-  const store = initializeStore()
-
-  return {
-    props: {
-      store: getSnapshot(store)
-    }
-  }
 }
 
 export default Login
