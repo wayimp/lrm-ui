@@ -820,9 +820,52 @@ const TopicComposer = props => {
                           )
                         }}
                       />
+                      <Button
+                        label='Image'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'image',
+                            label: 'Image',
+                            maxSizeKB: 1024,
+                            maxWidthOrHeight: 600
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                          openEditDialog(
+                            newItem,
+                            ind,
+                            newSections[ind].items.length - 1
+                          )
+                        }}
+                      />
+                      <Button
+                        label='Media'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'media',
+                            label: 'Media',
+                            provider: 'youtube',
+                            maxWidthOrHeight: 600
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                          openEditDialog(
+                            newItem,
+                            ind,
+                            newSections[ind].items.length - 1
+                          )
+                        }}
+                      />
                     </div>
                   </Fieldset>
-                  {/*JSON.stringify(el)*/}
                 </div>
               ))}
             </Fieldset>
@@ -838,6 +881,7 @@ const TopicComposer = props => {
                     {el.items.map((item, index) => {
                       return (
                         <ContentBlock
+                          key={index}
                           props={item}
                           mode='display'
                           readOnly={true}

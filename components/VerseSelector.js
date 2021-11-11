@@ -7,6 +7,7 @@ import { bibles } from '../bibles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { Toast } from 'primereact/toast'
 import { Tooltip } from 'primereact/tooltip'
+import { useQueryClient } from 'react-query'
 
 const VerseSelector = props => {
   const [bible, setBible] = useState({})
@@ -21,6 +22,7 @@ const VerseSelector = props => {
   const [extended, setExtended] = useState('')
   const options = [{ value: true, icon: 'pi pi-minus' }]
   const toast = useRef(null)
+  const queryClient = useQueryClient()
 
   const verseSelections = chapters => {
     const verseSelections = []
@@ -153,6 +155,17 @@ const VerseSelector = props => {
     }
   }
 
+  const getPassage = async url => {
+    const { data } = await axiosClient({
+      method: 'get',
+      url,
+      headers: {
+        accept: 'application/json'
+      }
+    })
+    return data
+  }
+
   const fetchPassage = async (version, passageId) => {
     setLoading(true)
     let ref =
@@ -162,13 +175,14 @@ const VerseSelector = props => {
       }`
 
     const url = `/verses/${version || bible.abbreviation}/${ref}`
-    const response = await axiosClient({
-      method: 'get',
-      url,
-      headers: {
-        accept: 'application/json'
+
+    const response = await queryClient.fetchQuery({
+      queryKey: ['passage', url],
+      queryFn: () => getPassage(url),
+      options: {
+        cacheTime: 600000
       }
-    }).then(response => response.data)
+    })
 
     const formatted = formatVerses(response)
 
@@ -253,7 +267,6 @@ const VerseSelector = props => {
               placeholder='Book'
               filter
               showClear
-              autoFocus
               showOnFocus
               filterInputAutoFocus
             />

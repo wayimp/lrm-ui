@@ -20,7 +20,6 @@ import { useMediaQuery } from 'react-responsive'
 import { categories } from '../static'
 import { Menu } from 'primereact/menu'
 import { useQueryClient } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
 
 const Index = props => {
   const toast = useRef(null)
@@ -184,7 +183,6 @@ const Index = props => {
   const selectTopic = async id => {
     if (!id) return
     setSearchTerm('')
-    setShowCategory(false)
 
     const url = new URL(window.location)
     url.searchParams.set('t', id)
@@ -273,7 +271,7 @@ const Index = props => {
         <meta
           property='og:title'
           content={
-            props.topic && props.version
+            props.topic && props.topic.sections && props.version
               ? props.topic.sections.find(s => s.version === props.version).name
               : 'Life Reference Manual'
           }
@@ -472,7 +470,7 @@ const Index = props => {
                 </div>
               </div>
               {selectedSection.items.map((item, index) => {
-                return <ContentBlock key={index} props={item} mode='display' />
+                return <ContentBlock key={`content-${index}`} props={item} mode='display' />
               })}
 
               <div className='p-grid'>
@@ -511,8 +509,9 @@ const Index = props => {
                 Array.isArray(selectedSection.links) ? (
                   <div className='p-d-inline-flex p-ai-center'>
                     <h3>Related Topics</h3>
-                    {selectedSection.links.map(link => (
+                    {selectedSection.links.map((link, index) => (
                       <Button
+                        key={`link-${index}`}
                         label={link.title}
                         type='button'
                         className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
@@ -559,7 +558,7 @@ const Index = props => {
         ) : (
           ''
         )}
-        {showCategory && !selectedSection ? (
+        {showCategory ? (
           <Fieldset
             key='category'
             style={{ margin: '20px 0px 0px 0px' }}
@@ -582,7 +581,7 @@ const Index = props => {
               )
               if (section && section.items) {
                 return (
-                  <div>
+                  <div key={`section-${i}`}>
                     <h3>{section.name}</h3>
                     {section.items.map((item, index) => {
                       return (
@@ -602,7 +601,6 @@ const Index = props => {
           ''
         )}
       </div>
-      <ReactQueryDevtools />
     </div>
   )
 }
