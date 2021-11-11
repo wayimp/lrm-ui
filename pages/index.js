@@ -20,6 +20,8 @@ import { useMediaQuery } from 'react-responsive'
 import { categories } from '../static'
 import { Menu } from 'primereact/menu'
 import { useQueryClient } from 'react-query'
+import { Dialog } from 'primereact/dialog'
+import { InputText } from 'primereact/inputtext'
 
 const Index = props => {
   const toast = useRef(null)
@@ -32,6 +34,8 @@ const Index = props => {
   const [bible, setBible] = useState('')
   const [showPassage, setShowPassage] = useState(false)
   const [showCategory, setShowCategory] = useState(true)
+  const [questionDialog, setQuestionDialog] = useState(false)
+  const [question, setQuestion] = useState({ email: '', text: '' })
   const [categoryLabel, setCategoryLabel] = useState(
     'Welcome to the Life Reference Manual Online'
   )
@@ -265,6 +269,40 @@ const Index = props => {
     selectTopic(props.topicNames[findIndex].id)
   }
 
+  const handleQuestionChange = e => {
+    const newQuestion = { ...question }
+    newQuestion[e.target.name] = e.target.value
+    setQuestion(newQuestion)
+  }
+
+  const submitQuestion = async () => {
+    const questionTopic = {
+      category: 'question',
+      email: question.email,
+      title: question.text
+    }
+
+    await axiosClient({
+      method: 'post',
+      url: '/question',
+      data: questionTopic
+    })
+      .then(async response => {
+        setQuestionDialog(false)
+        setQuestion({ email: '', text: '' })
+        toast.current.show({
+          severity: 'success',
+          summary: 'Question Submitted'
+        })
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Submitting Question'
+        })
+      })
+  }
+
   return (
     <div style={{ marginTop: 50 }}>
       <Head>
@@ -331,7 +369,7 @@ const Index = props => {
             )}
             <Button
               className='p-button-rounded p-button-text p-button-outlined p-mr-1'
-              icon='pi pi-question-circle'
+              icon='pi pi-sun'
               onClick={() => {
                 // Generate a random number
                 const random = Math.floor(
@@ -340,6 +378,15 @@ const Index = props => {
                 selectTopic(props.topicNames[random].id)
               }}
               tooltip='Random Topic'
+              tooltipOptions={{ position: 'left' }}
+            />
+            <Button
+              className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+              icon='pi pi-question-circle'
+              onClick={() => {
+                setQuestionDialog(true)
+              }}
+              tooltip='Ask a Question'
               tooltipOptions={{ position: 'left' }}
             />
           </>
@@ -470,7 +517,13 @@ const Index = props => {
                 </div>
               </div>
               {selectedSection.items.map((item, index) => {
-                return <ContentBlock key={`content-${index}`} props={item} mode='display' />
+                return (
+                  <ContentBlock
+                    key={`content-${index}`}
+                    props={item}
+                    mode='display'
+                  />
+                )
               })}
 
               <div className='p-grid'>
@@ -601,6 +654,50 @@ const Index = props => {
           ''
         )}
       </div>
+      <Dialog
+        header='Ask a Question'
+        visible={questionDialog}
+        style={{ width: '80vw' }}
+        onHide={() => setQuestionDialog(false)}
+      >
+        <div className='p-field p-grid'>
+          <label htmlFor='email'>Your Email:</label>
+          <div className='p-col-12 p-md-10'>
+            <InputText
+              type='text'
+              name='email'
+              value={question.email}
+              onChange={handleQuestionChange}
+            />
+          </div>
+        </div>
+        <div className='p-field p-grid'>
+          <label htmlFor='text'>Question:</label>
+          <div className='p-col-12 p-md-10'>
+            <InputText
+              type='text'
+              name='text'
+              value={question.text}
+              onChange={handleQuestionChange}
+            />
+          </div>
+        </div>
+        <div className='p-d-flex p-ai-center p-jc-end'>
+          <Button
+            label='Cancel'
+            icon='pi pi-times'
+            onClick={() => setQuestionDialog(false)}
+            className='p-button-text'
+          />
+          &nbsp;
+          <Button
+            label='Send'
+            icon='pi pi-send'
+            onClick={submitQuestion}
+            autoFocus
+          />
+        </div>
+      </Dialog>
     </div>
   )
 }

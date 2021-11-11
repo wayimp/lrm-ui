@@ -180,7 +180,7 @@ const TopicComposer = props => {
         setRefresh(uuid())
       }
     }
-  }, [currentTopic.title, sections])
+  }, [currentTopic.title, currentTopic.category, sections])
 
   useEffect(() => {
     const token = cookie.get('token')
@@ -213,6 +213,14 @@ const TopicComposer = props => {
     await setSelectedCategory(e.value)
     const filtered = topicTitles.filter(tt => tt.category === e.value)
     setTopicTitlesFiltered(filtered)
+  }
+
+  const onChangeTopicCategory = e => {
+    setIsLoaded(true)
+    setCurrentTopic({
+      ...currentTopic,
+      category: e.value
+    })
   }
 
   useEffect(() => {
@@ -310,8 +318,11 @@ const TopicComposer = props => {
 
     const newTopic = {
       ...currentTopic,
-      sections,
-      category: selectedCategory
+      sections
+    }
+
+    if (!newTopic.category) {
+      newTopic.category = selectedCategory
     }
 
     if (!newTopic.hasOwnProperty('order')) {
@@ -530,7 +541,10 @@ const TopicComposer = props => {
               style={{ margin: '10px 0px 10px 40px' }}
               legend='Topic Editor'
             >
-              <div className='p-d-flex' style={{ marginBottom: 10 }}>
+              <div
+                className='p-d-flex p-jc-between'
+                style={{ marginBottom: 10 }}
+              >
                 <Button
                   label='Add Version'
                   className='p-button-outlined p-button-sm p-button-secondary'
@@ -541,6 +555,16 @@ const TopicComposer = props => {
                     setSectionEditDialog(true)
                   }}
                 />
+
+                <Dropdown
+                  className='p-ml-auto'
+                  value={currentTopic.category}
+                  options={categories}
+                  onChange={onChangeTopicCategory}
+                  optionLabel='label'
+                  placeholder='Select Category'
+                />
+
                 <div className='p-ml-auto p-ai-center'>
                   <label htmlFor='topicTitle'>Title&nbsp;</label>
                   <InputText
