@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next -p 8055",
-    "build": "next build",
-    "start": "next start -p 8055"
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider next build",
+    "start": "export NODE_OPTIONS=--openssl-legacy-provider next start -p 8055"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -25,7 +25,8 @@
     "react-responsive": "*",
     "react-transition-group": "^4.4.2",
     "react-uuid": "^1.0.2",
-    "styled-components": "^5.3.0"
+    "styled-components": "^5.3.0",
+    "webpack": "^5.64.0"
   },
   "devDependencies": {
     "@babel/core": "7.14.5",
