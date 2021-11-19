@@ -148,8 +148,10 @@ const Index = props => {
     if (e.value && e.value.length > 1) {
       if (['topics', 'start', 'faqs'].includes(e.value)) {
         selectCategory(e.value)
+        setSelectedSection(null)
       } else {
         selectTopic(e.value)
+        setShowCategory(false)
       }
     }
   }
@@ -485,7 +487,7 @@ const Index = props => {
                       <span />
                     )}
                   </div>
-                  <h3>{selectedSection.name}</h3>&nbsp;&nbsp;
+                  <h2>{selectedSection.name}</h2>&nbsp;&nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
                     text={`${window.location.protocol +
@@ -611,7 +613,7 @@ const Index = props => {
         ) : (
           ''
         )}
-        {showCategory ? (
+        {showCategory && !selectedSection ? (
           <Fieldset
             key='category'
             style={{ margin: '20px 0px 0px 0px' }}
@@ -635,7 +637,7 @@ const Index = props => {
               if (section && section.items) {
                 return (
                   <div key={`section-${i}`}>
-                    <h3>{section.name}</h3>
+                    <h2>{section.name}</h2>&nbsp;&nbsp;
                     {section.items.map((item, index) => {
                       return (
                         <ContentBlock
