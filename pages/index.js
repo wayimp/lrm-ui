@@ -22,6 +22,7 @@ import { Menu } from 'primereact/menu'
 import { useQueryClient } from 'react-query'
 import { Dialog } from 'primereact/dialog'
 import { InputText } from 'primereact/inputtext'
+import { InputTextarea } from 'primereact/inputtextarea'
 
 const Index = props => {
   const toast = useRef(null)
@@ -35,7 +36,7 @@ const Index = props => {
   const [showPassage, setShowPassage] = useState(false)
   const [showCategory, setShowCategory] = useState(true)
   const [questionDialog, setQuestionDialog] = useState(false)
-  const [question, setQuestion] = useState({ email: '', text: '' })
+  const [question, setQuestion] = useState({ name: '', email: '', text: '' })
   const [categoryLabel, setCategoryLabel] = useState(
     'Welcome to the Life Reference Manual Online'
   )
@@ -148,6 +149,7 @@ const Index = props => {
     if (e.value && e.value.length > 1) {
       if (['topics', 'start', 'faqs'].includes(e.value)) {
         selectCategory(e.value)
+        setShowCategory(true)
         setSelectedSection(null)
       } else {
         selectTopic(e.value)
@@ -280,6 +282,7 @@ const Index = props => {
   const submitQuestion = async () => {
     const questionTopic = {
       category: 'question',
+      name: question.name,
       email: question.email,
       title: question.text
     }
@@ -291,7 +294,7 @@ const Index = props => {
     })
       .then(async response => {
         setQuestionDialog(false)
-        setQuestion({ email: '', text: '' })
+        setQuestion({ name: '', email: '', text: '' })
         toast.current.show({
           severity: 'success',
           summary: 'Question Submitted'
@@ -663,7 +666,18 @@ const Index = props => {
         onHide={() => setQuestionDialog(false)}
       >
         <div className='p-field p-grid'>
-          <label htmlFor='email'>Your Email:</label>
+          <label htmlFor='name'>Name:</label>
+          <div className='p-col-12 p-md-10'>
+            <InputText
+              type='text'
+              name='name'
+              value={question.name}
+              onChange={handleQuestionChange}
+            />
+          </div>
+        </div>
+        <div className='p-field p-grid'>
+          <label htmlFor='email'>Email:</label>
           <div className='p-col-12 p-md-10'>
             <InputText
               type='text'
@@ -676,11 +690,14 @@ const Index = props => {
         <div className='p-field p-grid'>
           <label htmlFor='text'>Question:</label>
           <div className='p-col-12 p-md-10'>
-            <InputText
+            <InputTextarea
               type='text'
               name='text'
               value={question.text}
               onChange={handleQuestionChange}
+              rows={5}
+              cols={30}
+              autoResize
             />
           </div>
         </div>
@@ -695,7 +712,7 @@ const Index = props => {
           <Button
             label='Send'
             icon='pi pi-send'
-            onClick={submitQuestion}
+            onClick={() => submitQuestion()}
             autoFocus
           />
         </div>
