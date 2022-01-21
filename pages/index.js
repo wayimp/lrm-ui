@@ -484,18 +484,18 @@ const Index = props => {
           </div>
         }
         right={
-          <div className='p-d-inline-flex p-ai-center p-m-3'>
+          <div className='p-d-inline-flex p-ai-center'>
             <span style={{ fontSize: 'xx-small' }}>
-              LifeReferenceManaul.net was created by Go Therefore Ministries. If
-              you'd like to support this ministry or order physical copies of
-              the Life Reference Manual, visit www.gothereforeministries.org
+              Support our Ministry
+              <br />
+              Order Physical Copies
             </span>
             <img
-              className='go pointer'
+              className='go pointer p-ml-2'
               src='/images/go.png'
               alt='Go Therefore Ministries'
-              onClick={() => window.open('https://gothereforeministries.org/')}
               style={{ margin: 0, padding: 0, height: 44 }}
+              onClick={() => window.open('https://gothereforeministries.org/')}
             />
           </div>
         }
@@ -539,7 +539,7 @@ const Index = props => {
                       <span />
                     )}
                   </div>
-                  <h2>{selectedSection.name}</h2>&nbsp;&nbsp;
+                  <h3 style={{ color: 'indigo' }}>{selectedSection.name}</h3>&nbsp;&nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
                     text={`${window.location.protocol +
@@ -657,7 +657,7 @@ const Index = props => {
             >
               <ContentBlock
                 props={{
-                  type: 'passage',
+                  type: 'tile',
                   version: bible,
                   passageId: props.reference ? props.reference : null
                 }}
@@ -692,7 +692,7 @@ const Index = props => {
               if (section && section.items) {
                 return (
                   <div key={`section-${i}`}>
-                    <h2>{section.name}</h2>&nbsp;&nbsp;
+                    <h3 className='p-mt-5' style={{ color: 'indigo' }}>{section.name}</h3>
                     {section.items.map((item, index) => {
                       return (
                         <ContentBlock

@@ -3,6 +3,7 @@ import HtmlComponent from './HtmlComponent'
 import PassageComponent from './PassageComponent'
 import ImageComponent from './ImageComponent'
 import MediaComponent from './MediaComponent'
+import TileComponent from './TileComponent'
 
 const ContentBlock = ({ props, mode, updateValue, updateConfig }) => {
   switch (props.type) {
@@ -20,6 +21,17 @@ const ContentBlock = ({ props, mode, updateValue, updateConfig }) => {
     case 'passage':
       return (
         <PassageComponent
+          props={props}
+          mode={mode}
+          updateValue={updateValue}
+          updateConfig={updateConfig}
+        />
+      )
+      break
+
+    case 'tile':
+      return (
+        <TileComponent
           props={props}
           mode={mode}
           updateValue={updateValue}

@@ -351,6 +351,38 @@ const TopicComposer = props => {
       })
   }
 
+  const copyCurrent = async () => {
+    const newTopic = {
+      ...currentTopic
+    }
+
+    delete newTopic._id
+
+    if (!newTopic.category) {
+      newTopic.category = selectedCategory
+    }
+
+    await axiosClient({
+      method: 'post',
+      url: '/topics',
+      data: newTopic,
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(async response => {
+        if (response.data.insertedId) {
+          setCurrentTopic({ ...currentTopic, _id: response.data.insertedId })
+        }
+        toast.current.show({ severity: 'success', summary: 'Topic Copied' })
+        //updateTopicTitles()
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Saving Topic'
+        })
+      })
+  }
+
   function onDragEnd (result) {
     const { source, destination } = result
 
@@ -506,6 +538,12 @@ const TopicComposer = props => {
               filterBy='title'
               optionLabel='title'
               placeholder='Select Topic'
+            />
+            <Button
+              label='Copy Topic'
+              className='p-button-outlined p-button-sm p-button-secondary'
+              icon='pi pi-copy'
+              onClick={copyCurrent}
             />
             <Button
               label='New Topic'

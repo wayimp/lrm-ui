@@ -9,7 +9,7 @@ import { Toast } from 'primereact/toast'
 import { Tooltip } from 'primereact/tooltip'
 import { useQueryClient } from 'react-query'
 
-const VerseSelector = props => {
+const TileSelector = props => {
   const [bible, setBible] = useState({})
   const [book, setBook] = useState({})
   const [verses, setVerses] = useState([])
@@ -108,10 +108,10 @@ const VerseSelector = props => {
     }
   }, [props.version, verse, extended, verseEnd])
 
-  const onChangeBook = e => {
-    if (e.value) {
-      setBook(e.value)
-      const selections = verseSelections(e.value.chapters)
+  const onChangeTile = _book => {
+    if (_book) {
+      setBook(_book)
+      const selections = verseSelections(_book.chapters)
       setVerses(selections)
       setVersesEnd([])
     } else {
@@ -122,6 +122,16 @@ const VerseSelector = props => {
     setVerse(null)
     setVerseEnd(null)
     setPassage({})
+  }
+
+  const onChangeTileVerse = ci => {
+    setVerse(`${ci + 1}:1`)
+    const _rangeStart = Number(1)
+    const _rangeEnd = book.chapters[Number(ci)]
+    const selectionsEnd = verseSelectionsEnd(_rangeStart, _rangeEnd)
+    setVersesEnd(selectionsEnd)
+    setExtended(true)
+    setVerseEnd(_rangeEnd)
   }
 
   const onChangeVerse = e => {
@@ -258,20 +268,57 @@ const VerseSelector = props => {
       {props.readOnly ? (
         ''
       ) : (
-        <>
-          <div className='p-d-inline-flex p-ai-center'>
-            <Dropdown
-              value={book}
-              options={bible && bible.books ? bible.books : []}
-              onChange={onChangeBook}
-              optionLabel='name'
-              filterBy='name'
-              placeholder='Book'
-              filter
-              showClear
-              showOnFocus
-              filterInputAutoFocus
-            />
+        <div>
+          <div className='p-d-flex p-flex-wrap'>
+            {bible?.books?.map(b => {
+              if (b === book) {
+                return (
+                  <Button
+                    key={b.id}
+                    label={b.name}
+                    style={{ background: '#9A9AEB' }}
+                  />
+                )
+              } else {
+                return (
+                  <Button
+                    key={b.id}
+                    className='p-button-outlined'
+                    label={b.name}
+                    style={{ background: 'lavender' }}
+                    onClick={() => onChangeTile(b)}
+                  />
+                )
+              }
+            })}
+          </div>
+          <div className='p-d-flex p-flex-wrap'>
+            {book?.chapters?.map((c, ci) => {
+              if (chapterNumber === ci + 1) {
+                return (
+                  <Button
+                    key={ci}
+                    className='p-button-outlined'
+                    label={`Chapter ${ci + 1}`}
+                    style={{ background: '#B6B7A4' }}
+                    onClick={() => onChangeTileVerse(ci)}
+                  />
+                )
+              } else {
+                return (
+                  <Button
+                    key={ci}
+                    className='p-button-outlined'
+                    label={`Chapter ${ci + 1}`}
+                    style={{ background: '#E8E9D5' }}
+                    onClick={() => onChangeTileVerse(ci)}
+                  />
+                )
+              }
+            })}
+          </div>
+
+          <div className='p-d-inline-flex p-ai-center p-m-3'>
             <Dropdown
               value={verse}
               options={verses || []}
@@ -304,8 +351,7 @@ const VerseSelector = props => {
               ''
             )}
           </div>
-          <br />
-        </>
+        </div>
       )}
 
       <div className='p-d-inline-flex p-ai-center'>
@@ -393,4 +439,4 @@ const VerseSelector = props => {
   )
 }
 
-export default VerseSelector
+export default TileSelector
