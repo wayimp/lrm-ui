@@ -10,7 +10,6 @@ import { Button } from 'primereact/button'
 import { Dropdown } from 'primereact/dropdown'
 
 const Topic = props => {
-  useEffect(() => {}, [])
 
   return (
     <Fieldset

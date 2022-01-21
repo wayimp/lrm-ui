@@ -189,6 +189,8 @@ const VerseSelector = props => {
     setPassage(formatted)
     if (props.setPassage) props.setPassage(formatted)
     setLoading(false)
+
+    axiosClient.get(`/metrics/verse_read/${ref}`)
   }
 
   const formatVerses = verses => {
@@ -360,12 +362,13 @@ const VerseSelector = props => {
               text={`${
                 typeof window !== 'undefined' ? window.location.origin : ''
               }?r=${verseRef}&v=${bible.abbreviation}`}
-              onCopy={() =>
+              onCopy={() => {
+                axiosClient.get(`/metrics/verse_copied/${verseRef}`)
                 toast.current.show({
                   severity: 'success',
                   summary: 'Link Copied'
                 })
-              }
+              }}
             >
               <i className='pi pi-upload'></i>
             </CopyToClipboard>

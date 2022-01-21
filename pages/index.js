@@ -37,12 +37,24 @@ const Index = props => {
   const [showCategory, setShowCategory] = useState(true)
   const [questionDialog, setQuestionDialog] = useState(false)
   const [question, setQuestion] = useState({ name: '', email: '', text: '' })
+  const [signupDialog, setSignupDialog] = useState(false)
+  const [signup, setSignup] = useState({
+    firstName: '',
+    lastName: '',
+    email: ''
+  })
   const [categoryLabel, setCategoryLabel] = useState(
     'Welcome to the Life Reference Manual Online'
   )
   const [selectedCategory, setSelectedCategory] = useState(props.front || [])
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (selectedTopic?._id) {
+      axiosClient.get(`/metrics/topic_read/${selectedTopic._id}`)
+    }
+  }, [selectedTopic])
 
   const popState = e => {
     if (e.state) {
@@ -308,6 +320,34 @@ const Index = props => {
       })
   }
 
+  const handleSignupChange = e => {
+    const _signup = { ...signup }
+    _signup[e.target.name] = e.target.value
+    setSignup(_signup)
+  }
+
+  const submitSignup = async () => {
+    await axiosClient({
+      method: 'post',
+      url: '/signup',
+      data: signup
+    })
+      .then(async response => {
+        setSignupDialog(false)
+        setSignup({ firstName: '', lastName: '', email: '' })
+        toast.current.show({
+          severity: 'success',
+          summary: 'Email Submitted'
+        })
+      })
+      .catch(error => {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error Submitting Email'
+        })
+      })
+  }
+
   return (
     <div style={{ marginTop: 50 }}>
       <Head>
@@ -372,6 +412,15 @@ const Index = props => {
             ) : (
               ''
             )}
+            <Button
+              className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+              icon='pi pi-envelope'
+              onClick={() => {
+                setSignupDialog(true)
+              }}
+              tooltip='Subscribe to Newsletter'
+              tooltipOptions={{ position: 'left' }}
+            />
             <Button
               className='p-button-rounded p-button-text p-button-outlined p-mr-1'
               icon='pi pi-sun'
@@ -498,12 +547,15 @@ const Index = props => {
                       window.location.host.split(/\//)[0]}?t=${
                       selectedTopic._id
                     }&v=${bible}`}
-                    onCopy={() =>
+                    onCopy={() => {
+                      axiosClient.get(
+                        `/metrics/topic_copied/${selectedTopic._id}`
+                      )
                       toast.current.show({
                         severity: 'success',
                         summary: 'Link Copied'
                       })
-                    }
+                    }}
                   >
                     <i className='pi pi-upload'></i>
                   </CopyToClipboard>
@@ -713,6 +765,61 @@ const Index = props => {
             label='Send'
             icon='pi pi-send'
             onClick={() => submitQuestion()}
+            autoFocus
+          />
+        </div>
+      </Dialog>
+      <Dialog
+        header='Newsletter Signup'
+        visible={signupDialog}
+        style={{ width: '80vw' }}
+        onHide={() => setSignupDialog(false)}
+      >
+        <div className='p-field p-grid'>
+          <label htmlFor='firstName'>First Name:</label>
+          <div className='p-col-12 p-md-10'>
+            <InputText
+              type='text'
+              name='firstName'
+              value={signup.firstName}
+              onChange={handleSignupChange}
+            />
+          </div>
+        </div>
+        <div className='p-field p-grid'>
+          <label htmlFor='name'>Last Name:</label>
+          <div className='p-col-12 p-md-10'>
+            <InputText
+              type='text'
+              name='lastName'
+              value={signup.lastName}
+              onChange={handleSignupChange}
+            />
+          </div>
+        </div>
+        <div className='p-field p-grid'>
+          <label htmlFor='email'>Email:</label>
+          <div className='p-col-12 p-md-10'>
+            <InputText
+              type='text'
+              name='email'
+              value={signup.email}
+              onChange={handleSignupChange}
+            />
+          </div>
+        </div>
+        <div className='p-d-flex p-ai-center p-jc-end'>
+          <Button
+            label='Cancel'
+            icon='pi pi-times'
+            onClick={() => setSignupDialog(false)}
+            className='p-button-text'
+          />
+          &nbsp;
+          <Button
+            label='Send'
+            icon='pi pi-send'
+            onClick={() => submitSignup()}
             autoFocus
           />
         </div>

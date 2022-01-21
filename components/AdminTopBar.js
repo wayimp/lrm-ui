@@ -38,11 +38,23 @@ export default function AdminTopBar () {
   const rightContents = (
     <React.Fragment>
       <Button
+        label='Topics'
+        icon='pi pi-chart-bar'
+        className='p-mr-2 p-button-secondary'
+        onClick={() => router.push('/topicMetrics')}
+      />
+      <Button
+        label='Verses'
+        icon='pi pi-chart-bar'
+        className='p-mr-2 p-button-secondary'
+        onClick={() => router.push('/verseMetrics')}
+      />
+      <Button
         icon='pi pi-sign-out'
         className='p-button-rounded p-button-text'
         onClick={reset}
         tooltip='Sign Out'
-        tooltipOptions={{position: 'left'}}
+        tooltipOptions={{ position: 'left' }}
       />
     </React.Fragment>
   )
