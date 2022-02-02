@@ -4,6 +4,7 @@ import PassageComponent from './PassageComponent'
 import ImageComponent from './ImageComponent'
 import MediaComponent from './MediaComponent'
 import TileComponent from './TileComponent'
+import CategoryComponent from './CategoryComponent'
 
 const ContentBlock = ({ props, mode, updateValue, updateConfig }) => {
   switch (props.type) {
@@ -54,6 +55,17 @@ const ContentBlock = ({ props, mode, updateValue, updateConfig }) => {
     case 'media':
       return (
         <MediaComponent
+          props={props}
+          mode={mode}
+          updateValue={updateValue}
+          updateConfig={updateConfig}
+        />
+      )
+      break
+
+    case 'category':
+      return (
+        <CategoryComponent
           props={props}
           mode={mode}
           updateValue={updateValue}

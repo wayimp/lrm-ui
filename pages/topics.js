@@ -926,6 +926,25 @@ const TopicComposer = props => {
                           )
                         }}
                       />
+                      <Button
+                        label='Subcategory'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'category'
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                          openEditDialog(
+                            newItem,
+                            ind,
+                            newSections[ind].items.length - 1
+                          )
+                        }}
+                      />
                     </div>
                   </Fieldset>
                 </div>
