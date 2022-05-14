@@ -51,8 +51,28 @@ const Index = props => {
   const queryClient = useQueryClient()
 
   useEffect(() => {
+    axios.get('https://ipapi.co/json/').then(response => {
+      const { data } = response
+      if (data) {
+        const { city, country_name, ip, latitude, longitude, region } = data
+        axiosClient.post('/metrics/visit', {
+          city,
+          country_name,
+          ip,
+          latitude,
+          longitude,
+          region
+        })
+      }
+    })
+  }, [])
+
+  useEffect(() => {
     if (selectedTopic?._id) {
-      axiosClient.get(`/metrics/topic_read/${selectedTopic._id}`)
+      axiosClient.post('/metrics/topic_read/', {
+        tId: selectedTopic._id,
+        version: props.version
+      })
     }
   }, [selectedTopic])
 
@@ -539,7 +559,8 @@ const Index = props => {
                       <span />
                     )}
                   </div>
-                  <h3 style={{ color: 'indigo' }}>{selectedSection.name}</h3>&nbsp;&nbsp;
+                  <h3 style={{ color: 'indigo' }}>{selectedSection.name}</h3>
+                  &nbsp;&nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
                     text={`${window.location.protocol +
@@ -548,9 +569,10 @@ const Index = props => {
                       selectedTopic._id
                     }&v=${bible}`}
                     onCopy={() => {
-                      axiosClient.get(
-                        `/metrics/topic_copied/${selectedTopic._id}`
-                      )
+                      axiosClient.post('/metrics/topic_copied', {
+                        tId: selectedTopic._id,
+                        version: bible
+                      })
                       toast.current.show({
                         severity: 'success',
                         summary: 'Link Copied'
@@ -692,7 +714,9 @@ const Index = props => {
               if (section && section.items) {
                 return (
                   <div key={`section-${i}`}>
-                    <h3 className='p-mt-5' style={{ color: 'indigo' }}>{section.name}</h3>
+                    <h3 className='p-mt-5' style={{ color: 'indigo' }}>
+                      {section.name}
+                    </h3>
                     {section.items.map((item, index) => {
                       return (
                         <ContentBlock

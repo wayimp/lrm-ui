@@ -190,7 +190,7 @@ const VerseSelector = props => {
     if (props.setPassage) props.setPassage(formatted)
     setLoading(false)
 
-    axiosClient.get(`/metrics/verse_read/${ref}`)
+    axiosClient.post('/metrics/verse_read', { ref, version })
   }
 
   const formatVerses = verses => {
@@ -364,7 +364,10 @@ const VerseSelector = props => {
                 typeof window !== 'undefined' ? window.location.origin : ''
               }?r=${verseRef}&v=${bible.abbreviation}`}
               onCopy={() => {
-                axiosClient.get(`/metrics/verse_copied/${verseRef}`)
+                axiosClient.post('/metrics/verse_copied', {
+                  ref: verseRef,
+                  version: bible.abbreviation
+                })
                 toast.current.show({
                   severity: 'success',
                   summary: 'Link Copied'

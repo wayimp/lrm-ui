@@ -13,6 +13,7 @@ import { Toolbar } from 'primereact/toolbar'
 import { Fieldset } from 'primereact/fieldset'
 import { Chips } from 'primereact/chips'
 import { Toast } from 'primereact/toast'
+import { InputSwitch } from 'primereact/inputswitch'
 import { confirmPopup } from 'primereact/confirmpopup'
 import uuid from 'react-uuid'
 import { bibles } from '../bibles'
@@ -180,7 +181,7 @@ const TopicComposer = props => {
         setRefresh(uuid())
       }
     }
-  }, [currentTopic.title, currentTopic.category, sections])
+  }, [currentTopic.title, currentTopic.featured, currentTopic.category, sections])
 
   useEffect(() => {
     const token = cookie.get('token')
@@ -624,6 +625,20 @@ const TopicComposer = props => {
                     }}
                     className={!currentTopic.title ? 'p-invalid' : ''}
                   />
+                  &nbsp;&nbsp;
+                  <label htmlFor='topicFeatured'>Featured&nbsp;</label>
+                  <InputSwitch
+                    className='p-as-baseline'
+                    id='topicFeatured'
+                    checked={currentTopic.featured}
+                    onChange={e => {
+                      setIsLoaded(true)
+                      setCurrentTopic({
+                        ...currentTopic,
+                        featured: e.value
+                      })
+                    }}
+                  />
                 </div>
               </div>
 
@@ -934,6 +949,25 @@ const TopicComposer = props => {
                           const newItem = {
                             id: uuid(),
                             type: 'category'
+                          }
+                          const newSections = [...sections]
+                          newSections[ind].items.push(newItem)
+                          setSections(newSections)
+                          openEditDialog(
+                            newItem,
+                            ind,
+                            newSections[ind].items.length - 1
+                          )
+                        }}
+                      />
+                      <Button
+                        label='Featured'
+                        className='p-button-outlined p-button-sm p-button-secondary'
+                        icon='pi pi-plus'
+                        onClick={() => {
+                          const newItem = {
+                            id: uuid(),
+                            type: 'featured'
                           }
                           const newSections = [...sections]
                           newSections[ind].items.push(newItem)
