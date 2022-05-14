@@ -1,6 +1,7 @@
 export const KJV = {
   id: 'de4e12af7f28f599-01',
   name: 'King James Version',
+  attribution: '',
   abbreviation: 'KJV',
   books: [
     {

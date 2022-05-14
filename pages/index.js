@@ -50,6 +50,9 @@ const Index = props => {
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
   const queryClient = useQueryClient()
 
+  const attribution = bibles.find(b => b.abbreviation === bible)
+  ?.attribution || ''
+
   useEffect(() => {
     axios.get('https://ipapi.co/json/').then(response => {
       const { data } = response
@@ -475,7 +478,7 @@ const Index = props => {
           zIndex: 1000
         }}
         left={
-          <div className='p-d-inline-flex'>
+          <div className='p-d-inline-flex p-ai-center'>
             {showPassage ? (
               ''
             ) : (
@@ -490,14 +493,18 @@ const Index = props => {
               />
             )}
             {!isMobile ? (
-              <Dropdown
-                value={bible}
-                options={bibles}
-                onChange={onChangeBible}
-                optionValue='abbreviation'
-                optionLabel='name'
-                placeholder='Select a Bible Version'
-              />
+              <>
+                <Dropdown
+                  value={bible}
+                  options={bibles}
+                  onChange={onChangeBible}
+                  optionValue='abbreviation'
+                  optionLabel='name'
+                  placeholder='Select a Bible Version'
+                />
+                &nbsp;&nbsp;
+                <div dangerouslySetInnerHTML={{ __html: attribution }} />
+              </>
             ) : (
               ''
             )}

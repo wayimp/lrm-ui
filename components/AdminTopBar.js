@@ -50,6 +50,12 @@ export default function AdminTopBar () {
         onClick={() => router.push('/verseMetrics')}
       />
       <Button
+        label='Version'
+        icon='pi pi-chart-bar'
+        className='p-mr-2 p-button-secondary'
+        onClick={() => router.push('/versionMetrics')}
+      />
+      <Button
         label='Visits'
         icon='pi pi-chart-bar'
         className='p-mr-2 p-button-secondary'
