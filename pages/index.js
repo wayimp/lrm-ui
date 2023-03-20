@@ -23,6 +23,7 @@ import { useQueryClient } from 'react-query'
 import { Dialog } from 'primereact/dialog'
 import { InputText } from 'primereact/inputtext'
 import { InputTextarea } from 'primereact/inputtextarea'
+import { Divider } from 'primereact/divider';
 
 const Index = props => {
   const toast = useRef(null)
@@ -51,7 +52,7 @@ const Index = props => {
   const queryClient = useQueryClient()
 
   const attribution = bibles.find(b => b.abbreviation === bible)
-  ?.attribution || ''
+    ?.attribution || ''
 
   useEffect(() => {
     axios.get('https://ipapi.co/json/').then(response => {
@@ -191,6 +192,12 @@ const Index = props => {
         setShowCategory(false)
       }
     }
+  }
+
+  const showFaqs = () => {
+    selectCategory('faqs')
+    setShowCategory(true)
+    setSelectedSection(null)
   }
 
   const selectCategory = async name => {
@@ -413,13 +420,19 @@ const Index = props => {
               filter
               placeholder='Browse Topics'
             ></TreeSelect>
+            <div style={{ marginTop: 10, cursor: 'pointer' }} onClick={() => showFaqs()} >FAQs</div>
+            &nbsp;&nbsp;&nbsp;
+            <div style={{ marginTop: 10, cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org/')} >Order</div>
+            &nbsp;&nbsp;&nbsp;
+            <div style={{ marginTop: 10, cursor: 'pointer' }} onClick={() => {
+              setShowPassage(true)
+            }} >Read</div>
           </div>
         }
         right={
           <>
             {!isMobile ? (
               <div>
-                What does the Bible say about...&nbsp;&nbsp;
                 <AutoComplete
                   style={{ width: 300 }}
                   value={searchTerm}
@@ -430,6 +443,7 @@ const Index = props => {
                   onChange={e => setSearchTerm(e.value)}
                   onSelect={e => selectTopic(e.value.id)}
                   forceSelection
+                  placeholder='Enter Search Words'
                 />
               </div>
             ) : (
@@ -469,7 +483,7 @@ const Index = props => {
           </>
         }
       />
-      <Toolbar
+      < Toolbar
         style={{
           position: 'fixed',
           bottom: 0,
@@ -478,41 +492,46 @@ const Index = props => {
           zIndex: 1000
         }}
         left={
-          <div className='p-d-inline-flex p-ai-center'>
-            {showPassage ? (
-              ''
-            ) : (
-              <Button
-                className='p-button-rounded p-button-text p-button-outlined p-mr-1'
-                icon='pi pi-book'
-                onClick={() => {
-                  setShowPassage(true)
-                }}
-                tooltip='Open Passage Lookup'
-                tooltipOptions={{ position: 'left' }}
-              />
-            )}
-            {!isMobile ? (
-              <>
-                <Dropdown
-                  value={bible}
-                  options={bibles}
-                  onChange={onChangeBible}
-                  optionValue='abbreviation'
-                  optionLabel='name'
-                  placeholder='Select a Bible Version'
+          < div className='p-d-inline-flex p-ai-center' >
+            {
+              showPassage ? (
+                ''
+              ) : (
+                <Button
+                  className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+                  icon='pi pi-book'
+                  onClick={
+                    () => {
+                      setShowPassage(true)
+                    }
+                  }
+                  tooltip='Open Passage Lookup'
+                  tooltipOptions={{ position: 'left' }}
                 />
-                &nbsp;&nbsp;
-                <div dangerouslySetInnerHTML={{ __html: attribution }} />
-              </>
-            ) : (
-              ''
-            )}
-          </div>
+              )}
+            {
+              !isMobile ? (
+                <>
+                  <Dropdown
+                    value={bible}
+                    options={bibles}
+                    onChange={onChangeBible}
+                    optionValue='abbreviation'
+                    optionLabel='name'
+                    placeholder='Select a Bible Version'
+                  />
+                  &nbsp;&nbsp;
+                  <div dangerouslySetInnerHTML={{ __html: attribution }} />
+                </>
+              ) : (
+                ''
+              )
+            }
+          </div >
         }
         right={
-          <div className='p-d-inline-flex p-ai-center'>
-            <span style={{ fontSize: 'xx-small' }}>
+          < div className='p-d-inline-flex p-ai-center' >
+            <span style={{ fontSize: 'x-small' }}>
               Support our Ministry
               <br />
               Order Physical Copies
@@ -524,224 +543,263 @@ const Index = props => {
               style={{ margin: 0, padding: 0, height: 44 }}
               onClick={() => window.open('https://gothereforeministries.org/')}
             />
-          </div>
+          </div >
         }
       />
-      <div
+      < div
         className='p-grid p-dir-row'
         style={{ margin: '80px 10px 100px 10px' }}
       >
-        {selectedSection ? (
-          <div className='p-m-2 p-col'>
-            <Fieldset
-              style={{ margin: '0px 0px 10px 0px' }}
-              legend={
-                <>
-                  <h3>Verse References</h3>
-                  <Button
-                    className='p-button-rounded p-button-text p-button-danger p-button-outlined'
-                    icon='pi pi-times'
-                    onClick={() => {
-                      setSelectedSection(null)
-                      setSearchTerm(null)
-                      setSelectedTopic(null)
-                    }}
-                    tooltip='Close'
-                    tooltipOptions={{ position: 'left' }}
-                  />
-                </>
-              }
-            >
-              <div className='p-grid'>
-                <div className='p-d-inline-flex p-ai-center'>
-                  <div>
-                    {topicIndex > 0 ? (
-                      <Button
-                        type='button'
-                        icon='pi pi-arrow-left'
-                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
-                        onClick={movePreviousTopic}
-                      />
-                    ) : (
-                      <span />
-                    )}
-                  </div>
-                  <h3 style={{ color: 'indigo' }}>{selectedSection.name}</h3>
-                  &nbsp;&nbsp;
-                  <CopyToClipboard
-                    style={{ cursor: 'copy' }}
-                    text={`${window.location.protocol +
-                      '//' +
-                      window.location.host.split(/\//)[0]}?t=${
-                      selectedTopic._id
-                    }&v=${bible}`}
-                    onCopy={() => {
-                      axiosClient.post('/metrics/topic_copied', {
-                        tId: selectedTopic._id,
-                        version: bible
-                      })
-                      toast.current.show({
-                        severity: 'success',
-                        summary: 'Link Copied'
-                      })
-                    }}
-                  >
-                    <i className='pi pi-upload'></i>
-                  </CopyToClipboard>
-                  <div>
-                    {topicIndex < props.topicNames.length - 1 ? (
-                      <Button
-                        type='button'
-                        icon='pi pi-arrow-right'
-                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
-                        onClick={moveNextTopic}
-                      />
-                    ) : (
-                      <span />
-                    )}
-                  </div>
-                </div>
-              </div>
-              {selectedSection.items.map((item, index) => {
-                return (
-                  <ContentBlock
-                    key={`content-${index}`}
-                    props={item}
-                    mode='display'
-                  />
-                )
-              })}
-
-              <div className='p-grid'>
-                <div className='p-d-inline-flex p-ai-center p-m-3'>
-                  <div>
-                    {topicIndex > 0 ? (
-                      <Button
-                        label={props.topicNames[topicIndex - 1].topicName}
-                        type='button'
-                        icon='pi pi-arrow-left'
-                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
-                        onClick={movePreviousTopic}
-                      />
-                    ) : (
-                      <span />
-                    )}
-                  </div>
-                  <div>
-                    {topicIndex < props.topicNames.length - 1 ? (
-                      <Button
-                        label={props.topicNames[topicIndex + 1].topicName}
-                        type='button'
-                        icon='pi pi-arrow-right'
-                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
-                        onClick={moveNextTopic}
-                      />
-                    ) : (
-                      <span />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className='p-grid'>
-                {selectedSection.links &&
-                Array.isArray(selectedSection.links) ? (
+        {
+          selectedSection ? (
+            <div className='p-m-2 p-col' >
+              <Fieldset
+                style={{ margin: '0px 0px 10px 0px' }}
+                legend={
+                  <>
+                    <h2>Topics&nbsp;&amp;&nbsp;References</h2>
+                    <Button
+                      className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                      icon='pi pi-times'
+                      onClick={() => {
+                        setSelectedSection(null)
+                        setSearchTerm(null)
+                        setSelectedTopic(null)
+                      }}
+                      tooltip='Close'
+                      tooltipOptions={{ position: 'left' }}
+                    />
+                  </>
+                }
+              >
+                <div className='grid'>
                   <div className='p-d-inline-flex p-ai-center'>
-                    <h3>Related Topics</h3>
-                    {selectedSection.links.map((link, index) => (
-                      <Button
-                        key={`link-${index}`}
-                        label={link.title}
-                        type='button'
-                        className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
-                        onClick={() => selectTopic(link._id)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  ''
-                )}
-              </div>
-            </Fieldset>
-          </div>
-        ) : (
-          ''
-        )}
-        {showPassage ? (
-          <div className='p-m-2 p-col'>
-            <Fieldset
-              style={{ margin: '0px 0px 10px 0px' }}
-              legend={
-                <>
-                  <h3>Lookup a Passage</h3>
-                  <Button
-                    className='p-button-rounded p-button-text p-button-danger p-button-outlined'
-                    icon='pi pi-times'
-                    onClick={() => setShowPassage(false)}
-                    tooltip='Close'
-                    tooltipOptions={{ position: 'left' }}
-                  />
-                </>
-              }
-            >
-              <ContentBlock
-                props={{
-                  type: 'tile',
-                  version: bible,
-                  passageId: props.reference ? props.reference : null
-                }}
-                mode='entry'
-              />
-            </Fieldset>
-          </div>
-        ) : (
-          ''
-        )}
-        {showCategory && !selectedSection ? (
-          <Fieldset
-            key='category'
-            style={{ margin: '20px 0px 0px 0px' }}
-            legend={
-              <>
-                <h3>{categoryLabel}</h3>
-                <Button
-                  className='p-button-rounded p-button-text p-button-danger p-button-outlined'
-                  icon='pi pi-times'
-                  onClick={() => setShowCategory(false)}
-                  tooltip='Close'
-                  tooltipOptions={{ position: 'left' }}
-                />
-              </>
-            }
-          >
-            {selectedCategory.map((t, i) => {
-              const section = t.sections.find(
-                s => s.version === (bible || 'HCSB')
-              )
-              if (section && section.items) {
-                return (
-                  <div key={`section-${i}`}>
-                    <h3 className='p-mt-5' style={{ color: 'indigo' }}>
-                      {section.name}
-                    </h3>
-                    {section.items.map((item, index) => {
-                      return (
-                        <ContentBlock
-                          key={`front-${index}`}
-                          props={item}
-                          mode='display'
+                    <div>
+                      {topicIndex > 0 ? (
+                        <Button
+                          type='button'
+                          icon='pi pi-chevron-left'
+                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          onClick={movePreviousTopic}
                         />
-                      )
-                    })}
+                      ) : (
+                        <span />
+                      )}
+                    </div>
+                    <h3>{selectedSection.name}</h3>
+                    &nbsp;&nbsp;
+                    <CopyToClipboard
+                      style={{ cursor: 'copy' }}
+                      text={`${window.location.protocol +
+                        '//' +
+                        window.location.host.split(/\//)[0]}?t=${selectedTopic._id
+                        }&v=${bible}`}
+                      onCopy={() => {
+                        axiosClient.post('/metrics/topic_copied', {
+                          tId: selectedTopic._id,
+                          version: bible
+                        })
+                        toast.current.show({
+                          severity: 'success',
+                          summary: 'Link Copied'
+                        })
+                      }}
+                    >
+                      <i className='pi pi-upload'></i>
+                    </CopyToClipboard>
+                    <div>
+                      {topicIndex < props.topicNames.length - 1 ? (
+                        <Button
+                          type='button'
+                          icon='pi pi-chevron-right'
+                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          onClick={moveNextTopic}
+                        />
+                      ) : (
+                        <span />
+                      )}
+                    </div>
                   </div>
-                )
-              }
-            })}
-          </Fieldset>
-        ) : (
-          ''
-        )}
-      </div>
+                  <Divider />
+                </div>
+                {selectedSection.items.map((item, index) => {
+                  return (
+                    <ContentBlock
+                      key={`content-${index}`}
+                      props={item}
+                      mode='display'
+                    />
+                  )
+                })}
+
+                <div className='p-grid'>
+                  <Divider />
+                  <div className='p-d-inline-flex p-ai-center p-m-3'>
+                    <div>
+                      {topicIndex > 0 ? (
+                        <Button
+                          label={props.topicNames[topicIndex - 1].topicName}
+                          type='button'
+                          icon='pi pi-arrow-left'
+                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          onClick={movePreviousTopic}
+                        />
+                      ) : (
+                        <span />
+                      )}
+                    </div>
+                    <div>
+                      {topicIndex < props.topicNames.length - 1 ? (
+                        <Button
+                          label={props.topicNames[topicIndex + 1].topicName}
+                          type='button'
+                          icon='pi pi-arrow-right'
+                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          onClick={moveNextTopic}
+                        />
+                      ) : (
+                        <span />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className='p-grid'>
+                  {selectedSection.links &&
+                    Array.isArray(selectedSection.links) ? (
+                    <div className='p-d-inline-flex p-ai-center'>
+                      <h3>Related Topics</h3>
+                      {selectedSection.links.map((link, index) => (
+                        <Button
+                          key={`link-${index}`}
+                          label={link.title}
+                          type='button'
+                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          onClick={() => selectTopic(link._id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    ''
+                  )}
+                </div>
+              </Fieldset>
+            </div>
+          ) : (
+            ''
+          )}
+        {
+          showPassage ? (
+            <div className='p-m-2 p-col'>
+              <Fieldset
+                style={{ margin: '0px 0px 10px 0px' }}
+                legend={
+                  <>
+                    <h2>Lookup a Passage</h2>
+                    <Button
+                      className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                      icon='pi pi-times'
+                      onClick={() => setShowPassage(false)}
+                      tooltip='Close'
+                      tooltipOptions={{ position: 'left' }}
+                    />
+                  </>
+                }
+              >
+                <ContentBlock
+                  props={{
+                    type: 'tile',
+                    version: bible,
+                    passageId: props.reference ? props.reference : null
+                  }}
+                  mode='entry'
+                />
+              </Fieldset>
+            </div>
+          ) : (
+            ''
+          )
+        }
+        {
+          showCategory && !selectedSection ? (
+
+            categoryLabel.startsWith('Welcome')
+              ?
+              <div>
+                <div class='flex justify-content-center'>
+                  <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' />
+                  <img src='/images/logo-blue.png' />
+                </div>
+                {selectedCategory.map((t, i) => {
+                  const section = t.sections.find(
+                    s => s.version === (bible || 'HCSB')
+                  )
+                  if (section && section.items) {
+                    return (
+                      <div key={`section-${i}`}>
+                        <h3 className='p-mt-5'>
+                          {section.name}
+                        </h3>
+                        {section.items.map((item, index) => {
+                          return (
+                            <ContentBlock
+                              key={`front-${index}`}
+                              props={item}
+                              mode='display'
+                            />
+                          )
+                        })}
+                      </div>
+                    )
+                  }
+                })}
+              </div>
+              :
+              <Fieldset
+                key='category'
+                style={{ margin: '20px 0px 0px 0px' }}
+                legend={
+                  <>
+                    <h2>{categoryLabel}</h2>
+                    <Button
+                      className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                      icon='pi pi-times'
+                      onClick={() => setShowCategory(false)}
+                      tooltip='Close'
+                      tooltipOptions={{ position: 'left' }}
+                    />
+                  </>
+                }
+              >
+                {selectedCategory.map((t, i) => {
+                  const section = t.sections.find(
+                    s => s.version === (bible || 'HCSB')
+                  )
+                  if (section && section.items) {
+                    return (
+                      <div key={`section-${i}`}>
+                        <h3 className='p-mt-5'>
+                          {section.name}
+                        </h3>
+                        {section.items.map((item, index) => {
+                          return (
+                            <ContentBlock
+                              key={`front-${index}`}
+                              props={item}
+                              mode='display'
+                            />
+                          )
+                        })}
+                      </div>
+                    )
+                  }
+                })}
+              </Fieldset>
+          ) : (
+            ''
+          )
+        }
+      </div >
       <Dialog
         header='Ask a Question'
         visible={questionDialog}
@@ -855,11 +913,11 @@ const Index = props => {
           />
         </div>
       </Dialog>
-    </div>
+    </div >
   )
 }
 
-export async function getServerSideProps (context) {
+export async function getServerSideProps(context) {
   let topic = {}
   let version = ''
   let reference = ''

@@ -3,7 +3,7 @@
 }
 
 body {
-  background: #efefff;
+  background: #fff2e2;
 }
 
 p.s1 {
@@ -20,4 +20,53 @@ span.v {
 
 img.pointer {
   cursor: pointer;
+}
+
+.p-toolbar {
+  color: white;
+  background: #25416B;
+}
+
+a:link {
+  color: #e9d5a2;
+  text-decoration: none;
+  font-size: x-small;
+}
+
+a:visited {
+  color: #e9d5a2;
+  text-decoration: none;
+  font-size: x-small;
+}
+
+a:hover {
+  color: #e9d5a2;
+  text-decoration: none;
+  font-size: x-small;
+}
+
+a:active {
+  color: #e9d5a2;
+  text-decoration: none;
+  font-size: x-small;
+}
+
+h2 {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: #e9d5a2;
+}
+
+h3 {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: #25416b;
+}
+
+.p-fieldset-legend-text {
+  padding-left: 16px;
+  font-size: x-large;
+}
+
+.p-fieldset-content {
+  background-color: #fff2e2;
+  color: #25416b;
 }

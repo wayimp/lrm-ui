@@ -119,7 +119,6 @@ const Search = props => {
       <p />
       <p />
       <div>
-        What does the Bible say about...&nbsp;&nbsp;
         <AutoComplete
           style={{ width: 300 }}
           value={searchTerm}
@@ -130,6 +129,7 @@ const Search = props => {
           onChange={e => setSearchTerm(e.value)}
           onSelect={selectTopic}
           forceSelection
+          placeholder='Enter Search Words'
         />
         <p />
         <p />

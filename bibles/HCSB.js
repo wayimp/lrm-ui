@@ -2,7 +2,7 @@ export const HCSB = {
   id: 'a556c5305ee15c3f-01',
   name: 'Holman Christian Standard Bible',
   attribution:
-    '&copy;&nbsp;<a href="https://csbible.com/" target="_blank">Christian Standard Bible</a>',
+    '<a href="https://csbible.com/" target="_blank">&copy;&nbsp;Christian Standard Bible</a>',
   abbreviation: 'HCSB',
   books: [
     {

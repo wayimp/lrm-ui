@@ -101,9 +101,8 @@ const TileSelector = props => {
     }
     // Retrieve the passage afresh if parameters change
     if (verse) {
-      const _passageId = `${book.id}.${verse.replace(':', '.')}${
-        extended && verseEnd ? `-${verseEnd}` : ''
-      }`
+      const _passageId = `${book.id}.${verse.replace(':', '.')}${extended && verseEnd ? `-${verseEnd}` : ''
+        }`
       fetchPassage(props.version, _passageId)
     }
   }, [props.version, verse, extended, verseEnd])
@@ -180,8 +179,7 @@ const TileSelector = props => {
     setLoading(true)
     let ref =
       passageId ||
-      `${book.id}.${verse.replace(':', '.')}${
-        extended && verseEnd ? `-${verseEnd}` : ''
+      `${book.id}.${verse.replace(':', '.')}${extended && verseEnd ? `-${verseEnd}` : ''
       }`
 
     const url = `/verses/${version || bible.abbreviation}/${ref}`
@@ -235,20 +233,18 @@ const TileSelector = props => {
   }
 
   const verseRef = book
-    ? `${book.id}.${verse ? verse.replace(':', '.') : ''}${
-        extended && verseEnd ? `-${verseEnd}` : ''
-      }`
+    ? `${book.id}.${verse ? verse.replace(':', '.') : ''}${extended && verseEnd ? `-${verseEnd}` : ''
+    }`
     : ''
 
   const chapterNumber = Number(verse ? verse.split(':')[0] : 0)
 
   const openChapter = _chapterNumber => {
     const chapterRef = `${book.id}.${_chapterNumber}`
-    const url = `${
-      typeof window !== 'undefined'
+    const url = `${typeof window !== 'undefined'
         ? window.location.protocol + '//' + window.location.host.split(/\//)[0]
         : ''
-    }?r=${chapterRef}&v=${bible.abbreviation}`
+      }?r=${chapterRef}&v=${bible.abbreviation}`
     window.open(url)
   }
 
@@ -276,7 +272,7 @@ const TileSelector = props => {
                   <Button
                     key={b.id}
                     label={b.name}
-                    style={{ background: '#9A9AEB' }}
+                    style={{ color: '#25416b', background: '#e9d5a2' }}
                   />
                 )
               } else {
@@ -285,7 +281,7 @@ const TileSelector = props => {
                     key={b.id}
                     className='p-button-outlined'
                     label={b.name}
-                    style={{ background: 'lavender' }}
+                    style={{ color: '#e9d5a2', background: '#25416b' }}
                     onClick={() => onChangeTile(b)}
                   />
                 )
@@ -300,7 +296,7 @@ const TileSelector = props => {
                     key={ci}
                     className='p-button-outlined'
                     label={`Chapter ${ci + 1}`}
-                    style={{ background: '#B6B7A4' }}
+                    style={{ color: '#25416b', background: '#e9d5a2' }}
                     onClick={() => onChangeTileVerse(ci)}
                   />
                 )
@@ -310,7 +306,7 @@ const TileSelector = props => {
                     key={ci}
                     className='p-button-outlined'
                     label={`Chapter ${ci + 1}`}
-                    style={{ background: '#E8E9D5' }}
+                    style={{ color: '#e9d5a2', background: '#25416b' }}
                     onClick={() => onChangeTileVerse(ci)}
                   />
                 )
@@ -406,9 +402,8 @@ const TileSelector = props => {
             &nbsp;
             <CopyToClipboard
               style={{ cursor: 'copy' }}
-              text={`${
-                typeof window !== 'undefined' ? window.location.origin : ''
-              }?r=${verseRef}&v=${bible.abbreviation}`}
+              text={`${typeof window !== 'undefined' ? window.location.origin : ''
+                }?r=${verseRef}&v=${bible.abbreviation}`}
               onCopy={() => {
                 axiosClient.post('/metrics/verse_copied', {
                   ref: verseRef,
