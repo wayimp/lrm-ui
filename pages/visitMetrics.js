@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { axiosClient } from '../axiosClient'
 import TopBar from '../components/AdminTopBar'
 import cookie from 'js-cookie'
@@ -143,7 +143,7 @@ const visitMetrics = ({ visits }) => {
   return (
     <div>
       <TopBar />
-      <div className='p-flex-column' style={{ marginTop: 80 }}>
+      <div className='flex-column' style={{ marginTop: 80 }}>
         <h3 style={{ marginLeft: 30 }}>Site Visits</h3>
         <div
           style={{ height: '80vh', width: '100%' }}

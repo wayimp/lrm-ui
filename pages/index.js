@@ -158,7 +158,7 @@ const Index = props => {
 
   const groupedItemTemplate = option => {
     return (
-      <div className='p-d-flex p-ai-center'>
+      <div className='flex align-content-center'>
         <div>{renderLabel(option.key)}</div>
       </div>
     )
@@ -379,7 +379,7 @@ const Index = props => {
   }
 
   return (
-    <div style={{ marginTop: 50 }}>
+    <div style={{ marginTop: 120 }}>
       <Head>
         <meta
           property='og:title'
@@ -404,32 +404,34 @@ const Index = props => {
           width: '100%',
           zIndex: 1000
         }}
-        left={
-          <div className='p-d-inline-flex'>
+        start={
+          <div className='flex'>
             <img
               src='/images/logo.png'
               alt='Life Reference Manual'
-              style={{ margin: 0, padding: 0, height: 44, cursor: 'pointer' }}
+              style={{ marginRight: 20, padding: 0, height: 44, cursor: 'pointer' }}
               onClick={() => (window.location.href = '/')}
             />
             <TreeSelect
-              className='p-ml-3 p-mr-3'
+              className='ml-3 mr-3'
               options={props.tree}
               onChange={selectTreeTopic}
               selectionMode='single'
               filter
               placeholder='Browse Topics'
             ></TreeSelect>
-            <div style={{ marginTop: 10, cursor: 'pointer' }} onClick={() => showFaqs()} >FAQs</div>
+          </div>
+        }
+        center={
+          <div class='flex align-content-center'>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org/')} >Order</div>
             &nbsp;&nbsp;&nbsp;
-            <div style={{ marginTop: 10, cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org/')} >Order</div>
-            &nbsp;&nbsp;&nbsp;
-            <div style={{ marginTop: 10, cursor: 'pointer' }} onClick={() => {
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               setShowPassage(true)
             }} >Read</div>
           </div>
         }
-        right={
+        end={
           <>
             {!isMobile ? (
               <div>
@@ -450,7 +452,7 @@ const Index = props => {
               ''
             )}
             <Button
-              className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+              className='button-rounded button-text button-outlined mr-1'
               icon='pi pi-envelope'
               onClick={() => {
                 setSignupDialog(true)
@@ -459,7 +461,7 @@ const Index = props => {
               tooltipOptions={{ position: 'left' }}
             />
             <Button
-              className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+              className='button-rounded button-text button-outlined mr-1'
               icon='pi pi-sun'
               onClick={() => {
                 // Generate a random number
@@ -472,7 +474,7 @@ const Index = props => {
               tooltipOptions={{ position: 'left' }}
             />
             <Button
-              className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+              className='button-rounded button-text button-outlined mr-1'
               icon='pi pi-question-circle'
               onClick={() => {
                 setQuestionDialog(true)
@@ -492,13 +494,13 @@ const Index = props => {
           zIndex: 1000
         }}
         left={
-          < div className='p-d-inline-flex p-ai-center' >
+          <div className='flex align-content-center'>
             {
               showPassage ? (
                 ''
               ) : (
                 <Button
-                  className='p-button-rounded p-button-text p-button-outlined p-mr-1'
+                  className='button-rounded button-text button-outlined mr-1'
                   icon='pi pi-book'
                   onClick={
                     () => {
@@ -521,7 +523,7 @@ const Index = props => {
                     placeholder='Select a Bible Version'
                   />
                   &nbsp;&nbsp;
-                  <div dangerouslySetInnerHTML={{ __html: attribution }} />
+                  <div className='flex align-items-center' dangerouslySetInnerHTML={{ __html: attribution }} />
                 </>
               ) : (
                 ''
@@ -530,14 +532,14 @@ const Index = props => {
           </div >
         }
         right={
-          < div className='p-d-inline-flex p-ai-center' >
-            <span style={{ fontSize: 'x-small' }}>
+          <div className='flex align-content-center' >
+            <div className='flex align-items-center' style={{ fontSize: 'x-small' }}>
               Support our Ministry
               <br />
               Order Physical Copies
-            </span>
+            </div>
             <img
-              className='go pointer p-ml-2'
+              className='go pointer ml-5'
               src='/images/go.png'
               alt='Go Therefore Ministries'
               style={{ margin: 0, padding: 0, height: 44 }}
@@ -547,19 +549,19 @@ const Index = props => {
         }
       />
       < div
-        className='p-grid p-dir-row'
+        className='grid dir-row'
         style={{ margin: '80px 10px 100px 10px' }}
       >
         {
           selectedSection ? (
-            <div className='p-m-2 p-col' >
+            <div className='m-2 col' >
               <Fieldset
                 style={{ margin: '0px 0px 10px 0px' }}
                 legend={
                   <>
                     <h2>Topics&nbsp;&amp;&nbsp;References</h2>
                     <Button
-                      className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                      className='button-rounded button-text button-danger button-outlined ml-4'
                       icon='pi pi-times'
                       onClick={() => {
                         setSelectedSection(null)
@@ -573,20 +575,20 @@ const Index = props => {
                 }
               >
                 <div className='grid'>
-                  <div className='p-d-inline-flex p-ai-center'>
+                  <div className='flex align-content-center'>
                     <div>
                       {topicIndex > 0 ? (
                         <Button
                           type='button'
                           icon='pi pi-chevron-left'
-                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          className='button-rounded button-outlined m-4'
                           onClick={movePreviousTopic}
                         />
                       ) : (
                         <span />
                       )}
                     </div>
-                    <h3>{selectedSection.name}</h3>
+                    <h3 className='flex align-items-center'>{selectedSection.name}</h3>
                     &nbsp;&nbsp;
                     <CopyToClipboard
                       style={{ cursor: 'copy' }}
@@ -605,14 +607,16 @@ const Index = props => {
                         })
                       }}
                     >
-                      <i className='pi pi-upload'></i>
+                      <div className='flex align-items-center'>
+                        <i className='pi pi-upload' />
+                      </div>
                     </CopyToClipboard>
                     <div>
                       {topicIndex < props.topicNames.length - 1 ? (
                         <Button
                           type='button'
                           icon='pi pi-chevron-right'
-                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          className='button-rounded button-outlined m-4'
                           onClick={moveNextTopic}
                         />
                       ) : (
@@ -632,16 +636,16 @@ const Index = props => {
                   )
                 })}
 
-                <div className='p-grid'>
+                <div className='grid'>
                   <Divider />
-                  <div className='p-d-inline-flex p-ai-center p-m-3'>
+                  <div className='flex align-content-center m-3'>
                     <div>
                       {topicIndex > 0 ? (
                         <Button
                           label={props.topicNames[topicIndex - 1].topicName}
                           type='button'
                           icon='pi pi-arrow-left'
-                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          className='ml-auto button-rounded button-outlined m-2'
                           onClick={movePreviousTopic}
                         />
                       ) : (
@@ -654,7 +658,7 @@ const Index = props => {
                           label={props.topicNames[topicIndex + 1].topicName}
                           type='button'
                           icon='pi pi-arrow-right'
-                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          className='ml-auto button-rounded button-outlined m-2'
                           onClick={moveNextTopic}
                         />
                       ) : (
@@ -664,17 +668,17 @@ const Index = props => {
                   </div>
                 </div>
 
-                <div className='p-grid'>
+                <div className='grid'>
                   {selectedSection.links &&
                     Array.isArray(selectedSection.links) ? (
-                    <div className='p-d-inline-flex p-ai-center'>
+                    <div className='flex align-items-center'>
                       <h3>Related Topics</h3>
                       {selectedSection.links.map((link, index) => (
                         <Button
                           key={`link-${index}`}
                           label={link.title}
                           type='button'
-                          className='p-ml-auto p-button-rounded p-button-outlined p-m-2'
+                          className='ml-auto button-rounded button-outlined m-2'
                           onClick={() => selectTopic(link._id)}
                         />
                       ))}
@@ -690,14 +694,14 @@ const Index = props => {
           )}
         {
           showPassage ? (
-            <div className='p-m-2 p-col'>
+            <div className='m-2 col'>
               <Fieldset
                 style={{ margin: '0px 0px 10px 0px' }}
                 legend={
                   <>
                     <h2>Lookup a Passage</h2>
                     <Button
-                      className='p-button-rounded p-button-text p-button-danger p-button-outlined'
+                      className='button-rounded button-text button-danger button-outlined ml-4'
                       icon='pi pi-times'
                       onClick={() => setShowPassage(false)}
                       tooltip='Close'
@@ -723,13 +727,10 @@ const Index = props => {
         {
           showCategory && !selectedSection ? (
 
-            categoryLabel.startsWith('Welcome')
+            !showPassage && categoryLabel.startsWith('Welcome')
               ?
               <div>
-                <div class='flex justify-content-center'>
-                  <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' />
-                  <img src='/images/logo-blue.png' />
-                </div>
+                <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left' }} />
                 {selectedCategory.map((t, i) => {
                   const section = t.sections.find(
                     s => s.version === (bible || 'HCSB')
@@ -737,7 +738,7 @@ const Index = props => {
                   if (section && section.items) {
                     return (
                       <div key={`section-${i}`}>
-                        <h3 className='p-mt-5'>
+                        <h3 className='mt-5'>
                           {section.name}
                         </h3>
                         {section.items.map((item, index) => {
@@ -755,46 +756,7 @@ const Index = props => {
                 })}
               </div>
               :
-              <Fieldset
-                key='category'
-                style={{ margin: '20px 0px 0px 0px' }}
-                legend={
-                  <>
-                    <h2>{categoryLabel}</h2>
-                    <Button
-                      className='p-button-rounded p-button-text p-button-danger p-button-outlined'
-                      icon='pi pi-times'
-                      onClick={() => setShowCategory(false)}
-                      tooltip='Close'
-                      tooltipOptions={{ position: 'left' }}
-                    />
-                  </>
-                }
-              >
-                {selectedCategory.map((t, i) => {
-                  const section = t.sections.find(
-                    s => s.version === (bible || 'HCSB')
-                  )
-                  if (section && section.items) {
-                    return (
-                      <div key={`section-${i}`}>
-                        <h3 className='p-mt-5'>
-                          {section.name}
-                        </h3>
-                        {section.items.map((item, index) => {
-                          return (
-                            <ContentBlock
-                              key={`front-${index}`}
-                              props={item}
-                              mode='display'
-                            />
-                          )
-                        })}
-                      </div>
-                    )
-                  }
-                })}
-              </Fieldset>
+              <div />
           ) : (
             ''
           )
@@ -806,9 +768,9 @@ const Index = props => {
         style={{ width: '80vw' }}
         onHide={() => setQuestionDialog(false)}
       >
-        <div className='p-field p-grid'>
+        <div className='field grid'>
           <label htmlFor='name'>Name:</label>
-          <div className='p-col-12 p-md-10'>
+          <div className='col-12 md-10'>
             <InputText
               type='text'
               name='name'
@@ -817,9 +779,9 @@ const Index = props => {
             />
           </div>
         </div>
-        <div className='p-field p-grid'>
+        <div className='field grid'>
           <label htmlFor='email'>Email:</label>
-          <div className='p-col-12 p-md-10'>
+          <div className='col-12 md-10'>
             <InputText
               type='text'
               name='email'
@@ -828,9 +790,9 @@ const Index = props => {
             />
           </div>
         </div>
-        <div className='p-field p-grid'>
+        <div className='field grid'>
           <label htmlFor='text'>Question:</label>
-          <div className='p-col-12 p-md-10'>
+          <div className='col-12 md-10'>
             <InputTextarea
               type='text'
               name='text'
@@ -842,12 +804,12 @@ const Index = props => {
             />
           </div>
         </div>
-        <div className='p-d-flex p-ai-center p-jc-end'>
+        <div className='flex align-content-center justify-content-end'>
           <Button
             label='Cancel'
             icon='pi pi-times'
             onClick={() => setQuestionDialog(false)}
-            className='p-button-text'
+            className='button-text ml-4'
           />
           &nbsp;
           <Button
@@ -864,9 +826,9 @@ const Index = props => {
         style={{ width: '80vw' }}
         onHide={() => setSignupDialog(false)}
       >
-        <div className='p-field p-grid'>
+        <div className='field grid'>
           <label htmlFor='firstName'>First Name:</label>
-          <div className='p-col-12 p-md-10'>
+          <div className='col-12 md-10'>
             <InputText
               type='text'
               name='firstName'
@@ -875,9 +837,9 @@ const Index = props => {
             />
           </div>
         </div>
-        <div className='p-field p-grid'>
+        <div className='field grid'>
           <label htmlFor='name'>Last Name:</label>
-          <div className='p-col-12 p-md-10'>
+          <div className='col-12 md-10'>
             <InputText
               type='text'
               name='lastName'
@@ -886,9 +848,9 @@ const Index = props => {
             />
           </div>
         </div>
-        <div className='p-field p-grid'>
+        <div className='field grid'>
           <label htmlFor='email'>Email:</label>
-          <div className='p-col-12 p-md-10'>
+          <div className='col-12 md-10'>
             <InputText
               type='text'
               name='email'
@@ -897,12 +859,12 @@ const Index = props => {
             />
           </div>
         </div>
-        <div className='p-d-flex p-ai-center p-jc-end'>
+        <div className='d-flex align-items-center justify-content-end'>
           <Button
             label='Cancel'
             icon='pi pi-times'
             onClick={() => setSignupDialog(false)}
-            className='p-button-text'
+            className='button-text ml-4'
           />
           &nbsp;
           <Button

@@ -297,7 +297,7 @@ const TopicComposer = props => {
         target: event.currentTarget,
         message: `Do you want to delete '${selectedTopic.title}' ?`,
         icon: 'pi pi-info-circle',
-        acceptClassName: 'p-button-danger',
+        acceptClassName: 'button-danger',
         accept,
         reject
       })
@@ -542,13 +542,13 @@ const TopicComposer = props => {
             />
             <Button
               label='Copy Topic'
-              className='p-button-outlined p-button-sm p-button-secondary'
+              className='button-outlined button-sm button-secondary'
               icon='pi pi-copy'
               onClick={copyCurrent}
             />
             <Button
               label='New Topic'
-              className='p-button-outlined p-button-sm p-button-secondary'
+              className='button-outlined button-sm button-secondary'
               icon='pi pi-book'
               onClick={() => {
                 setSelectedTopic({})
@@ -564,7 +564,7 @@ const TopicComposer = props => {
               onClick={deleteSelectedTopic}
               icon='pi pi-times'
               label='Delete'
-              className='p-button-danger p-button-outlined'
+              className='button-danger button-outlined ml-4'
             ></Button>
           </>
         }
@@ -574,19 +574,19 @@ const TopicComposer = props => {
         isDropDisabled={true}
         key={refresh}
       >
-        <div className='p-grid' style={{ marginTop: 70 }}>
-          <div className='p-col-7'>
+        <div className='grid' style={{ marginTop: 70 }}>
+          <div className='col-7'>
             <Fieldset
               style={{ margin: '10px 0px 10px 40px' }}
               legend='Topic Editor'
             >
               <div
-                className='p-d-flex p-jc-between'
+                className='flex justify-content-between'
                 style={{ marginBottom: 10 }}
               >
                 <Button
                   label='Add Version'
-                  className='p-button-outlined p-button-sm p-button-secondary'
+                  className='button-outlined button-sm button-secondary'
                   icon='pi pi-book'
                   onClick={() => {
                     setSectionEditIndex(-1)
@@ -596,7 +596,7 @@ const TopicComposer = props => {
                 />
 
                 <Dropdown
-                  className='p-ml-auto'
+                  className='ml-auto'
                   value={currentTopic.category}
                   options={categories}
                   onChange={onChangeTopicCategory}
@@ -604,7 +604,7 @@ const TopicComposer = props => {
                   placeholder='Select Category'
                 />
 
-                <div className='p-ml-auto p-ai-center'>
+                <div className='flex align-content-center'>
                   <label htmlFor='topicTitle'>Title&nbsp;</label>
                   <InputText
                     id='topicTitle'
@@ -623,12 +623,12 @@ const TopicComposer = props => {
                         title: e.target.value
                       })
                     }}
-                    className={!currentTopic.title ? 'p-invalid' : ''}
+                    className={!currentTopic.title ? 'invalid' : ''}
                   />
                   &nbsp;&nbsp;
                   <label htmlFor='topicFeatured'>Featured&nbsp;</label>
                   <InputSwitch
-                    className='p-as-baseline'
+                    className='as-baseline'
                     id='topicFeatured'
                     checked={currentTopic.featured}
                     onChange={e => {
@@ -652,7 +652,7 @@ const TopicComposer = props => {
                         <h4>{el.version}</h4>
                         <Button
                           label='Edit'
-                          className='p-button-outlined p-button-sm p-button-secondary'
+                          className='button-outlined button-sm button-secondary'
                           icon='pi pi-book'
                           onClick={() => {
                             setSectionEditIndex(ind)
@@ -662,7 +662,7 @@ const TopicComposer = props => {
                         />
                         <Button
                           label='Copy'
-                          className='p-button-outlined p-button-sm p-button-secondary'
+                          className='button-outlined button-sm button-secondary'
                           icon='pi pi-copy'
                           onClick={() => {
                             const newSections = [...sections]
@@ -684,7 +684,7 @@ const TopicComposer = props => {
                         />
                         <Button
                           label='Delete Version'
-                          className='p-button-outlined p-button-sm p-button-secondary'
+                          className='button-outlined button-sm button-secondary'
                           icon='pi pi-minus-circle'
                           onClick={() => {
                             const newSections = [...sections]
@@ -695,9 +695,9 @@ const TopicComposer = props => {
                       </div>
                     }
                   >
-                    <div className='p-fluid p-formgrid p-grid'>
-                      <div className='p-field p-col'>
-                        <label htmlFor='topicName' className='p-d-block'>
+                    <div className='fluid formgrid grid'>
+                      <div className='field col'>
+                        <label htmlFor='topicName' className='d-block'>
                           Name
                         </label>
                         <InputText
@@ -716,17 +716,17 @@ const TopicComposer = props => {
                             setSections(newSections)
                           }}
                           className={
-                            !el.name ? 'p-invalid p-d-block' : 'p-d-block'
+                            !el.name ? 'invalid block' : 'block'
                           }
                         />
                       </div>
-                      <div className='p-field p-col'>
-                        <label htmlFor='topicTags' className='p-d-block'>
+                      <div className='field col'>
+                        <label htmlFor='topicTags' className='d-block'>
                           Tags
                         </label>
                         <Chips
                           id='topicTags'
-                          className='p-d-block'
+                          className='d-block'
                           value={el.tags}
                           onChange={e => {
                             setIsLoaded(true)
@@ -737,14 +737,14 @@ const TopicComposer = props => {
                         />
                       </div>
                     </div>
-                    <div className='p-fluid p-formgrid p-grid'>
-                      <div className='p-field p-col'>
-                        <label htmlFor='topicLinks' className='p-d-block'>
+                    <div className='fluid formgrid grid'>
+                      <div className='field col'>
+                        <label htmlFor='topicLinks' className='d-block'>
                           Related Topics
                         </label>
                         <Chips
                           id='topicLinks'
-                          className='p-d-block'
+                          className='d-block'
                           value={
                             Array.isArray(el.links)
                               ? el.links.map(l => l.title)
@@ -760,8 +760,8 @@ const TopicComposer = props => {
                           }}
                         />
                       </div>
-                      <div className='p-field p-col'>
-                        <label htmlFor='addLink' className='p-d-block'>
+                      <div className='field col'>
+                        <label htmlFor='addLink' className='d-block'>
                           Add Link
                         </label>
                         <Dropdown
@@ -785,8 +785,8 @@ const TopicComposer = props => {
                         />
                       </div>
                     </div>
-                    <div className='p-field p-col'>
-                      <label htmlFor={`droppable${ind}`} className='p-d-block'>
+                    <div className='field col'>
+                      <label htmlFor={`droppable${ind}`} className='d-block'>
                         Content
                       </label>
                       <Droppable id={`droppable${ind}`} droppableId={`${ind}`}>
@@ -828,7 +828,7 @@ const TopicComposer = props => {
                                         />
                                         <Button
                                           label='Edit'
-                                          className='p-button-outlined p-button-sm p-button-secondary'
+                                          className='button-outlined button-sm button-secondary'
                                           icon='pi pi-window-maximize'
                                           onClick={() =>
                                             openEditDialog(item, ind, index)
@@ -836,7 +836,7 @@ const TopicComposer = props => {
                                         />
                                         <Button
                                           label='Delete'
-                                          className='p-button-outlined p-button-sm p-button-secondary'
+                                          className='button-outlined button-sm button-secondary'
                                           icon='pi pi-minus-circle'
                                           onClick={() => {
                                             setIsLoaded(true)
@@ -860,7 +860,7 @@ const TopicComposer = props => {
                       </Droppable>
                       <Button
                         label='Passage'
-                        className='p-button-outlined p-button-sm p-button-secondary'
+                        className='button-outlined button-sm button-secondary'
                         icon='pi pi-plus'
                         onClick={() => {
                           const newItem = {
@@ -880,7 +880,7 @@ const TopicComposer = props => {
                       />
                       <Button
                         label='Html'
-                        className='p-button-outlined p-button-sm p-button-secondary'
+                        className='button-outlined button-sm button-secondary'
                         icon='pi pi-plus'
                         onClick={() => {
                           const newItem = {
@@ -899,7 +899,7 @@ const TopicComposer = props => {
                       />
                       <Button
                         label='Image'
-                        className='p-button-outlined p-button-sm p-button-secondary'
+                        className='button-outlined button-sm button-secondary'
                         icon='pi pi-plus'
                         onClick={() => {
                           const newItem = {
@@ -921,7 +921,7 @@ const TopicComposer = props => {
                       />
                       <Button
                         label='Media'
-                        className='p-button-outlined p-button-sm p-button-secondary'
+                        className='button-outlined button-sm button-secondary'
                         icon='pi pi-plus'
                         onClick={() => {
                           const newItem = {
@@ -943,7 +943,7 @@ const TopicComposer = props => {
                       />
                       <Button
                         label='Subcategory'
-                        className='p-button-outlined p-button-sm p-button-secondary'
+                        className='button-outlined button-sm button-secondary'
                         icon='pi pi-plus'
                         onClick={() => {
                           const newItem = {
@@ -962,7 +962,7 @@ const TopicComposer = props => {
                       />
                       <Button
                         label='Featured'
-                        className='p-button-outlined p-button-sm p-button-secondary'
+                        className='button-outlined button-sm button-secondary'
                         icon='pi pi-plus'
                         onClick={() => {
                           const newItem = {
@@ -985,7 +985,7 @@ const TopicComposer = props => {
               ))}
             </Fieldset>
           </div>
-          <div className='p-col-4'>
+          <div className='col-4'>
             <Fieldset legend='Preview Pane' style={{ margin: 10 }}>
               {sections.map((el, ind) => (
                 <div key={`display-${ind}`}>
@@ -1035,7 +1035,7 @@ const TopicComposer = props => {
                 setSectionEditVersion('')
                 setSectionEditDialog(false)
               }}
-              className='p-button-text'
+              className='button-text ml-4'
             />
             <Button
               label='OK'
@@ -1087,7 +1087,7 @@ const TopicComposer = props => {
         }
         onHide={() => setSectionEditDialog(false)}
       >
-        <div className='p-field'>Select a Version</div>
+        <div className='field'>Select a Version</div>
         <Dropdown
           value={bible}
           options={bibles}

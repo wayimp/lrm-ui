@@ -58,11 +58,11 @@ const Login = props => {
     <div>
       <Toast ref={toast} position='bottom-right'></Toast>
       <TopBar />
-      <div className='demo-container p-p-4 p-lg-2' style={{ marginTop: 50 }}>
-        <div className='card p-d-block p-mx-auto'>
-          <div className='p-field p-grid'>
-            <div className='p-inputgroup'>
-              <span className='p-inputgroup-addon'>
+      <div className='demo-container p-4 lg-2' style={{ marginTop: 100 }}>
+        <div className='card block mx-auto'>
+          <div className='field grid'>
+            <div className='inputgroup'>
+              <span className='inputgroup-addon'>
                 <i className='pi pi-user'></i>
               </span>
               <InputText
@@ -74,9 +74,9 @@ const Login = props => {
               />
             </div>
           </div>
-          <div className='p-field p-grid'>
-            <div className='p-inputgroup'>
-              <span className='p-inputgroup-addon'>
+          <div className='field grid'>
+            <div className='inputgroup'>
+              <span className='inputgroup-addon'>
                 <i className='pi pi-lock'></i>
               </span>
               <InputText
@@ -89,7 +89,7 @@ const Login = props => {
               />
             </div>
           </div>
-          <div className='p-field p-grid'>
+          <div className='field grid'>
             <Button label='Submit' icon='pi pi-check' onClick={handleSubmit} />
           </div>
         </div>

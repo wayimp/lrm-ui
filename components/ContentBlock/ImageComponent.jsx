@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import imageCompression from 'browser-image-compression'
 import { Editor } from 'primereact/editor'
 import { Button } from 'primereact/button'
@@ -143,7 +143,7 @@ const ImageComponent = ({ props, mode, updateConfig }) => {
                 }}
               />
               <Button
-                className='p-button-rounded p-button-text'
+                className='button-rounded button-text ml-4'
                 onClick={() => {
                   setValue('')
                   const update = { ...state, value: '' }
@@ -158,7 +158,7 @@ const ImageComponent = ({ props, mode, updateConfig }) => {
           ) : (
             ''
           )}
-          <div className='p-d-flex'>
+          <div className='d-flex'>
             <FileUpload
               mode='basic'
               auto
@@ -195,7 +195,7 @@ const ImageComponent = ({ props, mode, updateConfig }) => {
                 }}
               />
               <Button
-                className='p-button-rounded p-button-text'
+                className='button-rounded button-text ml-4'
                 onClick={() => {
                   setValue('')
                   const update = { ...state, value: '' }
@@ -210,7 +210,7 @@ const ImageComponent = ({ props, mode, updateConfig }) => {
           ) : (
             ''
           )}
-          <div className='p-d-flex'>
+          <div className='d-flex'>
             <FileUpload
               mode='basic'
               auto
@@ -220,7 +220,7 @@ const ImageComponent = ({ props, mode, updateConfig }) => {
               uploadHandler={handleImageUpload}
               chooseLabel='Upload Image'
             />
-            <div className='p-field p-col'>
+            <div className='field col'>
               <label htmlFor='maxWidthOrHeight'>Max Width:</label>
               <InputNumber
                 name='maxWidthOrHeight'
@@ -234,7 +234,7 @@ const ImageComponent = ({ props, mode, updateConfig }) => {
               onClick={() => {
                 updateConfig(null)
               }}
-              className='p-button-text'
+              className='button-text ml-4'
             />
             <Button
               label='OK'

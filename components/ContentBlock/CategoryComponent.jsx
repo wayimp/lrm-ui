@@ -15,7 +15,7 @@ const CategoryComponent = ({ props, mode, updateValue, updateConfig }) => {
     setState(newState)
   }
 
-  useEffect(async () => {
+  const getCategory = async () => {
     if (state.value) {
       const featured = await axiosClient
         .get('/category/featured')
@@ -25,6 +25,10 @@ const CategoryComponent = ({ props, mode, updateValue, updateConfig }) => {
         setTopics(featured)
       }
     }
+  };
+
+  useEffect(() => {
+    getCategory();
   }, [])
 
   switch (mode) {
@@ -38,17 +42,16 @@ const CategoryComponent = ({ props, mode, updateValue, updateConfig }) => {
           {topics.map((t, i) => (
             <Button
               key={i}
-              className='p-button-outlined p-m-2'
+              className='button-outlined m-2'
               label={t.title}
               style={{ color: 'black', background: '#9A9AEB' }}
               onClick={() => {
-                window.location = `${
-                  typeof window !== 'undefined'
+                window.location = `${typeof window !== 'undefined'
                     ? window.location.protocol +
-                      '//' +
-                      window.location.host.split(/\//)[0]
+                    '//' +
+                    window.location.host.split(/\//)[0]
                     : ''
-                }?t=${t._id}&v=HCSB`
+                  }?t=${t._id}&v=HCSB`
               }}
             />
           ))}
@@ -63,7 +66,7 @@ const CategoryComponent = ({ props, mode, updateValue, updateConfig }) => {
     case 'config':
       return (
         <>
-          <div className='p-field'>
+          <div className='field'>
             <Dropdown
               value={state.value}
               options={categories}
@@ -73,14 +76,14 @@ const CategoryComponent = ({ props, mode, updateValue, updateConfig }) => {
               placeholder='Select a Category'
             />
           </div>
-          <div className='p-d-flex p-jc-end'>
+          <div className='d-flex justify-content-end'>
             <Button
               label='Cancel'
               icon='pi pi-times'
               onClick={() => {
                 updateConfig(null)
               }}
-              className='p-button-text'
+              className='button-text ml-4'
             />
             <Button
               label='OK'

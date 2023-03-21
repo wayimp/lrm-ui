@@ -76,7 +76,7 @@ const topicMetrics = ({ topicsRead, topicsCopied }) => {
   return (
     <div>
       <TopBar />
-      <div className='p-flex-column' style={{ marginTop: 80 }}>
+      <div className='flex-column' style={{ marginTop: 80 }}>
         <h3 style={{ marginLeft: 30 }}>Topics Read</h3>
         <Chart
           animations={false}

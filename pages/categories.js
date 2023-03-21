@@ -210,9 +210,9 @@ const TopicOrder = props => {
                           provided.draggableProps.style
                         )}
                       >
-                        <div className='p-d-flex p-ai-center p-text-nowrap p-text-truncate'>
+                        <div className='flex align-content-center text-nowrap text-truncate'>
                           <Button
-                            className='p-button-rounded p-button-text'
+                            className='button-rounded button-text'
                             icon='pi pi-window-maximize'
                             onClick={() => {
                               window.open(`topics?id=${item._id}`)

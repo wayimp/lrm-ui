@@ -89,7 +89,7 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
             passageId={props.passageId}
             setPassage={setPassage}
           />
-          <div className='p-ai-center p-mt-2'>
+          <div className='flex align-content-center mt-2'>
             <label htmlFor='reference'>Reference:&nbsp;</label>
             <InputText
               id='reference'
@@ -104,14 +104,14 @@ const PassageComponent = ({ props, mode, updateValue, updateConfig }) => {
             value={state.html}
             onTextChange={handleHtmlChange}
           />
-          <div className='p-d-flex p-jc-end'>
+          <div className='d-flex justify-content-end'>
             <Button
               label='Cancel'
               icon='pi pi-times'
               onClick={() => {
                 updateConfig(null)
               }}
-              className='p-button-text'
+              className='button-text ml-4'
             />
             <Button
               label='OK'

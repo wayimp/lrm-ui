@@ -17,8 +17,6 @@ const Start = props => {
 
   const toast = useRef(null)
 
-  useEffect(() => {}, [])
-
   const movePrevious = () => {
     let findIndex = props.topics.findIndex(t => t.title === selectedTopic.title)
 
@@ -44,10 +42,10 @@ const Start = props => {
   }
 
   return (
-    <div className='p-flex-column p-jc-center'>
+    <div className='flex-column justify-content-center'>
       <h3 style={{ marginLeft: 30 }}>How do I Make a Fresh Start?</h3>
       <div
-        className='p-d-flex p-flex-column p-flex-md-row'
+        className='d-flex flex-column flex-md-row'
         style={{ margin: '10px 10px 10px 10px' }}
       >
         <Toast ref={toast} position='bottom-right'></Toast>
@@ -58,7 +56,7 @@ const Start = props => {
           optionLabel='title'
           style={{ marginRight: 20, minWidth: 300 }}
         />
-        <div className='p-mb-2 p-mr-2'>
+        <div className='mb-2 mr-2'>
           {selectedTopic ? (
             <Fieldset
               style={{ margin: '0px 0px 10px 0px' }}
@@ -67,13 +65,12 @@ const Start = props => {
                   {selectedTopic.sections[0].name}&nbsp;&nbsp;
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
-                    text={`${
-                      typeof window !== 'undefined'
+                    text={`${typeof window !== 'undefined'
                         ? window.location.protocol +
-                          '//' +
-                          window.location.host.split(/\//)[0]
+                        '//' +
+                        window.location.host.split(/\//)[0]
                         : ''
-                    }?t=${selectedTopic._id}&v=HCSB`}
+                      }?t=${selectedTopic._id}&v=HCSB`}
                     onCopy={() =>
                       toast.current.show({
                         severity: 'success',
@@ -81,22 +78,24 @@ const Start = props => {
                       })
                     }
                   >
-                    <i className='pi pi-upload'></i>
-                  </CopyToClipboard>
+                    <div className='flex align-items-center'>
+                      <i className='pi pi-upload' />
+                    </div>
+                    </CopyToClipboard>
                 </div>
               }
             >
-              <div className='p-d-flex p-p-3'>
+              <div className='d-flex p-3'>
                 <Button
                   type='button'
                   icon='pi pi-arrow-left'
-                  className='p-button-rounded p-button-outlined'
+                  className='button-rounded button-outlined'
                   onClick={movePrevious}
                 />
                 <Button
                   type='button'
                   icon='pi pi-arrow-right'
-                  className='p-ml-auto p-button-rounded p-button-outlined'
+                  className='ml-auto button-rounded button-outlined'
                   onClick={moveNext}
                 />
               </div>
@@ -113,7 +112,7 @@ const Start = props => {
   )
 }
 
-export async function getServerSideProps () {
+export async function getServerSideProps() {
   const topics = await axiosClient
     .get('/topics?category=start')
     .then(response => response.data)

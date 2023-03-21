@@ -23,13 +23,13 @@ export default function AdminTopBar () {
       <Button
         label='Categories'
         icon='pi pi-th-large'
-        className='p-mr-2'
+        className='mr-2'
         onClick={() => router.push('/categories')}
       />
       <Button
         label='Topics'
         icon='pi pi-sitemap'
-        className='p-mr-2'
+        className='mr-2'
         onClick={() => router.push('/topics')}
       />
     </React.Fragment>
@@ -40,30 +40,30 @@ export default function AdminTopBar () {
       <Button
         label='Topics'
         icon='pi pi-chart-bar'
-        className='p-mr-2 p-button-secondary'
+        className='mr-2 button-secondary'
         onClick={() => router.push('/topicMetrics')}
       />
       <Button
         label='Verses'
         icon='pi pi-chart-bar'
-        className='p-mr-2 p-button-secondary'
+        className='mr-2 button-secondary'
         onClick={() => router.push('/verseMetrics')}
       />
       <Button
         label='Version'
         icon='pi pi-chart-bar'
-        className='p-mr-2 p-button-secondary'
+        className='mr-2 button-secondary'
         onClick={() => router.push('/versionMetrics')}
       />
       <Button
         label='Visits'
         icon='pi pi-chart-bar'
-        className='p-mr-2 p-button-secondary'
+        className='mr-2 button-secondary'
         onClick={() => router.push('/visitMetrics')}
       />
       <Button
         icon='pi pi-sign-out'
-        className='p-button-rounded p-button-text'
+        className='button-rounded button-text'
         onClick={reset}
         tooltip='Sign Out'
         tooltipOptions={{ position: 'left' }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import axios from 'axios'
 import VerseSelector from '../VerseSelector'
 import TileSelector from '../TileSelector'
@@ -90,7 +90,7 @@ const TileComponent = ({ props, mode, updateValue, updateConfig }) => {
             passageId={props.passageId}
             setPassage={setPassage}
           />
-          <div className='p-ai-center p-mt-2'>
+          <div className='align-items-center mt-2'>
             <label htmlFor='reference'>Reference:&nbsp;</label>
             <InputText
               id='reference'
@@ -105,14 +105,14 @@ const TileComponent = ({ props, mode, updateValue, updateConfig }) => {
             value={state.html}
             onTextChange={handleHtmlChange}
           />
-          <div className='p-d-flex p-jc-end'>
+          <div className='d-flex justify-content-end'>
             <Button
               label='Cancel'
               icon='pi pi-times'
               onClick={() => {
                 updateConfig(null)
               }}
-              className='p-button-text'
+              className='button-text ml-4'
             />
             <Button
               label='OK'

@@ -15,7 +15,7 @@ const FeaturedComponent = ({ props, mode, updateValue, updateConfig }) => {
     setState(newState)
   }
 
-  useEffect(async () => {
+  const getFeatured = async () => {
     const featured = await axiosClient
       .get('/featured')
       .then(response => response.data)
@@ -23,6 +23,10 @@ const FeaturedComponent = ({ props, mode, updateValue, updateConfig }) => {
     if (Array.isArray(featured)) {
       setTopics(featured)
     }
+  }
+
+  useEffect(() => {
+    getFeatured()
   }, [])
 
   switch (mode) {
@@ -36,17 +40,15 @@ const FeaturedComponent = ({ props, mode, updateValue, updateConfig }) => {
           {topics.map((t, i) => (
             <Button
               key={i}
-              className='p-button-outlined p-m-2'
+              className='button-outlined m-2'
               label={t.title}
-              style={{ color: 'black', background: '#9A9AEB' }}
               onClick={() => {
-                window.location = `${
-                  typeof window !== 'undefined'
+                window.location = `${typeof window !== 'undefined'
                     ? window.location.protocol +
-                      '//' +
-                      window.location.host.split(/\//)[0]
+                    '//' +
+                    window.location.host.split(/\//)[0]
                     : ''
-                }?t=${t._id}&v=HCSB`
+                  }?t=${t._id}&v=HCSB`
               }}
             />
           ))}
@@ -62,14 +64,14 @@ const FeaturedComponent = ({ props, mode, updateValue, updateConfig }) => {
       return (
         <>
           <div>Featured Topics</div>
-          <div className='p-d-flex p-jc-end'>
+          <div className='d-flex justify-content-end'>
             <Button
               label='Cancel'
               icon='pi pi-times'
               onClick={() => {
                 updateConfig(null)
               }}
-              className='p-button-text'
+              className='button-text ml-4'
             />
             <Button
               label='OK'

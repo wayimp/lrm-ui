@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Editor } from 'primereact/editor'
 import { Button } from 'primereact/button'
 
@@ -39,7 +39,7 @@ const HtmlComponent = ({ props, mode, updateValue, updateConfig }) => {
     case 'config':
       return (
         <>
-          <div className='p-field'>
+          <div className='field'>
             <Editor
               style={{ height: '320px' }}
               id='labelText'
@@ -48,14 +48,14 @@ const HtmlComponent = ({ props, mode, updateValue, updateConfig }) => {
               onTextChange={handleHtmlChange}
             />
           </div>
-          <div className='p-d-flex p-jc-end'>
+          <div className='d-flex justify-content-end'>
             <Button
               label='Cancel'
               icon='pi pi-times'
               onClick={() => {
                 updateConfig(null)
               }}
-              className='p-button-text'
+              className='button-text'
             />
             <Button
               label='OK'

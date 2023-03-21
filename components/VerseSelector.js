@@ -97,14 +97,14 @@ const VerseSelector = props => {
     if (props.readOnly) {
       const { reference, html } = props
       setPassage({ reference, html })
-      return
     }
-    // Retrieve the passage afresh if parameters change
-    if (verse) {
-      const _passageId = `${book.id}.${verse.replace(':', '.')}${
-        extended && verseEnd ? `-${verseEnd}` : ''
-      }`
-      fetchPassage(props.version, _passageId)
+    else {
+      // Retrieve the passage afresh if parameters change
+      if (verse) {
+        const _passageId = `${book.id}.${verse.replace(':', '.')}${extended && verseEnd ? `-${verseEnd}` : ''
+          }`
+        fetchPassage(props.version, _passageId)
+      }
     }
   }, [props.version, verse, extended, verseEnd])
 
@@ -170,8 +170,7 @@ const VerseSelector = props => {
     setLoading(true)
     let ref =
       passageId ||
-      `${book.id}.${verse.replace(':', '.')}${
-        extended && verseEnd ? `-${verseEnd}` : ''
+      `${book.id}.${verse.replace(':', '.')}${extended && verseEnd ? `-${verseEnd}` : ''
       }`
 
     const url = `/verses/${version || bible.abbreviation}/${ref}`
@@ -225,20 +224,18 @@ const VerseSelector = props => {
   }
 
   const verseRef = book
-    ? `${book.id}.${verse ? verse.replace(':', '.') : ''}${
-        extended && verseEnd ? `-${verseEnd}` : ''
-      }`
+    ? `${book.id}.${verse ? verse.replace(':', '.') : ''}${extended && verseEnd ? `-${verseEnd}` : ''
+    }`
     : ''
 
   const chapterNumber = Number(verse ? verse.split(':')[0] : 0)
 
   const openChapter = _chapterNumber => {
     const chapterRef = `${book.id}.${_chapterNumber}`
-    const url = `${
-      typeof window !== 'undefined'
-        ? window.location.protocol + '//' + window.location.host.split(/\//)[0]
-        : ''
-    }?r=${chapterRef}&v=${bible.abbreviation}`
+    const url = `${typeof window !== 'undefined'
+      ? window.location.protocol + '//' + window.location.host.split(/\//)[0]
+      : ''
+      }?r=${chapterRef}&v=${bible.abbreviation}`
     window.open(url)
   }
 
@@ -259,7 +256,7 @@ const VerseSelector = props => {
         ''
       ) : (
         <>
-          <div className='p-d-inline-flex p-ai-center'>
+          <div className='flex align-content-center'>
             <Dropdown
               value={book}
               options={bible && bible.books ? bible.books : []}
@@ -282,7 +279,7 @@ const VerseSelector = props => {
               disabled={!book || !book.chapters}
             />
             <MultiStateCheckbox
-              style={{ marginLeft: 6, marginRight: 6 }}
+              style={{ marginTop: 12, marginLeft: 6, marginRight: 6 }}
               value={extended}
               options={options}
               optionValue='value'
@@ -308,7 +305,7 @@ const VerseSelector = props => {
         </>
       )}
 
-      <div className='p-d-inline-flex p-ai-center'>
+      <div className='flex align-content-center'>
         {book && verse ? (
           <>
             <h3>{`${passage.reference || ''} (${bible.abbreviation ||
@@ -320,7 +317,7 @@ const VerseSelector = props => {
                 &nbsp;
                 {chapterNumber > 1 ? (
                   <Button
-                    className='p-button-rounded p-button-text'
+                    className='button-rounded button-text m-1'
                     icon='pi pi-arrow-circle-left'
                     onClick={() => readChapter(chapterNumber - 1)}
                     tooltip='Previous Chapter'
@@ -330,7 +327,7 @@ const VerseSelector = props => {
                   ''
                 )}
                 <Button
-                  className='p-button-rounded p-button-text'
+                  className='button-rounded button-text m-1'
                   icon='pi pi-book'
                   onClick={() => readChapter(chapterNumber)}
                   tooltip='Read Chapter'
@@ -338,7 +335,7 @@ const VerseSelector = props => {
                 />
                 {chapterNumber < book.chapters.length ? (
                   <Button
-                    className='p-button-rounded p-button-text'
+                    className='button-rounded button-text m-1'
                     icon='pi pi-arrow-circle-right'
                     onClick={() => readChapter(chapterNumber + 1)}
                     tooltip='Next Chapter'
@@ -351,7 +348,8 @@ const VerseSelector = props => {
             )}
             &nbsp;
             <Button
-              className='p-button-rounded p-button-text'
+              link
+              className='button-rounded button-text m-1'
               icon='pi pi-window-maximize'
               onClick={() => openChapter(chapterNumber)}
               tooltip='Open Chapter'
@@ -360,9 +358,8 @@ const VerseSelector = props => {
             &nbsp;
             <CopyToClipboard
               style={{ cursor: 'copy' }}
-              text={`${
-                typeof window !== 'undefined' ? window.location.origin : ''
-              }?r=${verseRef}&v=${bible.abbreviation}`}
+              text={`${typeof window !== 'undefined' ? window.location.origin : ''
+                }?r=${verseRef}&v=${bible.abbreviation}`}
               onCopy={() => {
                 axiosClient.post('/metrics/verse_copied', {
                   ref: verseRef,
@@ -374,7 +371,9 @@ const VerseSelector = props => {
                 })
               }}
             >
-              <i className='pi pi-upload'></i>
+              <div className='flex align-items-center'>
+                <i className='pi pi-upload' />
+              </div>
             </CopyToClipboard>
           </>
         ) : (

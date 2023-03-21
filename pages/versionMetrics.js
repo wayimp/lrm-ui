@@ -76,7 +76,7 @@ const versionMetrics = ({ versions }) => {
   return (
     <div>
       <TopBar />
-      <div className='p-flex-column' style={{ marginTop: 80 }}>
+      <div className='flex-column' style={{ marginTop: 80 }}>
         <h3 style={{ marginLeft: 30 }}>Versions Used</h3>
         <Chart
           animations={false}

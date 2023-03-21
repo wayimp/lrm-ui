@@ -144,9 +144,8 @@ const Search = props => {
                 style={{ cursor: 'copy' }}
                 text={`${window.location.protocol +
                   '//' +
-                  window.location.host.split(/\//)[0]}?t=${
-                  selectedTopic._id
-                }&v=${bible}`}
+                  window.location.host.split(/\//)[0]}?t=${selectedTopic._id
+                  }&v=${bible}`}
                 onCopy={() =>
                   toast.current.show({
                     severity: 'success',
@@ -154,7 +153,9 @@ const Search = props => {
                   })
                 }
               >
-                <i className='pi pi-upload'></i>
+                <div className='flex align-items-center'>
+                  <i className='pi pi-upload' />
+                </div>
               </CopyToClipboard>
             </div>
           }
@@ -180,7 +181,7 @@ const Search = props => {
   )
 }
 
-export async function getServerSideProps (context) {
+export async function getServerSideProps(context) {
   let topic = {}
   let version = ''
   if (context && context.query) {
