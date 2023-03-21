@@ -2,7 +2,6 @@ import React from 'react'
 import HtmlComponent from './HtmlComponent'
 import PassageComponent from './PassageComponent'
 import ImageComponent from './ImageComponent'
-import MediaComponent from './MediaComponent'
 import TileComponent from './TileComponent'
 import CategoryComponent from './CategoryComponent'
 import FeaturedComponent from './FeaturedComponent'
@@ -45,17 +44,6 @@ const ContentBlock = ({ props, mode, updateValue, updateConfig }) => {
     case 'image':
       return (
         <ImageComponent
-          props={props}
-          mode={mode}
-          updateValue={updateValue}
-          updateConfig={updateConfig}
-        />
-      )
-      break
-
-    case 'media':
-      return (
-        <MediaComponent
           props={props}
           mode={mode}
           updateValue={updateValue}
