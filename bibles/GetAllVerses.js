@@ -1,9 +1,15 @@
+//Reina Valera 1909 - 592420522e16049f-01
+//Spanish Bible, Palabla de Dios para ti - 48acedcf8595c754-01
+//The Holy Bible in Simple Spanish - b32b9d1b64b4ef29-01
+//The New Testament in Spanish, Free Bible Version - 482ddd53705278cc-01
+//Versión Biblia Libre - 482ddd53705278cc-02
+
 const fs = require('fs')
 const axios = require('axios')
 const flatten = require('lodash.flatten')
 const apiKey = 'abe1c86651b3f72bfdc3ff60319d3b7b'
 const fileName = __dirname + '/RV1909Verses.json'
-const bibleId = '592420522e16049f-01' // RV1909
+const bibleId = '482ddd53705278cc-02' // Versión Biblia Libre
 let books = []
 let chapters = []
 let chapterMap = []

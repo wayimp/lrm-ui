@@ -2,8 +2,8 @@ const fs = require('fs')
 const axios = require('axios')
 const flatten = require('lodash.flatten')
 const apiKey = 'abe1c86651b3f72bfdc3ff60319d3b7b'
-const fileName = __dirname + '/RVR09VersesTree.json'
-const bibleId = '592420522e16049f-01' // RVR09
+const fileName = __dirname + '/LibreAll.json'
+const bibleId = '482ddd53705278cc-02' // Versión Biblia Libre
 const Verses = [
   { chapterId: 'GEN.intro', count: 1 },
   { chapterId: 'GEN.1', count: 31 },
@@ -1289,6 +1289,18 @@ const getVerses = async chapterId => {
   }
 }
 
+const sequential = async (fn, isDone = false) => {
+  if (isDone) {
+    fs.writeFileSync(fileName, JSON.stringify(chapterMap))
+    return
+  }
+  const chapter = chapters.shift()
+  if (!chapter) return
+
+  const promise = await getVerses(chapter)
+  return Promise.resolve(promise).then(sequential(fn, chapters.length === 0))
+}
+
 const getBooks = async () => {
   books = await axios({
     method: 'get',
@@ -1316,7 +1328,7 @@ const getBooks = async () => {
   fs.writeFileSync(fileName, JSON.stringify(books))
 
   // Start the actual processing
-  //sequential(getVerses(chapters.shift()))
+  sequential(getVerses(chapters.shift()))
 }
 
 getBooks()
