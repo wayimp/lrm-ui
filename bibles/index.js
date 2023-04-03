@@ -1,5 +1,5 @@
 import { HCSB } from './HCSB'
 import { KJV } from './KJV'
-import { VBL } from './VBL'
+import { NVI } from './NVI'
 
-export const bibles = [HCSB, KJV, VBL]
+export const bibles = [HCSB, KJV, NVI]
