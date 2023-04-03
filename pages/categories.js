@@ -158,13 +158,13 @@ const TopicOrder = props => {
   }
 
   return (
-    <div style={{ marginTop: 150 }}>
+    <div style={{ marginTop: 200 }}>
       <Toast ref={toast} position='bottom-right'></Toast>
       <TopBar />
       <Toolbar
         style={{
           position: 'fixed',
-          top: 50,
+          top: 100,
           left: 0,
           width: '100%',
           zIndex: 1000
