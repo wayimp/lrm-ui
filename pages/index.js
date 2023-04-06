@@ -731,6 +731,8 @@ const Index = props => {
               ?
               <div>
                 <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left' }} />
+                <img src='/images/welcome.png' style={{maxHeight:140}}/>
+                
                 {selectedCategory.map((t, i) => {
                   const section = t.sections.find(
                     s => s.version === (bible || 'HCSB')
