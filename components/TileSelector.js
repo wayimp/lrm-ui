@@ -9,6 +9,7 @@ import { Toast } from 'primereact/toast'
 import { Tooltip } from 'primereact/tooltip'
 import { OverlayPanel } from 'primereact/overlaypanel'
 import { useQueryClient } from 'react-query'
+import { Accordion, AccordionTab } from 'primereact/accordion';
 
 const TileSelector = props => {
   const [bible, setBible] = useState({})
@@ -21,6 +22,7 @@ const TileSelector = props => {
   const [loading, setLoading] = useState(false)
   const [checked, setChecked] = useState(false)
   const [extended, setExtended] = useState('')
+  const [activeIndex, setActiveIndex] = useState(null);
   const options = [{ value: true, icon: 'pi pi-minus' }]
   const toast = useRef(null)
   const op = useRef(null);
@@ -135,6 +137,7 @@ const TileSelector = props => {
     setExtended(true)
     setVerseEnd(_rangeEnd)
     op?.current?.hide()
+    setActiveIndex(null)
   }
 
   const onChangeVerse = e => {
@@ -269,19 +272,38 @@ const TileSelector = props => {
         ''
       ) : (
         <div>
-          <div className='d-flex flex-wrap'>
-            {bible?.books?.map(b => {
-              return (
-                <span key={b.id}>
+          <Accordion activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
+            <AccordionTab header={<Button
+              label="Old Testament"
+              className="p-button-text"
+            />}>
+              {bible?.books?.map((b, i) => {
+                return i < 39 ?
                   <Button
+                    key={b.id}
                     label={b.name}
                     className="p-button-text"
                     type="button"
                     onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
-                </span>
-              )
-            })}
-          </div>
+                  : <></>
+              })}
+            </AccordionTab>
+            <AccordionTab header={<Button
+              label="New Testament"
+              className="p-button-text"
+            />}>
+              {bible?.books?.map((b, i) => {
+                return i >= 39 ?
+                  <Button
+                    key={b.id}
+                    label={b.name}
+                    className="p-button-text"
+                    type="button"
+                    onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+                  : <></>
+              })}
+            </AccordionTab>
+          </Accordion>
 
           <OverlayPanel ref={op} showCloseIcon id="overlay_panel" className="overlay-panel">
             <div className='d-flex flex-wrap mt-4'>
