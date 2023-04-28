@@ -7,6 +7,7 @@ import { bibles } from '../bibles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { Toast } from 'primereact/toast'
 import { Tooltip } from 'primereact/tooltip'
+import { OverlayPanel } from 'primereact/overlaypanel'
 import { useQueryClient } from 'react-query'
 
 const TileSelector = props => {
@@ -22,6 +23,7 @@ const TileSelector = props => {
   const [extended, setExtended] = useState('')
   const options = [{ value: true, icon: 'pi pi-minus' }]
   const toast = useRef(null)
+  const op = useRef(null);
   const queryClient = useQueryClient()
 
   const verseSelections = chapters => {
@@ -132,6 +134,7 @@ const TileSelector = props => {
     setVersesEnd(selectionsEnd)
     setExtended(true)
     setVerseEnd(_rangeEnd)
+    op?.current?.hide()
   }
 
   const onChangeVerse = e => {
@@ -268,52 +271,32 @@ const TileSelector = props => {
         <div>
           <div className='d-flex flex-wrap'>
             {bible?.books?.map(b => {
-              if (b === book) {
-                return (
+              return (
+                <span key={b.id}>
                   <Button
-                    key={b.id}
                     label={b.name}
-                    style={{ color: '#25416b', background: '#e9d5a2' }}
-                  />
-                )
-              } else {
-                return (
-                  <Button
-                    key={b.id}
-                    className='button-outlined'
-                    label={b.name}
-                    style={{ color: '#e9d5a2', background: '#25416b' }}
-                    onClick={() => onChangeTile(b)}
-                  />
-                )
-              }
+                    className="p-button-text"
+                    type="button"
+                    onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+                </span>
+              )
             })}
           </div>
-          <div className='d-flex flex-wrap mt-4'>
-            {book?.chapters?.map((c, ci) => {
-              if (chapterNumber === ci + 1) {
+
+          <OverlayPanel ref={op} showCloseIcon id="overlay_panel" className="overlay-panel">
+            <div className='d-flex flex-wrap mt-4'>
+              {book?.chapters?.map((c, ci) => {
                 return (
                   <Button
                     key={ci}
-                    className='button-outlined'
+                    className="p-button-text"
                     label={`Chapter ${ci + 1}`}
-                    style={{ color: '#25416b', background: '#e9d5a2' }}
                     onClick={() => onChangeTileVerse(ci)}
                   />
                 )
-              } else {
-                return (
-                  <Button
-                    key={ci}
-                    className='button-outlined'
-                    label={`Chapter ${ci + 1}`}
-                    style={{ color: '#e9d5a2', background: '#25416b' }}
-                    onClick={() => onChangeTileVerse(ci)}
-                  />
-                )
-              }
-            })}
-          </div>
+              })}
+            </div>
+          </OverlayPanel>
 
           <div className='flex align-content-center m-3'>
             <Dropdown
@@ -322,7 +305,7 @@ const TileSelector = props => {
               onChange={onChangeVerse}
               placeholder='Verse'
               editable
-              style={{ width: 100 }}
+              style={{ width: 120 }}
               disabled={!book || !book.chapters}
             />
             <MultiStateCheckbox
@@ -340,7 +323,7 @@ const TileSelector = props => {
                   onChange={onChangeVerseEnd}
                   placeholder='Verse'
                   editable
-                  style={{ width: 100 }}
+                  style={{ width: 120 }}
                   disabled={!book.chapters}
                 />
               </>

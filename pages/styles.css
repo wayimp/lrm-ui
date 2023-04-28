@@ -6,7 +6,9 @@ body {
   background: #fff2e2;
 }
 
-p { margin-top: 0px;}
+p {
+  margin-top: 0px;
+}
 
 p.s1 {
   font-weight: bolder;
@@ -75,4 +77,8 @@ h3 {
 
 .p-button-icon {
   margin: 3px;
+}
+
+.overlay-panel {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
