@@ -9,7 +9,6 @@ import { Toast } from 'primereact/toast'
 import { Tooltip } from 'primereact/tooltip'
 import { OverlayPanel } from 'primereact/overlaypanel'
 import { useQueryClient } from 'react-query'
-import { Accordion, AccordionTab } from 'primereact/accordion';
 
 const TileSelector = props => {
   const [bible, setBible] = useState({})
@@ -22,9 +21,10 @@ const TileSelector = props => {
   const [loading, setLoading] = useState(false)
   const [checked, setChecked] = useState(false)
   const [extended, setExtended] = useState('')
-  const [activeIndex, setActiveIndex] = useState(null);
   const options = [{ value: true, icon: 'pi pi-minus' }]
   const toast = useRef(null)
+  const ot = useRef(null);
+  const nt = useRef(null);
   const op = useRef(null);
   const queryClient = useQueryClient()
 
@@ -137,7 +137,8 @@ const TileSelector = props => {
     setExtended(true)
     setVerseEnd(_rangeEnd)
     op?.current?.hide()
-    setActiveIndex(null)
+    ot?.current?.hide()
+    nt?.current?.hide()
   }
 
   const onChangeVerse = e => {
@@ -151,7 +152,7 @@ const TileSelector = props => {
   }
 
   const onChangeExtended = e => {
-    if (!e.value) {
+    if (!e.value || !verse) {
       setVerseEnd(null)
     } else {
       const start = verse.split(':')
@@ -272,11 +273,18 @@ const TileSelector = props => {
         ''
       ) : (
         <div>
-          <Accordion activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-            <AccordionTab header={<Button
-              label={bible?.abbreviation=='NVI' ? 'Antiguo Testamento' : 'Old Testament'}
-              className="p-button-text"
-            />}>
+          <Button
+            label={bible?.abbreviation == 'NVI' ? 'Antiguo Testamento' : 'Old Testament'}
+            type="button"
+            onClick={(e) => { ot?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+          &nbsp;&nbsp;
+          <Button
+            label={bible?.abbreviation == 'NVI' ? 'Nuevo Testamento' : 'New Testament'}
+            type="button"
+            onClick={(e) => { nt?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+
+          <OverlayPanel ref={ot} showCloseIcon id="old_testament" className="overlay-panel">
+            <div className='d-flex flex-wrap mt-4'>
               {bible?.books?.map((b, i) => {
                 return i < 39 ?
                   <Button
@@ -287,11 +295,11 @@ const TileSelector = props => {
                     onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
                   : <></>
               })}
-            </AccordionTab>
-            <AccordionTab header={<Button
-              label={bible?.abbreviation=='NVI' ? 'Nuevo Testamento' : 'New Testament'}
-              className="p-button-text"
-            />}>
+            </div>
+          </OverlayPanel>
+
+          <OverlayPanel ref={nt} showCloseIcon id="new_testament" className="overlay-panel">
+            <div className='d-flex flex-wrap mt-4'>
               {bible?.books?.map((b, i) => {
                 return i >= 39 ?
                   <Button
@@ -302,8 +310,8 @@ const TileSelector = props => {
                     onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
                   : <></>
               })}
-            </AccordionTab>
-          </Accordion>
+            </div>
+          </OverlayPanel>
 
           <OverlayPanel ref={op} showCloseIcon id="overlay_panel" className="overlay-panel">
             <div className='d-flex flex-wrap mt-4'>
@@ -312,7 +320,7 @@ const TileSelector = props => {
                   <Button
                     key={ci}
                     className="p-button-text"
-                    label={`${bible?.abbreviation=='NVI' ? 'Capítulo' : 'Chapter'} ${ci + 1}`}
+                    label={`${bible?.abbreviation == 'NVI' ? 'Capítulo' : 'Chapter'} ${ci + 1}`}
                     onClick={() => onChangeTileVerse(ci)}
                   />
                 )

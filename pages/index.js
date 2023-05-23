@@ -24,6 +24,8 @@ import { Dialog } from 'primereact/dialog'
 import { InputText } from 'primereact/inputtext'
 import { InputTextarea } from 'primereact/inputtextarea'
 import { Divider } from 'primereact/divider';
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 const Index = props => {
   const toast = useRef(null)
@@ -36,6 +38,7 @@ const Index = props => {
   const [bible, setBible] = useState('')
   const [showPassage, setShowPassage] = useState(false)
   const [showCategory, setShowCategory] = useState(true)
+  const [categoryLoading, setCategoryLoading] = useState(false)
   const [questionDialog, setQuestionDialog] = useState(false)
   const [question, setQuestion] = useState({ name: '', email: '', text: '' })
   const [signupDialog, setSignupDialog] = useState(false)
@@ -194,10 +197,11 @@ const Index = props => {
     }
   }
 
-  const showFaqs = () => {
-    selectCategory('faqs')
+  const showCat = c => {
+    selectCategory(c)
     setShowCategory(true)
     setSelectedSection(null)
+    setShowPassage(false)
   }
 
   const selectCategory = async name => {
@@ -206,18 +210,21 @@ const Index = props => {
     const c = categories.find(c => c.value === name)
     setCategoryLabel(c.label)
 
+    setCategoryLoading(true)
     axiosClient({
       method: 'get',
       url: `/category/${name}`
     })
       .then(response => {
         setSelectedCategory(response.data || [])
+        setCategoryLoading(false)
       })
       .catch(error => {
         toast.current.show({
           severity: 'error',
           summary: 'Error Loading Section'
         })
+        setCategoryLoading(false)
       })
   }
 
@@ -412,19 +419,23 @@ const Index = props => {
               style={{ marginRight: 20, padding: 0, height: 44, cursor: 'pointer' }}
               onClick={() => (window.location.href = '/')}
             />
-            <TreeSelect
-              className='ml-3 mr-3'
-              options={props.tree}
-              onChange={selectTreeTopic}
-              selectionMode='single'
-              filter
-              placeholder='Browse Topics'
-            ></TreeSelect>
           </div>
         }
         center={
           <div class='flex align-content-center'>
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org/')} >Order</div>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
+              showCat('start')
+            }} >Need a Fresh Start?</div>
+            &nbsp;&nbsp;&nbsp;
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
+              showCat('faqs')
+            }} >FAQs</div>
+            &nbsp;&nbsp;&nbsp;
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
+              showCat('topics')
+            }} >Browse Topics</div>
+            &nbsp;&nbsp;&nbsp;
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org/')} >Order Copies</div>
             &nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               setShowPassage(true)
@@ -672,7 +683,7 @@ const Index = props => {
                   {selectedSection.links &&
                     Array.isArray(selectedSection.links) ? (
                     <div className='flex align-items-center'>
-                      <h3>Related Topics</h3>
+                      <h3>Related Topics&nbsp;&nbsp;</h3>
                       {selectedSection.links.map((link, index) => (
                         <Button
                           key={`link-${index}`}
@@ -725,44 +736,95 @@ const Index = props => {
           )
         }
         {
-          showCategory && !selectedSection ? (
-
-            !showPassage && categoryLabel.startsWith('Welcome')
+          showCategory && !selectedSection && !showPassage ?
+            categoryLabel.startsWith('Welcome')
               ?
-              <div>
-                <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left' }} />
-                <img src='/images/welcome.png' style={{maxHeight:140}}/>
-                
-                {selectedCategory.map((t, i) => {
-                  const section = t.sections.find(
-                    s => s.version === (bible || 'HCSB')
-                  )
-                  if (section && section.items) {
-                    return (
-                      <div key={`section-${i}`}>
-                        <h3 className='mt-5'>
-                          {section.name}
-                        </h3>
-                        {section.items.map((item, index) => {
-                          return (
-                            <ContentBlock
-                              key={`front-${index}`}
-                              props={item}
-                              mode='display'
-                            />
-                          )
-                        })}
-                      </div>
+              <>
+                <div>
+                  <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left', maxHeight: 180 }} />
+                  <img src='/images/welcome.png' style={{ maxHeight: 160 }} />
+                </div>
+                <div>
+                  <h3>Lookup a Topic or Passage:&nbsp;</h3>
+                  <TreeSelect
+                    className='ml-3 mr-3'
+                    options={props.tree}
+                    onChange={selectTreeTopic}
+                    selectionMode='single'
+                    filter
+                    placeholder='Browse Topics'
+                  ></TreeSelect>
+                  <p />
+                  <ContentBlock
+                    props={{
+                      type: 'tile',
+                      version: bible,
+                      passageId: props.reference ? props.reference : null
+                    }}
+                    mode='entry'
+                  />
+                  {selectedCategory.length > 0 ? <Divider /> : <></>}
+                  {selectedCategory.map((t, i) => {
+                    const section = t.sections.find(
+                      s => s.version === (bible || 'HCSB')
                     )
-                  }
-                })}
-              </div>
+                    if (section && section.items) {
+                      return (
+                        <div key={`section-${i}`}>
+                          <h3 className='mt-5'>
+                            {section.name}
+                          </h3>
+                          {section.items.map((item, index) => {
+                            return (
+                              <ContentBlock
+                                key={`front-${index}`}
+                                props={item}
+                                mode='display'
+                              />
+                            )
+                          })}
+                        </div>
+                      )
+                    }
+                  })}
+                </div>
+              </>
               :
-              <div />
-          ) : (
-            ''
-          )
+              categoryLoading
+                ?
+                <ProgressSpinner />
+                :
+                <div className='m-2 col'>
+                  <h1>{categoryLabel}</h1>
+                  <Accordion multiple activeIndex={[]}>
+                    {selectedCategory.map((t, i) => {
+                      const section = t.sections.find(
+                        s => s.version === (bible || 'HCSB')
+                      )
+                      if (section && section.items) {
+                        return (
+                          <AccordionTab header={
+                            <h1>{section.name}</h1>
+                          } key={`section-${i}`}>
+                            {section.items.map((item, index) => {
+                              return (
+                                <ContentBlock
+                                  key={`front-${index}`}
+                                  props={item}
+                                  mode='display'
+                                />
+                              )
+                            })}
+                          </AccordionTab>
+                        )
+                      }
+                    })}
+                  </Accordion>
+                </div>
+            :
+            <></>
         }
+
       </div >
       <Dialog
         header='Ask a Question'

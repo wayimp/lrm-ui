@@ -3,7 +3,7 @@
 }
 
 body {
-  background: #fff2e2;
+  background: white;
 }
 
 p {
@@ -71,8 +71,13 @@ h3 {
 }
 
 .p-fieldset-content {
-  background-color: #fff2e2;
+  background-color: white;
   color: #25416b;
+}
+
+.p-button {
+  background-color: #25416B;
+  color: #ffffff;
 }
 
 .p-button-icon {
@@ -80,5 +85,8 @@ h3 {
 }
 
 .overlay-panel {
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  box-shadow: 3px 6px 3px 6px rgba(0, 0, 0, 0.16), 3px 6px 3px 6px rgba(0, 0, 0, 0.23);
+  margin-left: 20px;
+  margin-right: 40px;
+  padding-top: -20px;
 }
