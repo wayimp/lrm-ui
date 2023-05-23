@@ -274,7 +274,7 @@ const TileSelector = props => {
         <div>
           <Accordion activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
             <AccordionTab header={<Button
-              label="Old Testament"
+              label={bible?.abbreviation=='NVI' ? 'Antiguo Testamento' : 'Old Testament'}
               className="p-button-text"
             />}>
               {bible?.books?.map((b, i) => {
@@ -289,7 +289,7 @@ const TileSelector = props => {
               })}
             </AccordionTab>
             <AccordionTab header={<Button
-              label="New Testament"
+              label={bible?.abbreviation=='NVI' ? 'Nuevo Testamento' : 'New Testament'}
               className="p-button-text"
             />}>
               {bible?.books?.map((b, i) => {
@@ -312,7 +312,7 @@ const TileSelector = props => {
                   <Button
                     key={ci}
                     className="p-button-text"
-                    label={`Chapter ${ci + 1}`}
+                    label={`${bible?.abbreviation=='NVI' ? 'Capítulo' : 'Chapter'} ${ci + 1}`}
                     onClick={() => onChangeTileVerse(ci)}
                   />
                 )
