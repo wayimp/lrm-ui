@@ -36,18 +36,20 @@ const FeaturedComponent = ({ props, mode, updateValue, updateConfig }) => {
 
     case 'display':
       return (
-        <div>
+        <div className='flex flex-row justify-content-center flex-grow-1'>
+          <h3 className='mr-2'>Featured Topics:</h3>
           {topics.map((t, i) => (
             <Button
+              size="small"
               key={i}
               className='button-outlined m-2'
               label={t.title}
               onClick={() => {
                 window.location = `${typeof window !== 'undefined'
-                    ? window.location.protocol +
-                    '//' +
-                    window.location.host.split(/\//)[0]
-                    : ''
+                  ? window.location.protocol +
+                  '//' +
+                  window.location.host.split(/\//)[0]
+                  : ''
                   }?t=${t._id}&v=HCSB`
               }}
             />

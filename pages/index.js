@@ -23,8 +23,26 @@ import { Dialog } from 'primereact/dialog'
 import { InputText } from 'primereact/inputtext'
 import { InputTextarea } from 'primereact/inputtextarea'
 import { Divider } from 'primereact/divider';
-import { Accordion, AccordionTab } from 'primereact/accordion';
+import { Panel } from 'primereact/panel';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { Ripple } from 'primereact/ripple'
+
+const panelTemplate = (options) => {
+  const toggleIcon = options.collapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up';
+  const className = `${options.className} justify-content-start`;
+  const titleClassName = `${options.titleClassName} ml-2 text-primary`;
+  const style = { fontSize: '1.25rem' };
+
+  return (
+    <div className={className}>
+      <button className={options.togglerClassName} onClick={options.onTogglerClick}>
+        <span className={toggleIcon}></span>
+        <Ripple />
+      </button>
+      <span className={titleClassName} style={style}>{options.titleElement}</span>
+    </div>
+  );
+};
 
 const Index = props => {
   const toast = useRef(null)
@@ -32,6 +50,7 @@ const Index = props => {
   const [searchTerm, setSearchTerm] = useState(null)
   const [filteredTags, setFilteredTags] = useState(null)
   const [topicId, setTopicId] = useState(null)
+  const [topics, setTopics] = useState({})
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [selectedSection, setSelectedSection] = useState(null)
   const [bible, setBible] = useState('')
@@ -209,6 +228,10 @@ const Index = props => {
     const c = categories.find(c => c.value === name)
     setCategoryLabel(c.label)
 
+    const categoryTopics = props.topicNames?.filter(topic => topic.category == name)
+    setSelectedCategory(categoryTopics)
+
+    /*
     setCategoryLoading(true)
     axiosClient({
       method: 'get',
@@ -225,6 +248,7 @@ const Index = props => {
         })
         setCategoryLoading(false)
       })
+    */
   }
 
   const getTopic = async id => {
@@ -234,6 +258,55 @@ const Index = props => {
       url
     })
     return data
+  }
+
+  const expandTopic = async id => {
+    try {
+      const topic = await queryClient.fetchQuery({
+        queryKey: ['topic', id],
+        queryFn: () => getTopic(id),
+        options: {
+          cacheTime: 600000
+        }
+      })
+
+      if (topic && topic.sections) {
+        setTopics({ ...topics, [id]: topic })
+      }
+    } catch {
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error Loading Topic'
+      })
+    }
+  }
+
+  const getTopicContent = id => {
+    const content = []
+    if (topics[id]) {
+      const section = topics[id].sections.find(
+        s => s.version === (bible || 'HCSB')
+      )
+      if (section && section.items) {
+        content.push(
+          <div>
+            {section.items.map((item, index) => {
+              return (
+                <ContentBlock
+                  key={`front-${index}`}
+                  props={item}
+                  mode='display'
+                />
+              )
+            })}
+          </div>
+        )
+      }
+    }
+    else {
+      content.push(<></>)
+    }
+    return content
   }
 
   const selectTopic = async id => {
@@ -751,48 +824,17 @@ const Index = props => {
                     mode='entry'
                   />
                   {selectedCategory.length > 0 ? <Divider /> : <></>}
-                  {selectedCategory.map((t, i) => {
-                    const section = t.sections.find(
-                      s => s.version === (bible || 'HCSB')
-                    )
-                    if (section && section.items) {
-                      return (
-                        <div key={`section-${i}`}>
-                          <h3 className='mt-5'>
-                            {section.name}
-                          </h3>
-                          {section.items.map((item, index) => {
-                            return (
-                              <ContentBlock
-                                key={`front-${index}`}
-                                props={item}
-                                mode='display'
-                              />
-                            )
-                          })}
-                        </div>
-                      )
-                    }
-                  })}
-                </div>
-              </>
-              :
-              categoryLoading
-                ?
-                <ProgressSpinner />
-                :
-                <div className='m-2 col'>
-                  <h1>{categoryLabel}</h1>
-                  <Accordion multiple activeIndex={[]}>
-                    {selectedCategory.map((t, i) => {
+                  {
+                    selectedCategory.map((t, i) => {
                       const section = t.sections.find(
                         s => s.version === (bible || 'HCSB')
                       )
                       if (section && section.items) {
                         return (
-                          <AccordionTab header={
-                            <h1>{section.name}</h1>
-                          } key={`section-${i}`}>
+                          <div key={`section-${i}`}>
+                            <h3 className='mt-5'>
+                              {section.name}
+                            </h3>
                             {section.items.map((item, index) => {
                               return (
                                 <ContentBlock
@@ -802,11 +844,42 @@ const Index = props => {
                                 />
                               )
                             })}
-                          </AccordionTab>
+                          </div>
                         )
                       }
                     })}
-                  </Accordion>
+                  <div className='flex flex-row justify-content-center flex-grow-1 mt-6'>
+                  <img
+              className='go pointer ml-5'
+              src='/images/go-grey.png'
+              alt='Go Therefore Ministries'
+              style={{ margin: 0, padding: 0, height: 44 }}
+              onClick={() => window.open('https://gothereforeministries.org/')}
+            /></div>
+                </div>
+              </>
+              :
+              categoryLoading
+                ?
+                <ProgressSpinner />
+                :
+                <div className='m-2 col'>
+                  <h2>{categoryLabel}</h2>
+                  {selectedCategory.map((t, i) => {
+                    return (
+                      <Panel
+                        headerTemplate={panelTemplate}
+                        header={<h3>{t.topicName}</h3>}
+                        key={`section-${i}`}
+                        onExpand={() => expandTopic(t.id)}
+                        toggleable
+                        collapsed
+                      >
+                        {getTopicContent(t.id)}
+                      </Panel>
+                    )
+                  }
+                  )}
                 </div>
             :
             <></>
@@ -956,6 +1029,7 @@ export async function getServerSideProps(context) {
     .get('/topicNames')
     .then(response => response.data)
 
+  /*
   const topicsByCategory = {}
   await topicNames.map(topic => {
     if (!topicsByCategory.hasOwnProperty(topic.category)) {
@@ -965,7 +1039,7 @@ export async function getServerSideProps(context) {
   })
 
   const tree = []
-  /*
+
   tree.push({
     key: 'start',
     label: 'Need a Fresh Start?',
@@ -1009,7 +1083,6 @@ export async function getServerSideProps(context) {
       reference,
       topicTags,
       topicNames,
-      tree,
       front
     }
   }
