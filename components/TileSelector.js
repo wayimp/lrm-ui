@@ -272,16 +272,53 @@ const TileSelector = props => {
       {props.readOnly ? (
         ''
       ) : (
-        <div>
+        <div className='flex flex-row align-items-center justify-content-center flex-grow-1'>
+          <h3>Lookup Passage:&nbsp;</h3>
           <Button
+            className='mt-3 mb-3'
             label={bible?.abbreviation == 'NVI' ? 'Antiguo Testamento' : 'Old Testament'}
             type="button"
             onClick={(e) => { ot?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
           &nbsp;&nbsp;
           <Button
+            className='mt-3 mb-3'
             label={bible?.abbreviation == 'NVI' ? 'Nuevo Testamento' : 'New Testament'}
             type="button"
             onClick={(e) => { nt?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+
+          <div className='flex align-content-center m-3'>
+            <Dropdown
+              value={verse}
+              options={verses || []}
+              onChange={onChangeVerse}
+              placeholder='Verse'
+              editable
+              style={{ width: 120 }}
+              disabled={!book || !book.chapters}
+            />
+            <MultiStateCheckbox
+              style={{ marginTop: 12, marginLeft: 6, marginRight: 6 }}
+              value={extended}
+              options={options}
+              optionValue='value'
+              onChange={onChangeExtended}
+            />
+            {extended ? (
+              <>
+                <Dropdown
+                  value={verseEnd}
+                  options={versesEnd || []}
+                  onChange={onChangeVerseEnd}
+                  placeholder='Verse'
+                  editable
+                  style={{ width: 120 }}
+                  disabled={!book.chapters}
+                />
+              </>
+            ) : (
+              ''
+            )}
+          </div>
 
           <OverlayPanel ref={ot} showCloseIcon id="old_testament" className="overlay-panel">
             <div className='d-flex flex-wrap mt-4'>
@@ -327,40 +364,6 @@ const TileSelector = props => {
               })}
             </div>
           </OverlayPanel>
-
-          <div className='flex align-content-center m-3'>
-            <Dropdown
-              value={verse}
-              options={verses || []}
-              onChange={onChangeVerse}
-              placeholder='Verse'
-              editable
-              style={{ width: 120 }}
-              disabled={!book || !book.chapters}
-            />
-            <MultiStateCheckbox
-              style={{ marginTop: 12, marginLeft: 6, marginRight: 6 }}
-              value={extended}
-              options={options}
-              optionValue='value'
-              onChange={onChangeExtended}
-            />
-            {extended ? (
-              <>
-                <Dropdown
-                  value={verseEnd}
-                  options={versesEnd || []}
-                  onChange={onChangeVerseEnd}
-                  placeholder='Verse'
-                  editable
-                  style={{ width: 120 }}
-                  disabled={!book.chapters}
-                />
-              </>
-            ) : (
-              ''
-            )}
-          </div>
         </div>
       )}
 

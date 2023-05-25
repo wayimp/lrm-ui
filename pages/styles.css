@@ -29,6 +29,8 @@ img.pointer {
 .p-toolbar {
   color: white;
   background: #25416B;
+  padding-top: .75rem;
+  padding-bottom: .75rem;
 }
 
 a:link {

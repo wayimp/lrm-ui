@@ -14,7 +14,6 @@ import ContentBlock from '../components/ContentBlock'
 import { Toolbar } from 'primereact/toolbar'
 import Link from 'next/link'
 import { Tooltip } from 'primereact/tooltip'
-import { TreeSelect } from 'primereact/treeselect'
 import uuid from 'react-uuid'
 import { useMediaQuery } from 'react-responsive'
 import { categories } from '../static'
@@ -425,7 +424,7 @@ const Index = props => {
           <div class='flex align-content-center'>
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('start')
-            }} >Need a Fresh Start?</div>
+            }} >NEED A FRESH START?</div>
             &nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('faqs')
@@ -433,21 +432,19 @@ const Index = props => {
             &nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('topics')
-            }} >Browse Topics</div>
+            }} >BROWSE TOPICS</div>
             &nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org/')} >Order Copies</div>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >ORDER COPIES</div>
             &nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
-              setShowPassage(true)
-            }} >Read</div>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=3')} >PARTNER WITH US</div>
           </div>
         }
         end={
-          <>
+          <div className='flex flex-row align-items-end'>
             {!isMobile ? (
               <div>
                 <AutoComplete
-                  style={{ width: 300 }}
+                  style={{ width: 210 }}
                   value={searchTerm}
                   suggestions={filteredTags}
                   completeMethod={searchTags}
@@ -493,7 +490,7 @@ const Index = props => {
               tooltip='Ask a Question'
               tooltipOptions={{ position: 'left' }}
             />
-          </>
+          </div>
         }
       />
       < Toolbar
@@ -740,21 +737,11 @@ const Index = props => {
             categoryLabel.startsWith('Welcome')
               ?
               <>
-                <div>
+                <div className='flex flex-row justify-content-center flex-grow-1 mt-6'>
                   <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left', maxHeight: 180 }} />
                   <img src='/images/welcome.png' style={{ maxHeight: 160 }} />
                 </div>
                 <div>
-                  <h3>Lookup a Topic or Passage:&nbsp;</h3>
-                  <TreeSelect
-                    className='ml-3 mr-3'
-                    options={props.tree}
-                    onChange={selectTreeTopic}
-                    selectionMode='single'
-                    filter
-                    placeholder='Browse Topics'
-                  ></TreeSelect>
-                  <p />
                   <ContentBlock
                     props={{
                       type: 'tile',
@@ -978,6 +965,7 @@ export async function getServerSideProps(context) {
   })
 
   const tree = []
+  /*
   tree.push({
     key: 'start',
     label: 'Need a Fresh Start?',
@@ -998,7 +986,6 @@ export async function getServerSideProps(context) {
       }
     })
   })
-
   tree.push({
     key: 'topics',
     label: 'Topical Bible',
@@ -1009,6 +996,7 @@ export async function getServerSideProps(context) {
       }
     })
   })
+*/
 
   const front = await axiosClient
     .get('/category/front')
