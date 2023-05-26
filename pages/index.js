@@ -507,7 +507,7 @@ const Index = props => {
               showCat('topics')
             }} >{renderLabel('topics')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? '' : 'SOLICITAR COPIAS'}</div>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? 'SOLICITAR COPIAS' : 'ORDER COPIES'}</div>
             &nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
           </div>
