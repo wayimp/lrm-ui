@@ -352,7 +352,7 @@ const VerseSelector = props => {
               className='button-rounded button-text m-1'
               icon='pi pi-window-maximize'
               onClick={() => openChapter(chapterNumber)}
-              tooltip='Open Chapter'
+              tooltip={bible?.abbreviation == 'NVI' ? 'Abierto Capítulo' : 'Open Chapter'}
               tooltipOptions={{ position: 'left' }}
             />
             &nbsp;
@@ -367,12 +367,12 @@ const VerseSelector = props => {
                 })
                 toast.current.show({
                   severity: 'success',
-                  summary: 'Link Copied'
+                  summary: bible.abbreviation == 'NVI' ? 'Enlace copiado' : 'Link Copied'
                 })
               }}
             >
               <div className='flex align-items-center'>
-                <i className='pi pi-upload' />
+                <i className='pi pi-copy' />
               </div>
             </CopyToClipboard>
           </>

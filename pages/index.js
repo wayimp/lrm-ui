@@ -71,7 +71,7 @@ const Index = props => {
   const [selectedCategory, setSelectedCategory] = useState(props.front || [])
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
   const queryClient = useQueryClient()
-
+  const versionNames = props.topicNames?.filter(t => t.version == bible)
   const attribution = bibles.find(b => b.abbreviation === bible)
     ?.attribution || ''
 
@@ -166,13 +166,13 @@ const Index = props => {
   const renderLabel = keyword => {
     switch (keyword) {
       case 'topics':
-        return 'Topical Bible'
+        return bible == 'NVI' ? 'Biblia Temática' : 'Topical Bible'
         break
       case 'start':
-        return 'Need a Fresh Start?'
+        return bible == 'NVI' ? '¿Necesita un nuevo comienzo?' : 'Need a Fresh Start?'
         break
       case 'faqs':
-        return 'Frequently Asked Questions'
+        return bible == 'NVI' ? 'Preguntas Frecuentes' : 'Frequently Asked Questions'
         break
     }
   }
@@ -194,7 +194,7 @@ const Index = props => {
         _filteredTags = [...props.topicTags]
       } else {
         _filteredTags = props.topicTags.filter(tag =>
-          queryWords.some(word => tag.tagName.toLowerCase().includes(word))
+          queryWords.some(word => tag.version == bible && tag.tagName.toLowerCase().includes(word))
         )
       }
 
@@ -225,10 +225,10 @@ const Index = props => {
   const selectCategory = async name => {
     setSearchTerm('')
 
-    const c = categories.find(c => c.value === name)
-    setCategoryLabel(c.label)
+    //const c = categories.find(c => c.value === name)
+    setCategoryLabel(renderLabel(name))
 
-    const categoryTopics = props.topicNames?.filter(topic => topic.category == name)
+    const categoryTopics = versionNames?.filter(topic => topic.category == name)
     setSelectedCategory(categoryTopics)
 
     /*
@@ -347,11 +347,11 @@ const Index = props => {
 
   const topicIndex =
     selectedSection && selectedSection.name
-      ? props.topicNames.findIndex(tn => tn.topicName === selectedSection.name)
+      ? versionNames?.findIndex(tn => tn.topicName === selectedSection.name)
       : 0
 
   if (topicIndex > 0) {
-    const previousId = props.topicNames[topicIndex - 1].id
+    const previousId = versionNames[topicIndex - 1].id
     queryClient.prefetchQuery({
       queryKey: ['topic', previousId],
       queryFn: () => getTopic(previousId),
@@ -361,8 +361,8 @@ const Index = props => {
     })
   }
 
-  if (topicIndex < props.topicNames.length - 1) {
-    const nextId = props.topicNames[topicIndex + 1].id
+  if (topicIndex < versionNames?.length - 1) {
+    const nextId = versionNames[topicIndex + 1].id
     queryClient.prefetchQuery({
       queryKey: ['topic', nextId],
       queryFn: () => getTopic(nextId),
@@ -377,21 +377,21 @@ const Index = props => {
     if (findIndex > 0) {
       findIndex--
     } else {
-      findIndex = props.topicNames.length - 1
+      findIndex = versionNames?.length - 1
     }
 
-    selectTopic(props.topicNames[findIndex].id)
+    selectTopic(versionNames[findIndex].id)
   }
 
   const moveNextTopic = () => {
     let findIndex = topicIndex
-    if (findIndex < props.topicNames.length - 1) {
+    if (findIndex < versionNames?.length - 1) {
       findIndex++
     } else {
       findIndex = 0
     }
 
-    selectTopic(props.topicNames[findIndex].id)
+    selectTopic(versionNames[findIndex].id)
   }
 
   const handleQuestionChange = e => {
@@ -494,22 +494,22 @@ const Index = props => {
           </div>
         }
         center={
-          <div class='flex align-content-center'>
+          <div class='flex align-content-center text-sm'>
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('start')
-            }} >NEED A FRESH START?</div>
+            }} >{renderLabel('start')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('faqs')
-            }} >FAQs</div>
+            }} >{renderLabel('faqs')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('topics')
-            }} >BROWSE TOPICS</div>
+            }} >{renderLabel('topics')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >ORDER COPIES</div>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? '' : 'SOLICITAR COPIAS'}</div>
             &nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=3')} >PARTNER WITH US</div>
+            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
           </div>
         }
         end={
@@ -526,7 +526,7 @@ const Index = props => {
                   onChange={e => setSearchTerm(e.value)}
                   onSelect={e => selectTopic(e.value.id)}
                   forceSelection
-                  placeholder='Enter Search Words'
+                  placeholder={bible == 'NVI' ? 'Palabras de Búsqueda' : 'Enter Search Words'}
                 />
               </div>
             ) : (
@@ -538,7 +538,7 @@ const Index = props => {
               onClick={() => {
                 setSignupDialog(true)
               }}
-              tooltip='Subscribe to Newsletter'
+              tooltip={bible == 'NVI' ? 'Suscríbete al boletín' : 'Subscribe to Newsletter'}
               tooltipOptions={{ position: 'left' }}
             />
             <Button
@@ -547,11 +547,11 @@ const Index = props => {
               onClick={() => {
                 // Generate a random number
                 const random = Math.floor(
-                  Math.random() * props.topicNames.length
+                  Math.random() * versionNames?.length
                 )
-                selectTopic(props.topicNames[random].id)
+                selectTopic(versionNames[random].id)
               }}
-              tooltip='Random Topic'
+              tooltip={bible == 'NVI' ? 'Tema aleatorio' : 'Random Topic'}
               tooltipOptions={{ position: 'left' }}
             />
             <Button
@@ -560,7 +560,7 @@ const Index = props => {
               onClick={() => {
                 setQuestionDialog(true)
               }}
-              tooltip='Ask a Question'
+              tooltip={bible == 'NVI' ? 'Hacer una pregunta' : 'Ask a Question'}
               tooltipOptions={{ position: 'left' }}
             />
           </div>
@@ -588,36 +588,28 @@ const Index = props => {
                       setShowPassage(true)
                     }
                   }
-                  tooltip='Open Passage Lookup'
+                  tooltip={bible == 'NVI' ? 'Abrir Búsqueda de Pasajes' : 'Open Passage Lookup'}
                   tooltipOptions={{ position: 'left' }}
                 />
               )}
-            {
-              !isMobile ? (
-                <>
-                  <Dropdown
-                    value={bible}
-                    options={bibles}
-                    onChange={onChangeBible}
-                    optionValue='abbreviation'
-                    optionLabel='name'
-                    placeholder='Select a Bible Version'
-                  />
-                  &nbsp;&nbsp;
-                  <div className='flex align-items-center' dangerouslySetInnerHTML={{ __html: attribution }} />
-                </>
-              ) : (
-                ''
-              )
-            }
+            <Dropdown
+              value={bible}
+              options={bibles}
+              onChange={onChangeBible}
+              optionValue='abbreviation'
+              optionLabel='name'
+              placeholder='Select a Bible Version'
+            />
+            &nbsp;&nbsp;
+            <div className='flex align-items-center' dangerouslySetInnerHTML={{ __html: attribution }} />
           </div >
         }
         right={
           <div className='flex align-content-center' >
             <div className='flex align-items-center' style={{ fontSize: 'x-small' }}>
-              Support our Ministry
+              {bible == 'NVI' ? 'Apoya a nuestro Ministerio' : 'Support our Ministry'}
               <br />
-              Order Physical Copies
+              {bible == 'NVI' ? 'Pedir copias físicas' : 'Order Physical Copies'}
             </div>
             <img
               className='go pointer ml-5'
@@ -640,7 +632,7 @@ const Index = props => {
                 style={{ margin: '0px 0px 10px 0px' }}
                 legend={
                   <>
-                    <h2>Topics&nbsp;&amp;&nbsp;References</h2>
+                    <h2>{bible == 'NVI' ? 'Temas' : 'Topics'}</h2>
                     <Button
                       className='button-rounded button-text button-danger button-outlined ml-4'
                       icon='pi pi-times'
@@ -684,16 +676,16 @@ const Index = props => {
                         })
                         toast.current.show({
                           severity: 'success',
-                          summary: 'Link Copied'
+                          summary: bible == 'NVI' ? 'Enlace copiado' : 'Link Copied'
                         })
                       }}
                     >
                       <div className='flex align-items-center'>
-                        <i className='pi pi-upload' />
+                        <i className='pi pi-copy' />
                       </div>
                     </CopyToClipboard>
                     <div>
-                      {topicIndex < props.topicNames.length - 1 ? (
+                      {topicIndex < versionNames?.length - 1 ? (
                         <Button
                           type='button'
                           icon='pi pi-chevron-right'
@@ -723,7 +715,7 @@ const Index = props => {
                     <div>
                       {topicIndex > 0 ? (
                         <Button
-                          label={props.topicNames[topicIndex - 1].topicName}
+                          label={versionNames[topicIndex - 1].topicName}
                           type='button'
                           icon='pi pi-arrow-left'
                           className='ml-auto button-rounded button-outlined m-2'
@@ -734,9 +726,9 @@ const Index = props => {
                       )}
                     </div>
                     <div>
-                      {topicIndex < props.topicNames.length - 1 ? (
+                      {topicIndex < versionNames?.length - 1 ? (
                         <Button
-                          label={props.topicNames[topicIndex + 1].topicName}
+                          label={versionNames[topicIndex + 1].topicName}
                           type='button'
                           icon='pi pi-arrow-right'
                           className='ml-auto button-rounded button-outlined m-2'
@@ -780,7 +772,7 @@ const Index = props => {
                 style={{ margin: '0px 0px 10px 0px' }}
                 legend={
                   <>
-                    <h2>Lookup a Passage</h2>
+                    <h2>{bible == 'NVI' ? 'Búsqueda de Pasajes' : 'Lookup a Passage'}</h2>
                     <Button
                       className='button-rounded button-text button-danger button-outlined ml-4'
                       icon='pi pi-times'
@@ -849,23 +841,20 @@ const Index = props => {
                       }
                     })}
                   <div className='flex flex-row justify-content-center flex-grow-1 mt-6'>
-                  <img
-              className='go pointer ml-5'
-              src='/images/go-grey.png'
-              alt='Go Therefore Ministries'
-              style={{ margin: 0, padding: 0, height: 44 }}
-              onClick={() => window.open('https://gothereforeministries.org/')}
-            /></div>
+                    <img
+                      className='go pointer ml-5'
+                      src='/images/go-grey.png'
+                      alt='Go Therefore Ministries'
+                      style={{ margin: 0, padding: 0, height: 44 }}
+                      onClick={() => window.open('https://gothereforeministries.org/')}
+                    /></div>
                 </div>
               </>
               :
-              categoryLoading
-                ?
-                <ProgressSpinner />
-                :
-                <div className='m-2 col'>
-                  <h2>{categoryLabel}</h2>
-                  {selectedCategory.map((t, i) => {
+              <div className='m-2 col'>
+                <h2>{categoryLabel}</h2>
+                {selectedCategory.map((t, i) => {
+                  if (t.version == bible) {
                     return (
                       <Panel
                         headerTemplate={panelTemplate}
@@ -879,21 +868,24 @@ const Index = props => {
                       </Panel>
                     )
                   }
-                  )}
-                </div>
+                  else
+                    return <></>
+                }
+                )}
+              </div>
             :
             <></>
         }
 
       </div >
       <Dialog
-        header='Ask a Question'
+        header={bible == 'NVI' ? 'Hacer una Pregunta' : 'Ask a Question'}
         visible={questionDialog}
         style={{ width: '80vw' }}
         onHide={() => setQuestionDialog(false)}
       >
         <div className='field grid'>
-          <label htmlFor='name'>Name:</label>
+          <label htmlFor='name'>{bible == 'NVI' ? 'Nombre' : 'Name'}:</label>
           <div className='col-12 md-10'>
             <InputText
               type='text'
@@ -904,7 +896,7 @@ const Index = props => {
           </div>
         </div>
         <div className='field grid'>
-          <label htmlFor='email'>Email:</label>
+          <label htmlFor='email'>{bible == 'NVI' ? 'Correo Electrónico' : 'Email'}:</label>
           <div className='col-12 md-10'>
             <InputText
               type='text'
@@ -915,7 +907,7 @@ const Index = props => {
           </div>
         </div>
         <div className='field grid'>
-          <label htmlFor='text'>Question:</label>
+          <label htmlFor='text'>{bible == 'NVI' ? 'Pregunta' : 'Question'}:</label>
           <div className='col-12 md-10'>
             <InputTextarea
               type='text'
@@ -930,14 +922,14 @@ const Index = props => {
         </div>
         <div className='flex align-content-center justify-content-end'>
           <Button
-            label='Cancel'
+            label={bible == 'NVI' ? 'Cancelar' : 'Cancel'}
             icon='pi pi-times'
             onClick={() => setQuestionDialog(false)}
             className='button-text ml-4'
           />
           &nbsp;
           <Button
-            label='Send'
+            label={bible == 'NVI' ? 'Enviar' : 'Send'}
             icon='pi pi-send'
             onClick={() => submitQuestion()}
             autoFocus
@@ -945,13 +937,13 @@ const Index = props => {
         </div>
       </Dialog>
       <Dialog
-        header='Newsletter Signup'
+        header={bible == 'NVI' ? 'Inscríbase al Boletín' : 'Newsletter Signup'}
         visible={signupDialog}
         style={{ width: '80vw' }}
         onHide={() => setSignupDialog(false)}
       >
         <div className='field grid'>
-          <label htmlFor='firstName'>First Name:</label>
+          <label htmlFor='firstName'>{bible == 'NVI' ? 'Nombre de Pila' : 'First Name'}:</label>
           <div className='col-12 md-10'>
             <InputText
               type='text'
@@ -962,7 +954,7 @@ const Index = props => {
           </div>
         </div>
         <div className='field grid'>
-          <label htmlFor='name'>Last Name:</label>
+          <label htmlFor='name'>{bible == 'NVI' ? 'Apellido' : 'Last Name'}:</label>
           <div className='col-12 md-10'>
             <InputText
               type='text'
@@ -973,7 +965,7 @@ const Index = props => {
           </div>
         </div>
         <div className='field grid'>
-          <label htmlFor='email'>Email:</label>
+          <label htmlFor='email'>{bible == 'NVI' ? 'Correo Electrónico' : 'Email'}:</label>
           <div className='col-12 md-10'>
             <InputText
               type='text'
@@ -985,14 +977,14 @@ const Index = props => {
         </div>
         <div className='d-flex align-items-center justify-content-end'>
           <Button
-            label='Cancel'
+            label={bible == 'NVI' ? 'Cancelar' : 'Cancel'}
             icon='pi pi-times'
             onClick={() => setSignupDialog(false)}
             className='button-text ml-4'
           />
           &nbsp;
           <Button
-            label='Send'
+            label={bible == 'NVI' ? 'Enviar' : 'Send'}
             icon='pi pi-send'
             onClick={() => submitSignup()}
             autoFocus
@@ -1028,49 +1020,6 @@ export async function getServerSideProps(context) {
   const topicNames = await axiosClient
     .get('/topicNames')
     .then(response => response.data)
-
-  /*
-  const topicsByCategory = {}
-  await topicNames.map(topic => {
-    if (!topicsByCategory.hasOwnProperty(topic.category)) {
-      topicsByCategory[topic.category] = []
-    }
-    topicsByCategory[topic.category].push(topic)
-  })
-
-  const tree = []
-
-  tree.push({
-    key: 'start',
-    label: 'Need a Fresh Start?',
-    children: topicsByCategory.start.map(t => {
-      return {
-        key: t.id,
-        label: t.topicName
-      }
-    })
-  })
-  tree.push({
-    key: 'faqs',
-    label: 'Frequently Asked Questions',
-    children: topicsByCategory.faqs.map(t => {
-      return {
-        key: t.id,
-        label: t.topicName
-      }
-    })
-  })
-  tree.push({
-    key: 'topics',
-    label: 'Topical Bible',
-    children: topicsByCategory.topics.map(t => {
-      return {
-        key: t.id,
-        label: t.topicName
-      }
-    })
-  })
-*/
 
   const front = await axiosClient
     .get('/category/front')

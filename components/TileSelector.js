@@ -273,7 +273,7 @@ const TileSelector = props => {
         ''
       ) : (
         <div className='flex flex-row align-items-center justify-content-center flex-grow-1'>
-          <h3>Lookup Passage:&nbsp;</h3>
+          <h3>{bible?.abbreviation == 'NVI' ? 'Búsqueda de Pasaje' : 'Lookup Passage'}:&nbsp;</h3>
           <Button
             className='mt-3 mb-3'
             label={bible?.abbreviation == 'NVI' ? 'Antiguo Testamento' : 'Old Testament'}
@@ -291,7 +291,7 @@ const TileSelector = props => {
               value={verse}
               options={verses || []}
               onChange={onChangeVerse}
-              placeholder='Verse'
+              placeholder={bible?.abbreviation == 'NVI' ? 'Verso' : 'Verse'}
               editable
               style={{ width: 120 }}
               disabled={!book || !book.chapters}
@@ -309,7 +309,7 @@ const TileSelector = props => {
                   value={verseEnd}
                   options={versesEnd || []}
                   onChange={onChangeVerseEnd}
-                  placeholder='Verse'
+                  placeholder={bible?.abbreviation == 'NVI' ? 'Verso' : 'Verse'}
                   editable
                   style={{ width: 120 }}
                   disabled={!book.chapters}
@@ -382,7 +382,7 @@ const TileSelector = props => {
                     className='button-rounded button-text m-1'
                     icon='pi pi-arrow-circle-left'
                     onClick={() => readChapter(chapterNumber - 1)}
-                    tooltip='Previous Chapter'
+                    tooltip={bible?.abbreviation == 'NVI' ? 'Capítulo Previo' : 'Previous Chapter'}
                     tooltipOptions={{ position: 'left' }}
                   />
                 ) : (
@@ -392,7 +392,7 @@ const TileSelector = props => {
                   className='button-rounded button-text m-1'
                   icon='pi pi-book'
                   onClick={() => readChapter(chapterNumber)}
-                  tooltip='Read Chapter'
+                  tooltip={bible?.abbreviation == 'NVI' ? 'Leer Capítulo' : 'Read Chapter'}
                   tooltipOptions={{ position: 'left' }}
                 />
                 {chapterNumber < book.chapters.length ? (
@@ -400,7 +400,7 @@ const TileSelector = props => {
                     className='button-rounded button-text m-1'
                     icon='pi pi-arrow-circle-right'
                     onClick={() => readChapter(chapterNumber + 1)}
-                    tooltip='Next Chapter'
+                    tooltip={bible?.abbreviation == 'NVI' ? 'Siguiente Capítulo' : 'Next Chapter'}
                     tooltipOptions={{ position: 'left' }}
                   />
                 ) : (
@@ -414,7 +414,7 @@ const TileSelector = props => {
               className='button-rounded button-text'
               icon='pi pi-window-maximize'
               onClick={() => openChapter(chapterNumber)}
-              tooltip='Open Chapter'
+              tooltip={bible?.abbreviation == 'NVI' ? 'Abierto Capítulo' : 'Open Chapter'}
               tooltipOptions={{ position: 'left' }}
             />
             &nbsp;
@@ -429,12 +429,12 @@ const TileSelector = props => {
                 })
                 toast.current.show({
                   severity: 'success',
-                  summary: 'Link Copied'
+                  summary: bible.abbreviation == 'NVI' ? 'Enlace copiado' : 'Link Copied'
                 })
               }}
             >
               <div className='flex align-items-center'>
-                <i className='pi pi-upload' />
+                <i className='pi pi-copy' />
               </div>
             </CopyToClipboard>
           </>

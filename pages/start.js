@@ -79,7 +79,7 @@ const Start = props => {
                     }
                   >
                     <div className='flex align-items-center'>
-                      <i className='pi pi-upload' />
+                      <i className='pi pi-copy' />
                     </div>
                     </CopyToClipboard>
                 </div>

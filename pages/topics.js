@@ -655,7 +655,8 @@ const TopicComposer = props => {
                           label='Edit'
                           className='button-outlined button-sm button-secondary'
                           icon='pi pi-book'
-                          onClick={() => {
+                          onClick={e => {
+                            e.preventDefault()
                             setSectionEditIndex(ind)
                             setSectionEditVersion(el.version)
                             setSectionEditDialog(true)
@@ -665,7 +666,8 @@ const TopicComposer = props => {
                           label='Copy'
                           className='button-outlined button-sm button-secondary'
                           icon='pi pi-copy'
-                          onClick={() => {
+                          onClick={e => {
+                            e.preventDefault()
                             const newSections = [...sections]
                             const copySection = JSON.parse(
                               JSON.stringify(sections[ind])
@@ -687,7 +689,8 @@ const TopicComposer = props => {
                           label='Delete Version'
                           className='button-outlined button-sm button-secondary'
                           icon='pi pi-minus-circle'
-                          onClick={() => {
+                          onClick={e => {
+                            e.preventDefault()
                             const newSections = [...sections]
                             newSections.splice(ind, 1)
                             setSections(newSections)

@@ -66,20 +66,20 @@ const Faqs = props => {
                   <CopyToClipboard
                     style={{ cursor: 'copy' }}
                     text={`${typeof window !== 'undefined'
-                        ? window.location.protocol +
-                        '//' +
-                        window.location.host.split(/\//)[0]
-                        : ''
+                      ? window.location.protocol +
+                      '//' +
+                      window.location.host.split(/\//)[0]
+                      : ''
                       }?t=${selectedTopic._id}&v=HCSB`}
                     onCopy={() =>
                       toast.current.show({
                         severity: 'success',
-                        summary: 'Link Copied'
+                        summary: bible.abbreviation == 'NVI' ? 'Enlace copiado' : 'Link Copied'
                       })
                     }
                   >
                     <div className='flex align-items-center'>
-                      <i className='pi pi-upload' />
+                      <i className='pi pi-copy' />
                     </div>
                   </CopyToClipboard>
                 </div>
