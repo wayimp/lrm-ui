@@ -644,7 +644,9 @@ const TopicComposer = props => {
 
               {sections.map((el, ind) => (
                 <div key={`builder-${ind}`}>
-                  <Fieldset                    
+                  <Fieldset  
+                    toggleable
+                    collapsed                  
                     style={{ margin: '0px 0px 10px 0px' }}
                     legend={
                       <div>
