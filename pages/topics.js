@@ -568,7 +568,7 @@ const TopicComposer = props => {
             ></Button>
           </>
         }
-      />
+   Fieldset   />
       <DragDropContext
         onDragEnd={onDragEnd}
         isDropDisabled={true}
@@ -644,8 +644,7 @@ const TopicComposer = props => {
 
               {sections.map((el, ind) => (
                 <div key={`builder-${ind}`}>
-                  <Fieldset
-                    toggleable
+                  <Fieldset                    
                     style={{ margin: '0px 0px 10px 0px' }}
                     legend={
                       <div>
