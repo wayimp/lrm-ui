@@ -40,6 +40,7 @@ const panelTemplate = (options) => {
         <Ripple />
       </button>
       <span className={titleClassName} style={style}>{options.titleElement}</span>
+
     </div>
   );
 };
@@ -158,7 +159,7 @@ const Index = props => {
   const itemTemplate = item => {
     return (
       <span>
-        <b>{item.topicName}</b> ({item.tagName})
+        <b>{item.topicName}</b>
       </span>
     )
   }
@@ -172,7 +173,7 @@ const Index = props => {
         return bible == 'NVI' ? '¿Necesita un nuevo comienzo?' : 'Need a Fresh Start?'
         break
       case 'faqs':
-        return bible == 'NVI' ? 'Preguntas Frecuentes' : 'Frequently Asked Questions'
+        return bible == 'NVI' ? 'Preguntas Frecuentes' : 'FAQ'
         break
     }
   }
@@ -180,21 +181,22 @@ const Index = props => {
   const groupedItemTemplate = option => {
     return (
       <div className='flex align-content-center'>
-        <div>{renderLabel(option.key)}</div>
+        <div className='m-2'>{renderLabel(option.key)}</div>
       </div>
     )
   }
 
   const searchTags = event => {
     if (typeof event.query === 'string' || event.query instanceof String) {
-      let queryWords = event.query.toLowerCase().split(' ')
+      let queryWords = event.query.toLowerCase()
       let _filteredTags = []
 
       if (!event.query.trim().length) {
-        _filteredTags = [...props.topicTags]
+        _filteredTags = [...props.topicNames]
       } else {
-        _filteredTags = props.topicTags.filter(tag =>
-          queryWords.some(word => tag.version == bible && tag.tagName.toLowerCase().includes(word))
+        _filteredTags = props.topicNames.filter(tag =>
+          tag.version == bible &&
+          tag.topicName.toLowerCase().includes(queryWords)
         )
       }
 
@@ -498,17 +500,17 @@ const Index = props => {
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('start')
             }} >{renderLabel('start')?.toUpperCase()}</div>
-            &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('faqs')
             }} >{renderLabel('faqs')?.toUpperCase()}</div>
-            &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
               showCat('topics')
             }} >{renderLabel('topics')?.toUpperCase()}</div>
-            &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? 'SOLICITAR COPIAS' : 'ORDER COPIES'}</div>
-            &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
           </div>
         }
@@ -623,144 +625,144 @@ const Index = props => {
       />
       < div
         className='grid dir-row'
-        style={{ margin: '80px 10px 100px 10px' }}
+        style={{ margin: '100px' }}
       >
         {
           selectedSection ? (
             <div className='m-2 col' >
-              <Fieldset
-                style={{ margin: '0px 0px 10px 0px' }}
-                legend={
-                  <>
-                    <h2>{bible == 'NVI' ? 'Temas' : 'Topics'}</h2>
+              <div className='flex justify-content-center flex-wrap'>
+                <div class='flex align-items-center justify-content-center'>
+                  <h1 >{bible == 'NVI' ? 'Temas' : 'Topics'}</h1>
+                  <Button
+                    rounded outlined
+                    className='button-rounded button-text button-danger button-outlined ml-4'
+                    icon='pi pi-times'
+                    onClick={() => {
+                      setSelectedSection(null)
+                      setSearchTerm(null)
+                      setSelectedTopic(null)
+                    }}
+                    tooltip='Close'
+                    tooltipOptions={{ position: 'left' }}
+                  />
+                </div>
+              </div>
+              <hr style={{ height: '3px', backgroundColor: 'navy' }} />
+              <br />
+              <div className='flex justify-content-center flex-wrap'>
+                <div class='flex align-items-center justify-content-center'>
+                  {topicIndex > 0 ? (
                     <Button
-                      className='button-rounded button-text button-danger button-outlined ml-4'
-                      icon='pi pi-times'
-                      onClick={() => {
-                        setSelectedSection(null)
-                        setSearchTerm(null)
-                        setSelectedTopic(null)
-                      }}
-                      tooltip='Close'
-                      tooltipOptions={{ position: 'left' }}
+                      rounded outlined
+                      type='button'
+                      icon='pi pi-chevron-left'
+                      className='button-rounded button-outlined m-4'
+                      onClick={movePreviousTopic}
                     />
-                  </>
-                }
-              >
-                <div className='grid'>
-                  <div className='flex align-content-center'>
-                    <div>
-                      {topicIndex > 0 ? (
-                        <Button
-                          type='button'
-                          icon='pi pi-chevron-left'
-                          className='button-rounded button-outlined m-4'
-                          onClick={movePreviousTopic}
-                        />
-                      ) : (
-                        <span />
-                      )}
-                    </div>
-                    <h3 className='flex align-items-center'>{selectedSection.name}</h3>
-                    &nbsp;&nbsp;
-                    <CopyToClipboard
-                      style={{ cursor: 'copy' }}
-                      text={`${window.location.protocol +
-                        '//' +
-                        window.location.host.split(/\//)[0]}?t=${selectedTopic._id
-                        }&v=${bible}`}
-                      onCopy={() => {
-                        axiosClient.post('/metrics/topic_copied', {
-                          tId: selectedTopic._id,
-                          version: bible
-                        })
-                        toast.current.show({
-                          severity: 'success',
-                          summary: bible == 'NVI' ? 'Enlace copiado' : 'Link Copied'
-                        })
-                      }}
-                    >
-                      <div className='flex align-items-center'>
-                        <i className='pi pi-copy' />
-                      </div>
-                    </CopyToClipboard>
-                    <div>
-                      {topicIndex < versionNames?.length - 1 ? (
-                        <Button
-                          type='button'
-                          icon='pi pi-chevron-right'
-                          className='button-rounded button-outlined m-4'
-                          onClick={moveNextTopic}
-                        />
-                      ) : (
-                        <span />
-                      )}
-                    </div>
-                  </div>
-                  <Divider />
-                </div>
-                {selectedSection.items.map((item, index) => {
-                  return (
-                    <ContentBlock
-                      key={`content-${index}`}
-                      props={item}
-                      mode='display'
-                    />
-                  )
-                })}
-
-                <div className='grid'>
-                  <Divider />
-                  <div className='flex align-content-center m-3'>
-                    <div>
-                      {topicIndex > 0 ? (
-                        <Button
-                          label={versionNames[topicIndex - 1].topicName}
-                          type='button'
-                          icon='pi pi-arrow-left'
-                          className='ml-auto button-rounded button-outlined m-2'
-                          onClick={movePreviousTopic}
-                        />
-                      ) : (
-                        <span />
-                      )}
-                    </div>
-                    <div>
-                      {topicIndex < versionNames?.length - 1 ? (
-                        <Button
-                          label={versionNames[topicIndex + 1].topicName}
-                          type='button'
-                          icon='pi pi-arrow-right'
-                          className='ml-auto button-rounded button-outlined m-2'
-                          onClick={moveNextTopic}
-                        />
-                      ) : (
-                        <span />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className='grid'>
-                  {selectedSection.links &&
-                    Array.isArray(selectedSection.links) ? (
-                    <div className='flex align-items-center'>
-                      <h3>Related Topics&nbsp;&nbsp;</h3>
-                      {selectedSection.links.map((link, index) => (
-                        <Button
-                          key={`link-${index}`}
-                          label={link.title}
-                          type='button'
-                          className='ml-auto button-rounded button-outlined m-2'
-                          onClick={() => selectTopic(link._id)}
-                        />
-                      ))}
-                    </div>
                   ) : (
-                    ''
+                    <span />
                   )}
                 </div>
-              </Fieldset>
+                <h2 className='flex align-items-center'>{selectedSection.name}</h2>
+                &nbsp;&nbsp;
+                <CopyToClipboard
+                  style={{ cursor: 'copy' }}
+                  text={`${window.location.protocol +
+                    '//' +
+                    window.location.host.split(/\//)[0]}?t=${selectedTopic._id
+                    }&v=${bible}`}
+                  onCopy={() => {
+                    axiosClient.post('/metrics/topic_copied', {
+                      tId: selectedTopic._id,
+                      version: bible
+                    })
+                    toast.current.show({
+                      severity: 'success',
+                      summary: bible == 'NVI' ? 'Enlace copiado' : 'Link Copied'
+                    })
+                  }}
+                >
+                  <div className='flex align-items-center'>
+                    <i className='pi pi-copy' />
+                  </div>
+                </CopyToClipboard>
+                <div>
+                  {topicIndex < versionNames?.length - 1 ? (
+                    <Button
+                      rounded outlined
+                      type='button'
+                      icon='pi pi-chevron-right'
+                      className='button-rounded button-outlined m-4'
+                      onClick={moveNextTopic}
+                    />
+                  ) : (
+                    <span />
+                  )}
+                </div>
+              </div>
+              <Divider />
+
+              {selectedSection.items.map((item, index) => {
+                return (
+                  <ContentBlock
+                    key={`content-${index}`}
+                    props={item}
+                    mode='display'
+                  />
+                )
+              })}
+
+              <div className='grid'>
+                <Divider />
+                <div className='flex align-content-center m-3'>
+                  <div>
+                    {topicIndex > 0 ? (
+                      <Button
+                        label={versionNames[topicIndex - 1].topicName}
+                        type='button'
+                        icon='pi pi-arrow-left'
+                        className='ml-auto button-rounded button-outlined m-2'
+                        onClick={movePreviousTopic}
+                      />
+                    ) : (
+                      <span />
+                    )}
+                  </div>
+                  <div>
+                    {topicIndex < versionNames?.length - 1 ? (
+                      <Button
+                        label={versionNames[topicIndex + 1].topicName}
+                        type='button'
+                        icon='pi pi-arrow-right'
+                        className='ml-auto button-rounded button-outlined m-2'
+                        onClick={moveNextTopic}
+                      />
+                    ) : (
+                      <span />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className='grid'>
+                {selectedSection.links &&
+                  Array.isArray(selectedSection.links) ? (
+                  <div className='flex align-items-center'>
+                    <h3>Related Topics&nbsp;&nbsp;</h3>
+                    {selectedSection.links.map((link, index) => (
+                      <Button
+                        key={`link-${index}`}
+                        label={link.title}
+                        type='button'
+                        className='ml-auto button-rounded button-outlined m-2'
+                        onClick={() => selectTopic(link._id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  ''
+                )}
+              </div>
             </div>
           ) : (
             ''
@@ -768,30 +770,29 @@ const Index = props => {
         {
           showPassage ? (
             <div className='m-2 col'>
-              <Fieldset
-                style={{ margin: '0px 0px 10px 0px' }}
-                legend={
-                  <>
-                    <h2>{bible == 'NVI' ? 'Búsqueda de Pasajes' : 'Lookup a Passage'}</h2>
-                    <Button
-                      className='button-rounded button-text button-danger button-outlined ml-4'
-                      icon='pi pi-times'
-                      onClick={() => setShowPassage(false)}
-                      tooltip='Close'
-                      tooltipOptions={{ position: 'left' }}
-                    />
-                  </>
-                }
-              >
-                <ContentBlock
-                  props={{
-                    type: 'tile',
-                    version: bible,
-                    passageId: props.reference ? props.reference : null
-                  }}
-                  mode='entry'
-                />
-              </Fieldset>
+              <div className='flex justify-content-center flex-wrap'>
+                <div class="flex align-items-center justify-content-center">
+                  <h1>{bible == 'NVI' ? 'Búsqueda de Pasajes' : 'Lookup a Passage'}</h1>
+                  <Button
+                    rounded outlined
+                    className='button-rounded button-text button-danger button-outlined ml-4'
+                    icon='pi pi-times'
+                    onClick={() => setShowPassage(false)}
+                    tooltip='Close'
+                    tooltipOptions={{ position: 'left' }}
+                  />
+                </div>
+              </div>
+              <hr style={{ height: '3px', backgroundColor: 'navy' }} />
+              <br /><br />
+              <ContentBlock
+                props={{
+                  type: 'tile',
+                  version: bible,
+                  passageId: props.reference ? props.reference : null
+                }}
+                mode='entry'
+              />
             </div>
           ) : (
             ''
@@ -802,7 +803,7 @@ const Index = props => {
             categoryLabel.startsWith('Welcome')
               ?
               <>
-                <div className='flex flex-row justify-content-center flex-grow-1 mt-6'>
+                <div className='flex flex-row justify-content-center flex-grow-1 mt-2'>
                   <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left', maxHeight: 180 }} />
                   <img src='/images/welcome.png' style={{ maxHeight: 160 }} />
                 </div>
@@ -840,6 +841,7 @@ const Index = props => {
                         )
                       }
                     })}
+                  {/*
                   <div className='flex flex-row justify-content-center flex-grow-1 mt-6'>
                     <img
                       className='go pointer ml-5'
@@ -847,18 +849,49 @@ const Index = props => {
                       alt='Go Therefore Ministries'
                       style={{ margin: 0, padding: 0, height: 44 }}
                       onClick={() => window.open('https://gothereforeministries.org/')}
-                    /></div>
+                    />
+                  </div>
+                  */}
                 </div>
               </>
               :
               <div className='m-2 col'>
-                <h2>{categoryLabel}</h2>
+                <div className='flex justify-content-center flex-wrap'>
+                  <div class="flex align-items-center justify-content-center">
+                    <h1 >{categoryLabel}</h1>
+                  </div>
+                </div>
+                <hr style={{ height: '3px', backgroundColor: 'navy' }} />
+                <br /><br />
                 {selectedCategory.map((t, i) => {
                   if (t.version == bible) {
                     return (
                       <Panel
                         headerTemplate={panelTemplate}
-                        header={<h3>{t.topicName}</h3>}
+                        header={<div className='flex align-content-center'>
+                          <h3>{t.topicName}</h3>&nbsp;&nbsp;
+                          <CopyToClipboard
+                            style={{ cursor: 'copy' }}
+                            text={`${window.location.protocol +
+                              '//' +
+                              window.location.host.split(/\//)[0]}?t=${t.id
+                              }&v=${bible}`}
+                            onCopy={() => {
+                              axiosClient.post('/metrics/topic_copied', {
+                                tId: t.id,
+                                version: bible
+                              })
+                              toast.current.show({
+                                severity: 'success',
+                                summary: bible == 'NVI' ? 'Enlace copiado' : 'Link Copied'
+                              })
+                            }}
+                          >
+                            <div className='flex align-items-center'>
+                              <i className='pi pi-copy' />
+                            </div>
+                          </CopyToClipboard>
+                        </div>}
                         key={`section-${i}`}
                         onExpand={() => expandTopic(t.id)}
                         toggleable
@@ -1013,9 +1046,12 @@ export async function getServerSideProps(context) {
     }
   }
 
-  const topicTags = await axiosClient
+  const topicTags = []
+  /*
+  await axiosClient
     .get('/topicTags')
     .then(response => response.data)
+  */
 
   const topicNames = await axiosClient
     .get('/topicNames')

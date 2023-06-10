@@ -57,6 +57,12 @@ a:active {
   font-size: x-small;
 }
 
+h1 {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: #736441;
+  font-size: 3rem;
+}
+
 h2 {
   font-family: Georgia, 'Times New Roman', Times, serif;
   color: #25416b;
