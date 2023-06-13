@@ -76,6 +76,8 @@ const Index = props => {
   const attribution = bibles.find(b => b.abbreviation === bible)
     ?.attribution || ''
 
+  const titleStyle = { cursor: 'pointer', fontFamily: 'Calibri', fontSize: '16px', fontStyle: 'normal' }
+
   useEffect(() => {
     axios.get('https://ipapi.co/json/').then(response => {
       const { data } = response
@@ -496,22 +498,22 @@ const Index = props => {
           </div>
         }
         center={
-          <div class='flex align-content-center text-sm'>
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
+          <div class='flex align-content-center text-sm' >
+            <div class='flex align-items-center' style={titleStyle} onClick={() => {
               showCat('start')
             }} >{renderLabel('start')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
+            <div class='flex align-items-center' style={titleStyle} onClick={() => {
               showCat('faqs')
             }} >{renderLabel('faqs')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => {
+            <div class='flex align-items-center' style={titleStyle} onClick={() => {
               showCat('topics')
             }} >{renderLabel('topics')?.toUpperCase()}</div>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? 'SOLICITAR COPIAS' : 'ORDER COPIES'}</div>
+            <div class='flex align-items-center' style={titleStyle} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? 'SOLICITAR COPIAS' : 'ORDER COPIES'}</div>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={{ cursor: 'pointer' }} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
+            <div class='flex align-items-center' style={titleStyle} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
           </div>
         }
         end={
