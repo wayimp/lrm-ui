@@ -4,19 +4,12 @@ import axios from 'axios'
 import { bibles } from '../bibles'
 import { axiosClient } from '../axiosClient'
 import { AutoComplete } from 'primereact/autocomplete'
-import { Fieldset } from 'primereact/fieldset'
 import { Toast } from 'primereact/toast'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { Button } from 'primereact/button'
 import { Dropdown } from 'primereact/dropdown'
-import { ListBox } from 'primereact/listbox'
 import ContentBlock from '../components/ContentBlock'
 import { Toolbar } from 'primereact/toolbar'
-import Link from 'next/link'
-import { Tooltip } from 'primereact/tooltip'
-import uuid from 'react-uuid'
-import { useMediaQuery } from 'react-responsive'
-import { categories } from '../static'
 import { Menu } from 'primereact/menu'
 import { useQueryClient } from 'react-query'
 import { Dialog } from 'primereact/dialog'
@@ -24,8 +17,9 @@ import { InputText } from 'primereact/inputtext'
 import { InputTextarea } from 'primereact/inputtextarea'
 import { Divider } from 'primereact/divider';
 import { Panel } from 'primereact/panel';
-import { ProgressSpinner } from 'primereact/progressspinner';
-import { Ripple } from 'primereact/ripple'
+import { Ripple } from 'primereact/ripple';
+import { getIsSsrMobile, useIsMobile } from "../utils/useIsMobile";
+import { GetServerSidePropsContext } from "next";
 
 const panelTemplate = (options) => {
   const toggleIcon = options.collapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up';
@@ -55,7 +49,6 @@ const Index = props => {
   const [selectedSection, setSelectedSection] = useState(null)
   const [bible, setBible] = useState('')
   const [showPage, setShowPage] = useState('category')
-  const [categoryLoading, setCategoryLoading] = useState(false)
   const [questionDialog, setQuestionDialog] = useState(false)
   const [question, setQuestion] = useState({ name: '', email: '', text: '' })
   const [signupDialog, setSignupDialog] = useState(false)
@@ -68,7 +61,7 @@ const Index = props => {
     'Welcome to the Life Reference Manual Online'
   )
   const [selectedCategory, setSelectedCategory] = useState(props.front || [])
-  const isMobile = useMediaQuery({ query: `(max-width: 760px)` })
+  const isMobile = useIsMobile();
   const queryClient = useQueryClient()
   const versionNames = props.topicNames?.filter(t => t.version == bible)
   const attribution = bibles.find(b => b.abbreviation === bible)
@@ -864,18 +857,8 @@ const Index = props => {
                         )
                       }
                     })}
-                  {/*
-                  <div className='flex flex-row justify-content-center flex-grow-1 mt-6'>
-                    <img
-                      className='go pointer ml-5'
-                      src='/images/go-grey.png'
-                      alt='Go Therefore Ministries'
-                      style={{ margin: 0, padding: 0, height: 44 }}
-                      onClick={() => window.open('https://gothereforeministries.org/')}
-                    />
-                  </div>
-                  */}
                 </div>
+                <br/><br/>
               </>
               :
               <div className='m-2 col'>
@@ -1091,7 +1074,8 @@ export async function getServerSideProps(context) {
       reference,
       topicTags,
       topicNames,
-      front
+      front,
+      isSsrMobile: getIsSsrMobile(context)
     }
   }
 }
