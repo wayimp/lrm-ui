@@ -272,20 +272,21 @@ const TileSelector = props => {
       {props.readOnly ? (
         ''
       ) : (
-        <div className='flex flex-row align-items-center justify-content-center flex-grow-1'>
+        <div className='flex flex-wrap align-items-center justify-content-center flex-grow-1'>
           <h3>{bible?.abbreviation == 'NVI' ? 'Búsqueda de Pasaje' : 'Lookup Passage'}:&nbsp;</h3>
-          <Button
-            className='mt-3 mb-3'
-            label={bible?.abbreviation == 'NVI' ? 'Antiguo Testamento' : 'Old Testament'}
-            type="button"
-            onClick={(e) => { ot?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
-          &nbsp;&nbsp;
-          <Button
-            className='mt-3 mb-3'
-            label={bible?.abbreviation == 'NVI' ? 'Nuevo Testamento' : 'New Testament'}
-            type="button"
-            onClick={(e) => { nt?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
-
+          <div className='flex flex-row'>
+            <Button
+              className='mt-3 mb-3'
+              label={bible?.abbreviation == 'NVI' ? 'Antiguo Testamento' : 'Old Testament'}
+              type="button"
+              onClick={(e) => { ot?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+            &nbsp;&nbsp;
+            <Button
+              className='mt-3 mb-3'
+              label={bible?.abbreviation == 'NVI' ? 'Nuevo Testamento' : 'New Testament'}
+              type="button"
+              onClick={(e) => { nt?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
+          </div>
           <div className='flex align-content-center m-3'>
             <Dropdown
               value={verse}

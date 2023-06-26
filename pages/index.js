@@ -40,7 +40,6 @@ const panelTemplate = (options) => {
         <Ripple />
       </button>
       <span className={titleClassName} style={style}>{options.titleElement}</span>
-
     </div>
   );
 };
@@ -55,8 +54,7 @@ const Index = props => {
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [selectedSection, setSelectedSection] = useState(null)
   const [bible, setBible] = useState('')
-  const [showPassage, setShowPassage] = useState(false)
-  const [showCategory, setShowCategory] = useState(true)
+  const [showPage, setShowPage] = useState('category')
   const [categoryLoading, setCategoryLoading] = useState(false)
   const [questionDialog, setQuestionDialog] = useState(false)
   const [question, setQuestion] = useState({ name: '', email: '', text: '' })
@@ -77,6 +75,7 @@ const Index = props => {
     ?.attribution || ''
 
   const titleStyle = { cursor: 'pointer', fontFamily: 'Calibri', fontSize: '16px', fontStyle: 'normal' }
+  const menuOpen = useRef(null);
 
   useEffect(() => {
     axios.get('https://ipapi.co/json/').then(response => {
@@ -103,6 +102,52 @@ const Index = props => {
       })
     }
   }, [selectedTopic])
+
+  const menuEnglish = [
+    {
+      label: 'Need a Fresh Start?'.toUpperCase(),
+      command: () => { showCat('start') }
+    },
+    {
+      label: 'FAQ',
+      command: () => { showCat('faqs') }
+    },
+    {
+      label: 'Topical Bible'.toUpperCase(),
+      command: () => { showCat('topics') }
+    },
+    {
+      label: 'ORDER COPIES',
+      command: () => { window.open('https://gothereforeministries.org?t=1') }
+    },
+    {
+      label: 'PARTNER WITH US',
+      command: () => { window.open('https://gothereforeministries.org?t=3') }
+    }
+  ];
+
+  const menuSpanish = [
+    {
+      label: '¿Necesita un nuevo comienzo?'.toUpperCase(),
+      command: () => { showCat('start') }
+    },
+    {
+      label: 'Preguntas Frecuentes'.toUpperCase(),
+      command: () => { showCat('faqs') }
+    },
+    {
+      label: 'Biblia Temática'.toUpperCase(),
+      command: () => { showCat('topics') }
+    },
+    {
+      label: 'SOLICITAR COPIAS',
+      command: () => { window.open('https://gothereforeministries.org?t=1') }
+    },
+    {
+      label: 'ASOCIATE CON NOSOTROS',
+      command: () => { window.open('https://gothereforeministries.org?t=3') }
+    }
+  ];
 
   const popState = e => {
     if (e.state) {
@@ -137,10 +182,11 @@ const Index = props => {
       setSelectedSection(findSection)
       setSearchTerm(findSection.name)
       setSelectedTopic(topic)
+      setShowPage('topic')
     }
 
     if (reference) {
-      setShowPassage(true)
+      setShowPage('passage')
     }
   }, [])
 
@@ -210,20 +256,19 @@ const Index = props => {
     if (e.value && e.value.length > 1) {
       if (['topics', 'start', 'faqs'].includes(e.value)) {
         selectCategory(e.value)
-        setShowCategory(true)
+        setShowPage('category')
         setSelectedSection(null)
       } else {
         selectTopic(e.value)
-        setShowCategory(false)
+        setShowPage('topic')
       }
     }
   }
 
   const showCat = c => {
     selectCategory(c)
-    setShowCategory(true)
+    setShowPage('category')
     setSelectedSection(null)
-    setShowPassage(false)
   }
 
   const selectCategory = async name => {
@@ -234,25 +279,6 @@ const Index = props => {
 
     const categoryTopics = versionNames?.filter(topic => topic.category == name)
     setSelectedCategory(categoryTopics)
-
-    /*
-    setCategoryLoading(true)
-    axiosClient({
-      method: 'get',
-      url: `/category/${name}`
-    })
-      .then(response => {
-        setSelectedCategory(response.data || [])
-        setCategoryLoading(false)
-      })
-      .catch(error => {
-        toast.current.show({
-          severity: 'error',
-          summary: 'Error Loading Section'
-        })
-        setCategoryLoading(false)
-      })
-    */
   }
 
   const getTopic = async id => {
@@ -338,6 +364,7 @@ const Index = props => {
         )
         if (!findSection) findSection = topic.sections[0]
         setSelectedSection(findSection)
+        setShowPage('topic')
       }
     } catch {
       toast.current.show({
@@ -489,37 +516,49 @@ const Index = props => {
         }}
         start={
           <div className='flex'>
-            <img
-              src='/images/logo.png'
-              alt='Life Reference Manual'
-              style={{ marginRight: 20, padding: 0, height: 44, cursor: 'pointer' }}
-              onClick={() => (window.location.href = '/')}
-            />
+            {isMobile ?
+              <>
+                <Menu model={bible == 'NVI' ? menuSpanish : menuEnglish} popup ref={menuOpen} id="popup_menu" />
+                <Button icon="pi pi-bars" className="mr-2" onClick={(event) => menuOpen.current.toggle(event)} />
+              </>
+              :
+              <img
+                src='/images/logo.png'
+                alt='Life Reference Manual'
+                style={{ marginRight: 20, padding: 0, height: 44, cursor: 'pointer' }}
+                onClick={() => (window.location.href = '/')}
+              />
+            }
           </div>
         }
         center={
-          <div class='flex align-content-center text-sm' >
-            <div class='flex align-items-center' style={titleStyle} onClick={() => {
-              showCat('start')
-            }} >{renderLabel('start')?.toUpperCase()}</div>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={titleStyle} onClick={() => {
-              showCat('faqs')
-            }} >{renderLabel('faqs')?.toUpperCase()}</div>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={titleStyle} onClick={() => {
-              showCat('topics')
-            }} >{renderLabel('topics')?.toUpperCase()}</div>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={titleStyle} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? 'SOLICITAR COPIAS' : 'ORDER COPIES'}</div>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class='flex align-items-center' style={titleStyle} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
+          <div class='flex align-content-center text-sm'>
+            {!isMobile ?
+              <>
+                <div class='flex align-items-center' style={titleStyle} onClick={() => { showCat('start') }} >{renderLabel('start')?.toUpperCase()}</div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class='flex align-items-center' style={titleStyle} onClick={() => { showCat('faqs') }} >{renderLabel('faqs')?.toUpperCase()}</div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class='flex align-items-center' style={titleStyle} onClick={() => { showCat('topics') }} >{renderLabel('topics')?.toUpperCase()}</div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class='flex align-items-center' style={titleStyle} onClick={() => window.open('https://gothereforeministries.org?t=1')} >{bible == 'NVI' ? 'SOLICITAR COPIAS' : 'ORDER COPIES'}</div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class='flex align-items-center' style={titleStyle} onClick={() => window.open('https://gothereforeministries.org?t=3')} >{bible == 'NVI' ? 'ASOCIATE CON NOSOTROS' : 'PARTNER WITH US'}</div>
+              </>
+              :
+              <img
+                src='/images/logo.png'
+                alt='Life Reference Manual'
+                style={{ marginRight: 20, padding: 0, height: 44, cursor: 'pointer' }}
+                onClick={() => (window.location.href = '/')}
+              />
+            }
           </div>
         }
         end={
           <div className='flex flex-row align-items-end'>
             {!isMobile ? (
-              <div>
+              <>
                 <AutoComplete
                   style={{ width: 210 }}
                   value={searchTerm}
@@ -532,9 +571,31 @@ const Index = props => {
                   forceSelection
                   placeholder={bible == 'NVI' ? 'Palabras de Búsqueda' : 'Enter Search Words'}
                 />
-              </div>
+                <Button
+                  className='button-rounded button-text button-outlined mr-1'
+                  icon='pi pi-sun'
+                  onClick={() => {
+                    // Generate a random number
+                    const random = Math.floor(
+                      Math.random() * versionNames?.length
+                    )
+                    selectTopic(versionNames[random].id)
+                  }}
+                  tooltip={bible == 'NVI' ? 'Tema aleatorio' : 'Random Topic'}
+                  tooltipOptions={{ position: 'left' }}
+                />
+                <Button
+                  className='button-rounded button-text button-outlined mr-1'
+                  icon='pi pi-question-circle'
+                  onClick={() => {
+                    setQuestionDialog(true)
+                  }}
+                  tooltip={bible == 'NVI' ? 'Hacer una pregunta' : 'Ask a Question'}
+                  tooltipOptions={{ position: 'left' }}
+                />
+              </>
             ) : (
-              ''
+              <></>
             )}
             <Button
               className='button-rounded button-text button-outlined mr-1'
@@ -543,28 +604,6 @@ const Index = props => {
                 setSignupDialog(true)
               }}
               tooltip={bible == 'NVI' ? 'Suscríbete al boletín' : 'Subscribe to Newsletter'}
-              tooltipOptions={{ position: 'left' }}
-            />
-            <Button
-              className='button-rounded button-text button-outlined mr-1'
-              icon='pi pi-sun'
-              onClick={() => {
-                // Generate a random number
-                const random = Math.floor(
-                  Math.random() * versionNames?.length
-                )
-                selectTopic(versionNames[random].id)
-              }}
-              tooltip={bible == 'NVI' ? 'Tema aleatorio' : 'Random Topic'}
-              tooltipOptions={{ position: 'left' }}
-            />
-            <Button
-              className='button-rounded button-text button-outlined mr-1'
-              icon='pi pi-question-circle'
-              onClick={() => {
-                setQuestionDialog(true)
-              }}
-              tooltip={bible == 'NVI' ? 'Hacer una pregunta' : 'Ask a Question'}
               tooltipOptions={{ position: 'left' }}
             />
           </div>
@@ -578,10 +617,10 @@ const Index = props => {
           width: '100%',
           zIndex: 1000
         }}
-        left={
+        start={
           <div className='flex align-content-center'>
             {
-              showPassage ? (
+              showPage == 'passage' ? (
                 ''
               ) : (
                 <Button
@@ -589,7 +628,7 @@ const Index = props => {
                   icon='pi pi-book'
                   onClick={
                     () => {
-                      setShowPassage(true)
+                      setShowPage('passage')
                     }
                   }
                   tooltip={bible == 'NVI' ? 'Abrir Búsqueda de Pasajes' : 'Open Passage Lookup'}
@@ -608,7 +647,7 @@ const Index = props => {
             <div className='flex align-items-center' dangerouslySetInnerHTML={{ __html: attribution }} />
           </div >
         }
-        right={
+        end={!isMobile ?
           <div className='flex align-content-center' >
             <div className='flex align-items-center' style={{ fontSize: 'x-small' }}>
               {bible == 'NVI' ? 'Apoya a nuestro Ministerio' : 'Support our Ministry'}
@@ -623,30 +662,20 @@ const Index = props => {
               onClick={() => window.open('https://gothereforeministries.org/')}
             />
           </div >
+          :
+          <></>
         }
       />
       < div
         className='grid dir-row'
-        style={{ margin: '100px' }}
+        style={{ margin: '5%' }}
       >
         {
-          selectedSection ? (
+          selectedSection && showPage == 'topic' ? (
             <div className='m-2 col' >
               <div className='flex justify-content-center flex-wrap'>
                 <div class='flex align-items-center justify-content-center'>
                   <h1 >{bible == 'NVI' ? 'Temas' : 'Topics'}</h1>
-                  <Button
-                    rounded outlined
-                    className='button-rounded button-text button-danger button-outlined ml-4'
-                    icon='pi pi-times'
-                    onClick={() => {
-                      setSelectedSection(null)
-                      setSearchTerm(null)
-                      setSelectedTopic(null)
-                    }}
-                    tooltip='Close'
-                    tooltipOptions={{ position: 'left' }}
-                  />
                 </div>
               </div>
               <hr style={{ height: '3px', backgroundColor: 'navy' }} />
@@ -770,19 +799,11 @@ const Index = props => {
             ''
           )}
         {
-          showPassage ? (
+          showPage == 'passage' ? (
             <div className='m-2 col'>
               <div className='flex justify-content-center flex-wrap'>
                 <div class="flex align-items-center justify-content-center">
                   <h1>{bible == 'NVI' ? 'Búsqueda de Pasajes' : 'Lookup a Passage'}</h1>
-                  <Button
-                    rounded outlined
-                    className='button-rounded button-text button-danger button-outlined ml-4'
-                    icon='pi pi-times'
-                    onClick={() => setShowPassage(false)}
-                    tooltip='Close'
-                    tooltipOptions={{ position: 'left' }}
-                  />
                 </div>
               </div>
               <hr style={{ height: '3px', backgroundColor: 'navy' }} />
@@ -801,13 +822,13 @@ const Index = props => {
           )
         }
         {
-          showCategory && !selectedSection && !showPassage ?
+          showPage == 'category' ?
             categoryLabel.startsWith('Welcome')
               ?
               <>
-                <div className='flex flex-row justify-content-center flex-grow-1 mt-2'>
-                  <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ float: 'left', maxHeight: 180 }} />
-                  <img src='/images/welcome.png' style={{ maxHeight: 160 }} />
+                <div className='flex align-content-center justify-content-center flex-grow-1 mt-2'>
+                  <img src='https://tanque.nyc3.digitaloceanspaces.com/up/life-reference-manual-6th-small.png' style={{ maxHeight: 160 }} className='align-items-center' />
+                  {!isMobile ? <img src='/images/welcome.png' style={{ maxHeight: 160 }} /> : <></>}
                 </div>
                 <div>
                   <ContentBlock

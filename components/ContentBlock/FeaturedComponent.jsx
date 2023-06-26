@@ -36,7 +36,7 @@ const FeaturedComponent = ({ props, mode, updateValue, updateConfig }) => {
 
     case 'display':
       return (
-        <div className='flex flex-row justify-content-center flex-grow-1'>
+        <div className='flex flex-wrap justify-content-center flex-grow-1'>
           <h3 className='mr-2'>Featured Topics:</h3>
           {topics.map((t, i) => (
             <Button
