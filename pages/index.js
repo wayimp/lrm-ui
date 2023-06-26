@@ -857,8 +857,8 @@ const Index = props => {
                         )
                       }
                     })}
+                  <br /><br />
                 </div>
-                <br/><br/>
               </>
               :
               <div className='m-2 col'>
@@ -915,7 +915,7 @@ const Index = props => {
             :
             <></>
         }
-
+        <br /><br />
       </div >
       <Dialog
         header={bible == 'NVI' ? 'Hacer una Pregunta' : 'Ask a Question'}
