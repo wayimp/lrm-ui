@@ -659,34 +659,42 @@ const Index = props => {
           <></>
         }
       />
-      < div
-        className='grid dir-row'
-        style={{ margin: '5%' }}
-      >
+      <div style={{ marginTop: -40, minWidth: 360 }}>
         {
           selectedSection && showPage == 'topic' ? (
             <div className='m-2 col' >
-              <div className='flex justify-content-center flex-wrap'>
-                <div class='flex align-items-center justify-content-center'>
-                  <h1 >{bible == 'NVI' ? 'Temas' : 'Topics'}</h1>
-                </div>
-              </div>
-              <hr style={{ height: '3px', backgroundColor: 'navy' }} />
-              <br />
               <div className='flex justify-content-center flex-wrap'>
                 <div class='flex align-items-center justify-content-center'>
                   {topicIndex > 0 ? (
                     <Button
                       rounded outlined
                       type='button'
+                      size='small'
                       icon='pi pi-chevron-left'
-                      className='button-rounded button-outlined m-4'
+                      className='mt-5 mr-5'
                       onClick={movePreviousTopic}
                     />
                   ) : (
                     <span />
                   )}
+                  <h1>{bible == 'NVI' ? 'Temas' : 'Topics'}</h1>
+                  {topicIndex < versionNames?.length - 1 ? (
+                    <Button
+                      rounded outlined
+                      type='button'
+                      size='small'
+                      icon='pi pi-chevron-right'
+                      className='mt-5 ml-5'
+                      onClick={moveNextTopic}
+                    />
+                  ) : (
+                    <span />
+                  )}
                 </div>
+              </div>
+              <hr style={{ height: '3px', backgroundColor: 'navy' }} />
+              <br />
+              <div className='flex justify-content-center flex-wrap'>
                 <h2 className='flex align-items-center'>{selectedSection.name}</h2>
                 &nbsp;&nbsp;
                 <CopyToClipboard
@@ -710,19 +718,6 @@ const Index = props => {
                     <i className='pi pi-copy' />
                   </div>
                 </CopyToClipboard>
-                <div>
-                  {topicIndex < versionNames?.length - 1 ? (
-                    <Button
-                      rounded outlined
-                      type='button'
-                      icon='pi pi-chevron-right'
-                      className='button-rounded button-outlined m-4'
-                      onClick={moveNextTopic}
-                    />
-                  ) : (
-                    <span />
-                  )}
-                </div>
               </div>
               <Divider />
 
@@ -962,14 +957,15 @@ const Index = props => {
         <div className='flex align-content-center justify-content-end'>
           <Button
             label={bible == 'NVI' ? 'Cancelar' : 'Cancel'}
-            icon='pi pi-times'
+            size='small'
             onClick={() => setQuestionDialog(false)}
             className='button-text ml-4'
           />
-          &nbsp;
           <Button
             label={bible == 'NVI' ? 'Enviar' : 'Send'}
             icon='pi pi-send'
+            size='small'
+            className='ml-2'
             onClick={() => submitQuestion()}
             autoFocus
           />
@@ -1017,7 +1013,7 @@ const Index = props => {
         <div className='d-flex align-items-center justify-content-end'>
           <Button
             label={bible == 'NVI' ? 'Cancelar' : 'Cancel'}
-            icon='pi pi-times'
+            size='small'
             onClick={() => setSignupDialog(false)}
             className='button-text ml-4'
           />
@@ -1025,6 +1021,7 @@ const Index = props => {
           <Button
             label={bible == 'NVI' ? 'Enviar' : 'Send'}
             icon='pi pi-send'
+            size='small'
             onClick={() => submitSignup()}
             autoFocus
           />

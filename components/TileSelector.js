@@ -328,6 +328,7 @@ const TileSelector = props => {
                   <Button
                     key={b.id}
                     label={b.name}
+                    size="small"
                     className="p-button-text"
                     type="button"
                     onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
@@ -343,6 +344,7 @@ const TileSelector = props => {
                   <Button
                     key={b.id}
                     label={b.name}
+                    size="small"
                     className="p-button-text"
                     type="button"
                     onClick={(e) => { onChangeTile(b); op?.current?.show(e) }} aria-haspopup aria-controls="overlay_panel" />
